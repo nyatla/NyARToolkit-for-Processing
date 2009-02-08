@@ -1,7 +1,7 @@
 NyARToolkit for proce55ing
 Copyright (C)2008 nyatla
 
-version 0.2.0
+version 0.2.1
 
 http://nyatla.jp/
 airmail(at)ebony.plala.or.jp
