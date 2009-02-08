@@ -6,6 +6,6 @@
 	<classpathentry path="C:/Documents and Settings/atla/デスクトップ/processing-1.0.1/libraries/video/library/video.jar" kind="lib"/>
 	<classpathentry path="C:/Documents and Settings/atla/デスクトップ/processing-1.0.1/libraries/opengl/library/opengl.jar" kind="lib"/>
 	<classpathentry path="C:/Documents and Settings/atla/デスクトップ/processing-1.0.1/libraries/opengl/library/jogl.jar" kind="lib"/>
-	<classpathentry path="library/NyARToolkit.jar" kind="lib"/>
+	<classpathentry path="library/NyARToolkit.jar" exported="true" kind="lib"/>
 	<classpathentry path="bin" kind="output"/>
 </classpath>
