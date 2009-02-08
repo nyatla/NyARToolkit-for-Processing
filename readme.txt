@@ -77,6 +77,9 @@ airmail(at)ebony.plala.or.jp
 　src以下のファイルはMITライセンスですが、NyARToolkitがGPLv2ライセンスのため、
 　jarファイルのライセンスはGPLv2になります。
 
+　NyARToolkitのソースファイルは、http://sourceforge.jp/projects/nyartoolkit/
+　よりダウンロードできます。
+
 
 ・謝辞
 　ARToolkitを開発された加藤博一先生と、Human Interface Technology Lab
