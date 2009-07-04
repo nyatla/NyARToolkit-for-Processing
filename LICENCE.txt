@@ -1,5 +1,5 @@
-ARToolkit Java class library NyARToolkit.
-Copyright (C)2008 R.Iizuka
+nyar4psg
+Copyright (C)2008-2009 R.Iizuka
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -17,8 +17,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
  
 
-Java版 ARToolkit クラスライブラリ NyARToolkit
-Copyright (C)2008  R.Iizuka
+nyar4psg
+Copyright (C)2008-2009  R.Iizuka
 
 このプログラムはフリーソフトウェアです。あなたはこれを、フリーソフトウェ
 ア財団によって発行された GNU 一般公衆利用許諾契約書(バージョン2か、希

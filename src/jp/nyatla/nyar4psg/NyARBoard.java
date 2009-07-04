@@ -206,7 +206,7 @@ class NyARRgbRaster_PImage extends NyARRgbRaster_BasicClass implements INyARRgbR
  * <pre>
  * NyARBoard needs two an external configuration file "Marker file" and "Camera parameter" files.
  * These are compatible with the original ARToolKit. 
- * Please place these under the data directory of the sketch. (Look at example.)
+ * Place those files to under the data directory of the sketch. (see example.)
  * </pre>
  * <br/>JP:
  * このクラスは、PImageからARToolKit準拠の変換行列を求めるクラスです。
@@ -222,12 +222,14 @@ class NyARRgbRaster_PImage extends NyARRgbRaster_BasicClass implements INyARRgbR
  */
 public class NyARBoard
 {
+	public final static int CS_RIGHT=0;
+	public final static int CS_LEFT =1;
 	/**
 	 * version information.
 	 * <br/>JP:
 	 * バージョン文字列です。
 	 */
-	public final String VERSION = "NyAR4psg/0.2.1;NyARToolkit for java/2.2.0;ARToolKit/2.72.1";
+	public final String VERSION = "NyAR4psg/0.2.2;NyARToolkit for java/2.2.0;ARToolKit/2.72.1";
 	/**
 	 * NyARBoard ignores that it lost the marker while under specified number.
 	 * Must be "n&gt;=0".
@@ -337,25 +339,56 @@ public class NyARBoard
 	 * The length of one side of a square marker in millimeter unit.
 	 * <br/>JP:
 	 * マーカのサイズを指定します。単位はmmです。
+	 * @param i_projection_coord_system
+	 * Coordinate system flag of projection Matrix. Should be NyARBoard.CS_RIGHT or NyARBoard.Left(default)
+	 * <br/>JP:
+	 * Projection Matrixの座標系を指定します。NyARBoard.CS_RIGHT か NyARBoard.Left(規定値)を指定します。
 	 */
+	public NyARBoard(PApplet parent, int i_width,int i_htight,String i_cparam,String i_patt,int i_patt_width,int i_projection_coord_system)
+	{
+		constructor(this,parent,i_width,i_htight,i_cparam,i_patt,i_patt_width,i_projection_coord_system);
+		return;
+	}
+	/**
+	 * This function is constructor same as i_projection_coord_system=CS_LEFT.
+	 * <br/>JP:
+	 * この関数はi_projection_coord_systemにCS_LEFTを設定するコンストラクタです。
+	 * @param parent
+	 * Specify processing instance.
+	 * <br/>JP:
+	 * processingのインスタンスを指定します。
+	 * @param i_width
+	 * Width of source image size for "detect()".
+	 * <br/>JP:
+	 * detect()に渡す入力画像の幅を指定します。
+	 * @param i_htight
+	 * Height of source image size for "detect()".
+	 * <br/>JP:
+	 * detectに渡す入力画像の高さを指定します。
+	 * @param i_cparam
+	 * The file name of the camera parameter of ARToolKit format.
+	 * Place the file to "data" directory at sketch.
+	 * <br/>JP:
+	 * ARToolKitのパラメータファイル名を指定します。パラメータファイルはdataディレクトリにおいて下さい。
+	 * @param i_patt
+	 * The file name of the marker pattern file of ARToolkit.
+	 * Place the file to "data" directory at sketch.
+	 * The marker resolution must be 16x16.
+	 * <br/>JP:
+	 * マーカのパターンファイル名を指定します。パターンファイルは、dataディレクトリにおいて下さい。
+	 * マーカの解像度は、16x16である必要があります。
+	 * @param i_patt_width
+	 * The length of one side of a square marker in millimeter unit.
+	 * <br/>JP:
+	 * マーカのサイズを指定します。単位はmmです。
+	 */	
 	public NyARBoard(PApplet parent, int i_width,int i_htight,String i_cparam,String i_patt,int i_patt_width)
 	{
-		NyARCode code;
-		this._pa=parent;
-		try{
-			this._raster=new NyARRgbRaster_PImage(i_width, i_htight);
-			this._ar_param=new NyARParam();
-			this._ar_param.loadARParam(this._pa.createInput(i_cparam));
-			this._ar_param.changeScreenSize(i_width, i_htight);
-			initProjection(this._ar_param,projection);
-			code=new NyARCode(16,16);
-			code.loadARPatt(this._pa.createInput(i_patt));
-			this._filter=new ARToolkitThreshold4PImage();
-			this._nya=new NyARCustomSingleDetectMarker(this._ar_param,code,(double)i_patt_width,this._filter);
-		}catch(NyARException e){
-			this._pa.die("Error while setting up NyARToolkit for java", e);
-		}
+		constructor(this,parent,i_width,i_htight,i_cparam,i_patt,i_patt_width,CS_LEFT);
+		return;
 	}
+	
+
 	/**
 	 * This function detect a marker which is must higher confidence in i_image.
 	 * When function detects marker, properties (pos2d,angle,trans,confidence,transmat) are updated.
@@ -434,22 +467,34 @@ public class NyARBoard
 	 */
 	public void beginTransform(PGraphicsOpenGL i_pgl)
 	{
-		if(this._pgl!=null){
+		if(this._gl!=null){
 			this._pa.die("The function beginTransform is already called.", null);			
 		}
 		this._pgl=i_pgl;
-		this._gl = i_pgl.beginGL();  // always use the GL object returned by beginGL
-		this._gl.glMatrixMode(GL.GL_PROJECTION);
+		beginTransform(i_pgl.beginGL());
+		return;
+	}
+	public void beginTransform(GL i_gl)
+	{
+		if(this._gl!=null){
+			this._pa.die("The function beginTransform is already called.", null);			
+		}
+		
+		this._gl=i_gl;
+		i_gl.glMatrixMode(GL.GL_PROJECTION);
 		this._pa.pushMatrix();
 		this._pa.resetMatrix();
-		this._gl.glLoadMatrixd(this.projection,0);
-		this._gl.glMatrixMode(GL.GL_MODELVIEW);
+		i_gl.glLoadMatrixd(this.projection,0);
+		i_gl.glMatrixMode(GL.GL_MODELVIEW);
 		this._pa.pushMatrix();
 		this._pa.resetMatrix();
-		this._gl.glLoadMatrixd(this.transmat,0);  
+		i_gl.glLoadMatrixd(this.transmat,0);
+				
 		this._pa.pushMatrix();
 		return;
 	}
+
+	
 	/**
 	 * This function recover coordinate system that was changed by beginTransform function.
 	 * <br/>JP:
@@ -457,7 +502,7 @@ public class NyARBoard
 	 */
 	public void endTransform()
 	{
-		if(this._pgl==null){
+		if(this._gl==null){
 			this._pa.die("The function beginTransform is never called.", null);			
 		}
 		this._pa.popMatrix();
@@ -465,13 +510,34 @@ public class NyARBoard
 		this._gl.glMatrixMode(GL.GL_PROJECTION);
 		this._pa.popMatrix();
 		this._gl.glMatrixMode(GL.GL_MODELVIEW);
-		this._pgl.endGL();
+		if(this._pgl!=null){
+			this._pgl.endGL();
+		}
 		this._gl=null;
 		this._pgl=null;
 		return;
 	}
-
-	private static void initProjection(NyARParam i_param,double[] o_projection)
+	private static void constructor(NyARBoard i_this,PApplet parent, int i_width,int i_htight,String i_cparam,String i_patt,int i_patt_width,int i_projection_coord_system)
+	{
+		checkCoordinateSystemRange(parent,i_projection_coord_system);
+		NyARCode code;
+		i_this._pa=parent;
+		try{
+			i_this._raster=new NyARRgbRaster_PImage(i_width, i_htight);
+			i_this._ar_param=new NyARParam();
+			i_this._ar_param.loadARParam(i_this._pa.createInput(i_cparam));
+			i_this._ar_param.changeScreenSize(i_width, i_htight);
+			initProjection(parent,i_this._ar_param,i_this.projection,i_projection_coord_system);
+			code=new NyARCode(16,16);
+			code.loadARPatt(i_this._pa.createInput(i_patt));
+			i_this._filter=new ARToolkitThreshold4PImage();
+			i_this._nya=new NyARCustomSingleDetectMarker(i_this._ar_param,code,(double)i_patt_width,i_this._filter);
+		}catch(NyARException e){
+			i_this._pa.die("Error while setting up NyARToolkit for java", e);
+		}
+		return;
+	}
+	private static void initProjection(PApplet i_pa, NyARParam i_param,double[] o_projection,int i_coord_system)
 	{
 		NyARMat trans_mat = new NyARMat(3, 4);
 		NyARMat icpara_mat = new NyARMat(3, 4);
@@ -514,9 +580,18 @@ public class NyARBoard
 		q[3][1] = 0.0;
 		q[3][2] = -1.0;
 		q[3][3] = 0.0;
-
-		q[2][2] = q[2][2] * -1;
-		q[2][3] = q[2][3] * -1;
+		
+		switch(i_coord_system){
+		case NyARBoard.CS_LEFT:
+			break;
+		case NyARBoard.CS_RIGHT:
+			q[2][2] = q[2][2]* -1;
+			q[2][3] = q[2][3]* -1;
+			break;
+		default:
+			i_pa.die("Please set NyARBoard.CS_LEFT or NyARBoard.CS_RIGHT.");
+		}
+		
 		for (i = 0; i < 4; i++) { // Row.
 			// First 3 columns of the current row.
 			for (j = 0; j < 3; j++) { // Column.
@@ -559,4 +634,14 @@ public class NyARBoard
 	
 	private final static double view_distance_min = 100;//#define VIEW_DISTANCE_MIN		0.1			// Objects closer to the camera than this will not be displayed.
 	private final static double view_distance_max = 10000.0;//#define VIEW_DISTANCE_MAX		100.0		// Objects further away from the camera than this will not be displayed.
+	private final static void checkCoordinateSystemRange(PApplet i_pa,int i_cs)
+	{
+		switch(i_cs){
+		case NyARBoard.CS_LEFT:
+		case NyARBoard.CS_RIGHT:
+			return;
+		default:
+			i_pa.die("Please set NyARBoard.CS_LEFT or NyARBoard.CS_RIGHT.");
+		}
+	}
 }

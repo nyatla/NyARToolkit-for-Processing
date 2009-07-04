@@ -1,7 +1,7 @@
 NyARToolkit for proce55ing
-Copyright (C)2008 nyatla
+Copyright (C)2008-2009 R.Iizuka
 
-version 0.2.1
+version 0.2.2
 
 http://nyatla.jp/
 airmail(at)ebony.plala.or.jp
@@ -91,3 +91,6 @@ airmail(at)ebony.plala.or.jp
 
 　CaptureDSを開発されたarc@dmz氏に感謝します。
 　http://digitalmuseum.jp/
+
+　Processingの座標系問題を解決して頂いた、reco氏に感謝します。
+　http://www.hyde-ysd.com/reco-memo/
