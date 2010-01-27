@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry path="src" kind="src"/>
-	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
-	<classpathentry path="C:/Documents and Settings/atla/デスクトップ/processing-1.0.1/lib/core.jar" kind="lib"/>
-	<classpathentry path="C:/Documents and Settings/atla/デスクトップ/processing-1.0.1/libraries/video/library/video.jar" kind="lib"/>
-	<classpathentry path="C:/Documents and Settings/atla/デスクトップ/processing-1.0.1/libraries/opengl/library/opengl.jar" kind="lib"/>
-	<classpathentry path="C:/Documents and Settings/atla/デスクトップ/processing-1.0.1/libraries/opengl/library/jogl.jar" kind="lib"/>
-	<classpathentry path="library/NyARToolkit.jar" exported="true" kind="lib"/>
-	<classpathentry path="bin" kind="output"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/nyatla/Desktop/processing-1.0.1/lib/core.jar"/>
+	<classpathentry kind="lib" path="C:/Users/nyatla/Desktop/processing-1.0.1/libraries/opengl/library/jogl.jar"/>
+	<classpathentry kind="lib" path="C:/Users/nyatla/Desktop/processing-1.0.1/libraries/opengl/library/opengl.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NyARToolKit"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -33,170 +33,9 @@ import processing.opengl.*;
 import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.*;
-import jp.nyatla.nyartoolkit.core.raster.*;
-import jp.nyatla.nyartoolkit.core.raster.rgb.*;
-import jp.nyatla.nyartoolkit.core.rasterfilter.rgb2bin.*;
-import jp.nyatla.nyartoolkit.core.rasterreader.*;
 import jp.nyatla.nyartoolkit.core.types.*;
 import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.detector.*;
-
-/**
- * このクラスは、内部クラスです。
- * @author nyatla
- */
-class ARToolkitThreshold4PImage implements INyARRasterFilter_RgbToBin
-{
-	private int _threshold;
-
-	public ARToolkitThreshold4PImage()
-	{
-	}
-	public void setThreshold(int i_threshold)
-	{
-		this._threshold = i_threshold;
-	}
-
-	public void doFilter(INyARRgbRaster i_input, NyARBinRaster i_output) throws NyARException
-	{
-		INyARBufferReader in_buffer_reader=i_input.getBufferReader();	
-		INyARBufferReader out_buffer_reader=i_output.getBufferReader();
-
-		assert (out_buffer_reader.isEqualBufferType(INyARBufferReader.BUFFERFORMAT_INT1D_BIN_8));
-		assert (in_buffer_reader.isEqualBufferType(INyARBufferReader.BUFFERFORMAT_INT1D_X8R8G8B8_32));
-		assert (i_input.getSize().isEqualSize(i_output.getSize()) == true);
-
-		NyARIntSize size = i_output.getSize();
-		convert((int[]) in_buffer_reader.getBuffer(), (int[]) out_buffer_reader.getBuffer(), size);
-		return;
-	}
-
-	private void convert(int[] i_in, int[] i_out, NyARIntSize i_size)
-	{
-		final int th=this._threshold*3;
-		int w;
-		int xy;
-		final int pix_count   =i_size.h*i_size.w;
-		final int pix_mod_part=pix_count-(pix_count%8);
-		for(xy=pix_count-1;xy>=pix_mod_part;xy--){
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-		}
-		//タイリング
-		for (;xy>=0;) {
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-			xy--;
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-			xy--;
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-			xy--;
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-			xy--;
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-			xy--;
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-			xy--;
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-			xy--;
-			w=i_in[xy];
-			i_out[xy]=(w&0xff)+((w>>8)&0xff)+((w>>16)&0xff)<=th?0:1;
-			xy--;
-		}
-		return;
-	}
-}
-
-/**
- * このクラスは、内部クラスです。
- * @author nyatla
- */
-class NyARRgbRaster_PImage extends NyARRgbRaster_BasicClass implements INyARRgbRaster
-{
-	private class PixelReader implements INyARRgbPixelReader
-	{
-		private NyARRgbRaster_PImage _parent;
-
-		public PixelReader(NyARRgbRaster_PImage i_parent)
-		{
-			this._parent = i_parent;
-		}
-
-		public void getPixel(int i_x, int i_y, int[] o_rgb)
-		{
-			int[] ref_buf = this._parent._ref_image.pixels;
-			int bp = ref_buf[(i_x + i_y * this._parent._size.w)];
-			o_rgb[0] = ((bp>>16) & 0xff);// R
-			o_rgb[1] = ((bp>>8) & 0xff);// G
-			o_rgb[2] = (bp & 0xff);// B
-			return;
-		}
-
-		public void getPixelSet(int[] i_x, int[] i_y, int i_num, int[] o_rgb)
-		{
-			int[] ref_buf = this._parent._ref_image.pixels;
-			int width = _parent._size.w;
-			int bp;
-			for (int i = i_num - 1; i >= 0; i--) {
-				bp =ref_buf[(i_x[i] + i_y[i] * width)];
-				o_rgb[i * 3 + 0] = (bp>>16) & 0xff;// R
-				o_rgb[i * 3 + 1] = (bp>>8) & 0xff;// G
-				o_rgb[i * 3 + 2] = (bp & 0xff);// B
-			}
-			return;
-		}
-	}
-	public class BufferReader extends NyARBufferReader
-	{
-		NyARRgbRaster_PImage _parent;
-		public BufferReader(NyARRgbRaster_PImage i_parent)
-		{
-			super();
-			this._buffer_type=INyARBufferReader.BUFFERFORMAT_INT1D_X8R8G8B8_32;
-			this._parent=i_parent;
-		}
-		public Object getBuffer()
-		{
-			return this._parent._ref_image.pixels;
-		}
-	}
-	private INyARRgbPixelReader _rgb_reader;
-	private INyARBufferReader _buffer_reader;
-
-	public NyARRgbRaster_PImage(int i_width, int i_height)
-	{
-		super(new NyARIntSize(i_width,i_height));
-
-		this._rgb_reader = new PixelReader(this);
-		this._buffer_reader=new BufferReader(this);
-		return;
-	}
-	private PImage _ref_image;
-	public void bindImage(PImage i_img)
-	{
-		this._ref_image=i_img;
-		this._ref_image.updatePixels();
-	}
-	public void unBindImage(PImage i_img)
-	{
-		this._ref_image=null;
-		return;
-	}
-	public INyARRgbPixelReader getRgbPixelReader()
-	{
-		return this._rgb_reader;
-	}
-	public INyARBufferReader getBufferReader()
-	{
-		return this._buffer_reader;
-	}
-}
 
 
 
@@ -220,16 +59,8 @@ class NyARRgbRaster_PImage extends NyARRgbRaster_BasicClass implements INyARRgbR
  * @author nyatla
  *
  */
-public class NyARBoard
+public class NyARBoard extends NyARPsgBaseClass
 {
-	public final static int CS_RIGHT=0;
-	public final static int CS_LEFT =1;
-	/**
-	 * version information.
-	 * <br/>JP:
-	 * バージョン文字列です。
-	 */
-	public final String VERSION = "NyAR4psg/0.2.2;NyARToolkit for java/2.2.0;ARToolKit/2.72.1";
 	/**
 	 * NyARBoard ignores that it lost the marker while under specified number.
 	 * Must be "n&gt;=0".
@@ -254,13 +85,6 @@ public class NyARBoard
 	 * この数値より一致度が大きい場合のみ、マーカを検出したと判定され、座標計算が行われます。
 	 */
 	public double cfThreshold=0.4;
-	/**
-	 * The projection matrix adday for OpenGL projection.
-	 * This value is initialized by constructor.
-	 * <br/>JP:
-	 * OpenGLのProjection配列。コンストラクタで初期化されます。
-	 */
-	public final double[] projection=new double[16];
 	/**
 	 * The angle value in radian unit of "x,y,z" .
 	 * <br/>JP:
@@ -302,11 +126,8 @@ public class NyARBoard
 	
 	
 	private final NyARTransMatResult _result=new NyARTransMatResult();
-	private PApplet _pa;
-	private NyARCustomSingleDetectMarker _nya;
-	private NyARParam _ar_param;
-	private NyARRgbRaster_PImage _raster;
-	private ARToolkitThreshold4PImage _filter;
+	private NyARSingleDetectMarker _nya;
+	private PImageRaster _raster;
 	/**
 	 * This function is constructor.
 	 * <br/>JP:
@@ -344,9 +165,10 @@ public class NyARBoard
 	 * <br/>JP:
 	 * Projection Matrixの座標系を指定します。NyARBoard.CS_RIGHT か NyARBoard.Left(規定値)を指定します。
 	 */
-	public NyARBoard(PApplet parent, int i_width,int i_htight,String i_cparam,String i_patt,int i_patt_width,int i_projection_coord_system)
+	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width,int i_projection_coord_system)
 	{
-		constructor(this,parent,i_width,i_htight,i_cparam,i_patt,i_patt_width,i_projection_coord_system);
+		super(parent,i_cparam,i_width,i_height,i_projection_coord_system);
+		initInstance(i_width,i_height,i_patt,i_patt_width);
 		return;
 	}
 	/**
@@ -382,13 +204,26 @@ public class NyARBoard
 	 * <br/>JP:
 	 * マーカのサイズを指定します。単位はmmです。
 	 */	
-	public NyARBoard(PApplet parent, int i_width,int i_htight,String i_cparam,String i_patt,int i_patt_width)
+	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width)
 	{
-		constructor(this,parent,i_width,i_htight,i_cparam,i_patt,i_patt_width,CS_LEFT);
+		super(parent,i_cparam,i_width,i_height,CS_LEFT);
+		initInstance(i_width,i_height,i_patt,i_patt_width);
 		return;
 	}
 	
-
+	private void initInstance(int i_width,int i_height,String i_patt,int i_patt_width)
+	{
+		try{
+			this._raster=new PImageRaster(i_width, i_height);
+			NyARCode code=new NyARCode(16,16);
+			code.loadARPatt(this._pa.createInput(i_patt));
+			this._nya=new NyARSingleDetectMarker(this._ar_param,code,i_patt_width,this._raster.getBufferType());
+		}catch(NyARException e){
+			this._pa.die("Error while setting up NyARToolkit for java", e);
+		}
+		return;
+	}
+	
 	/**
 	 * This function detect a marker which is must higher confidence in i_image.
 	 * When function detects marker, properties (pos2d,angle,trans,confidence,transmat) are updated.
@@ -409,10 +244,9 @@ public class NyARBoard
 	{
 		boolean is_marker_exist=false;
 		try{
-			this._raster.bindImage(i_image);
+			this._raster.wrapBuffer(i_image);
 			//マーカの検出をするよ。
-			this._filter.setThreshold(this.gsThreshold);
-			is_marker_exist = this._nya.detectMarkerLite(this._raster);
+			is_marker_exist = this._nya.detectMarkerLite(this._raster,this.gsThreshold);
 			//マーカ見つかったら一致度確認
 			if(is_marker_exist){
 				double cf=this._nya.getConfidence();
@@ -422,10 +256,10 @@ public class NyARBoard
 			}
 			//マーカとして処理？
 			if(is_marker_exist){
-				final NyARIntPoint[] pts=this._nya.refSquarePosition();
+				final NyARDoublePoint2d[] pts=this._nya.refSquare().sqvertex;
 				for(int i=0;i<4;i++){
-					this.pos2d[i][0]=pts[i].x;
-					this.pos2d[i][1]=pts[i].y;
+					this.pos2d[i][0]=(int)pts[i].x;
+					this.pos2d[i][1]=(int)pts[i].y;
 				}
 				this.confidence=this._nya.getConfidence();
 				this.lostCount=0;
@@ -439,8 +273,6 @@ public class NyARBoard
 			}else{
 				is_marker_exist=false;				
 			}
-			
-			this._raster.unBindImage(i_image);
 			return is_marker_exist;
 		}catch(NyARException e){
 			this._pa.die("Error while marker detecting up NyARToolkit for java", e);
@@ -493,8 +325,6 @@ public class NyARBoard
 		this._pa.pushMatrix();
 		return;
 	}
-
-	
 	/**
 	 * This function recover coordinate system that was changed by beginTransform function.
 	 * <br/>JP:
@@ -517,131 +347,22 @@ public class NyARBoard
 		this._pgl=null;
 		return;
 	}
-	private static void constructor(NyARBoard i_this,PApplet parent, int i_width,int i_htight,String i_cparam,String i_patt,int i_patt_width,int i_projection_coord_system)
-	{
-		checkCoordinateSystemRange(parent,i_projection_coord_system);
-		NyARCode code;
-		i_this._pa=parent;
-		try{
-			i_this._raster=new NyARRgbRaster_PImage(i_width, i_htight);
-			i_this._ar_param=new NyARParam();
-			i_this._ar_param.loadARParam(i_this._pa.createInput(i_cparam));
-			i_this._ar_param.changeScreenSize(i_width, i_htight);
-			initProjection(parent,i_this._ar_param,i_this.projection,i_projection_coord_system);
-			code=new NyARCode(16,16);
-			code.loadARPatt(i_this._pa.createInput(i_patt));
-			i_this._filter=new ARToolkitThreshold4PImage();
-			i_this._nya=new NyARCustomSingleDetectMarker(i_this._ar_param,code,(double)i_patt_width,i_this._filter);
-		}catch(NyARException e){
-			i_this._pa.die("Error while setting up NyARToolkit for java", e);
-		}
-		return;
-	}
-	private static void initProjection(PApplet i_pa, NyARParam i_param,double[] o_projection,int i_coord_system)
-	{
-		NyARMat trans_mat = new NyARMat(3, 4);
-		NyARMat icpara_mat = new NyARMat(3, 4);
-		double[][] p = new double[3][3], q = new double[4][4];
-		int i, j;
+	private final NyARDoublePoint3d _tmp_d3p=new NyARDoublePoint3d();
 
-		final NyARIntSize size=i_param.getScreenSize();
-		final int width = size.w;
-		final int height = size.h;
-		
-		i_param.getPerspectiveProjectionMatrix().decompMat(icpara_mat, trans_mat);
-
-		double[][] icpara = icpara_mat.getArray();
-		double[][] trans = trans_mat.getArray();
-		for (i = 0; i < 4; i++) {
-			icpara[1][i] = (height - 1) * (icpara[2][i]) - icpara[1][i];
-		}
-
-		for (i = 0; i < 3; i++) {
-			for (j = 0; j < 3; j++) {
-				p[i][j] = icpara[i][j] / icpara[2][2];
-			}
-		}
-		q[0][0] = (2.0 * p[0][0] / (width - 1));
-		q[0][1] = (2.0 * p[0][1] / (width - 1));
-		q[0][2] = -((2.0 * p[0][2] / (width - 1)) - 1.0);
-		q[0][3] = 0.0;
-
-		q[1][0] = 0.0;
-		q[1][1] = -(2.0 * p[1][1] / (height - 1));
-		q[1][2] = -((2.0 * p[1][2] / (height - 1)) - 1.0);
-		q[1][3] = 0.0;
-
-		q[2][0] = 0.0;
-		q[2][1] = 0.0;
-		q[2][2] = (view_distance_max + view_distance_min) / (view_distance_min - view_distance_max);
-		q[2][3] = 2.0 * view_distance_max * view_distance_min / (view_distance_min - view_distance_max);
-
-		q[3][0] = 0.0;
-		q[3][1] = 0.0;
-		q[3][2] = -1.0;
-		q[3][3] = 0.0;
-		
-		switch(i_coord_system){
-		case NyARBoard.CS_LEFT:
-			break;
-		case NyARBoard.CS_RIGHT:
-			q[2][2] = q[2][2]* -1;
-			q[2][3] = q[2][3]* -1;
-			break;
-		default:
-			i_pa.die("Please set NyARBoard.CS_LEFT or NyARBoard.CS_RIGHT.");
-		}
-		
-		for (i = 0; i < 4; i++) { // Row.
-			// First 3 columns of the current row.
-			for (j = 0; j < 3; j++) { // Column.
-				o_projection[i + j * 4] = q[i][0] * trans[0][j] + q[i][1] * trans[1][j] + q[i][2] * trans[2][j];
-			}
-			// Fourth column of the current row.
-			o_projection[i + 3 * 4] = q[i][0] * trans[0][3] + q[i][1] * trans[1][3] + q[i][2] * trans[2][3] + q[i][3];
-		}
-		return;	
-	}
 	private void updateTransmat(NyARTransMatResult i_src)
 	{
-		this.transmat[0 + 0 * 4] = i_src.m00; 
-		this.transmat[0 + 1 * 4] = i_src.m01;
-		this.transmat[0 + 2 * 4] = i_src.m02;
-		this.transmat[0 + 3 * 4] = i_src.m03;
-		this.transmat[1 + 0 * 4] = -i_src.m10;
-		this.transmat[1 + 1 * 4] = -i_src.m11;
-		this.transmat[1 + 2 * 4] = -i_src.m12;
-		this.transmat[1 + 3 * 4] = -i_src.m13;
-		this.transmat[2 + 0 * 4] = -i_src.m20;
-		this.transmat[2 + 1 * 4] = -i_src.m21;
-		this.transmat[2 + 2 * 4] = -i_src.m22;
-		this.transmat[2 + 3 * 4] = -i_src.m23;
-		this.transmat[3 + 0 * 4] = 0.0;
-		this.transmat[3 + 1 * 4] = 0.0;
-		this.transmat[3 + 2 * 4] = 0.0;
-		this.transmat[3 + 3 * 4] = 1.0;
+		matResult2GLArray(i_src,this.transmat);
 		//angle
-		this.angle.x=(float)i_src.angle.x;
-		this.angle.y=(float)i_src.angle.y;
-		this.angle.z=(float)i_src.angle.z;
+		i_src.getZXYAngle(this._tmp_d3p);
+		
+		this.angle.x=(float)this._tmp_d3p.x;
+		this.angle.y=(float)this._tmp_d3p.y;
+		this.angle.z=(float)this._tmp_d3p.z;
 		//trans
 		this.trans.x=(float)i_src.m03;
 		this.trans.y=(float)i_src.m13;
 		this.trans.z=(float)i_src.m23;
 		
 		return;	
-	}
-	
-	private final static double view_distance_min = 100;//#define VIEW_DISTANCE_MIN		0.1			// Objects closer to the camera than this will not be displayed.
-	private final static double view_distance_max = 10000.0;//#define VIEW_DISTANCE_MAX		100.0		// Objects further away from the camera than this will not be displayed.
-	private final static void checkCoordinateSystemRange(PApplet i_pa,int i_cs)
-	{
-		switch(i_cs){
-		case NyARBoard.CS_LEFT:
-		case NyARBoard.CS_RIGHT:
-			return;
-		default:
-			i_pa.die("Please set NyARBoard.CS_LEFT or NyARBoard.CS_RIGHT.");
-		}
 	}
 }

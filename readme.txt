@@ -1,7 +1,7 @@
 NyARToolkit for proce55ing
-Copyright (C)2008-2009 R.Iizuka
+Copyright (C)2008-2010 R.Iizuka
 
-version 0.2.2
+version 0.3.0
 
 http://nyatla.jp/
 airmail(at)ebony.plala.or.jp
@@ -60,12 +60,22 @@ airmail(at)ebony.plala.or.jp
 　マーカを検出し、変換行列の計算する機能を持ちます。データを単純に映像と合成する時に
 　便利です。
 
+　・SingleARTKMarkerクラス（SingleARTKMarker.java）
+　複数種類のマーカを同時に１個認識するクラスです。PImage形式の画像入力から、複数の
+　種類のマーカを用意して、それぞれのマーカに違うオブジェクトを出すユースケースに
+　使用できます。NyARBoardの機能に加え、自動式位置調整や簡易トラッキング機能が使えます。
+
+　・SingleNyIdMarkerクラス（SingleNyIdMarker.java）
+　複数種類のIdマーカを同時に１個認識するクラスです。複数の種類のマーカを用意して、
+　それぞれのマーカに違うオブジェクトを出すユースケースに使用できます。
+　SingleARTKMarkerと比べて、たくさんの種類のマーカを扱える特徴があります。
+　Idの仕様は、NyId形式です。
 
 
 ・その他
 　カメラパラメータファイル、パターンファイルは、ARToolKitのそれと完全な互換性が
 　あります。このライブラリにはこれらを作成する機能がありませんので、ARToolKit、または
-　FLARToolKitの機能を利用してください。
+　FLARToolKitの機能を利用してください。なお、マーカパターンは16x16で作る必要があります。
 
 　Windows環境下では、arc@dmzさん作のDirectShow Javaベースのキャプチャライブラリ
 　CaptureDSを使用することをお勧めします。

@@ -1,4 +1,4 @@
-/**	NyARToolkit for proce55ing/0.2.2
+/**	NyARToolkit for proce55ing/0.3.0
 	(c)2008 nyatla
 	airmail(at)ebony.plala.or.jp
 */
@@ -24,8 +24,9 @@ void setup() {
   //Left hand projection matrix
   nya=new NyARBoard(this,width,height,"camera_para.dat","patt.hiro",80);
   print(nya.VERSION);
-//  //Right hand projection matrix
-//  nya=new NyARBoard(this,width,height,"camera_para.dat","patt.hiro",80,NyARBoard.CS_RIGHT);
+  //Right hand projection matrix
+  //nya=new NyARBoard(this,width,height,"camera_para.dat","patt.hiro",80,NyARBoard.CS_RIGHT);
+
   //各種プロパティ設定（必要に応じて設定すること。何もしないとデフォルト値が入力される。）
   nya.gsThreshold=120;//画像２値化の閾値(0<n<255) default=110
   nya.cfThreshold=0.4;//変換行列計算を行うマーカ一致度(0.0<n<1.0) default=0.4
