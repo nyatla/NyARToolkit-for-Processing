@@ -84,8 +84,8 @@ airmail(at)ebony.plala.or.jp
 
 
 ・ライセンス
-　src以下のファイルはMITライセンスですが、NyARToolkitがGPLv2ライセンスのため、
-　jarファイルのライセンスはGPLv2になります。
+　src以下のファイルはMITライセンスですが、NyARToolkitがGPLv3ライセンスのため、
+　jarファイルのライセンスはGPLv3になります。
 
 　NyARToolkitのソースファイルは、http://sourceforge.jp/projects/nyartoolkit/
 　よりダウンロードできます。
