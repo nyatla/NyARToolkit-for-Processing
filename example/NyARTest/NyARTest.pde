@@ -1,5 +1,5 @@
 /**	NyARToolkit for proce55ing/0.3.0
-	(c)2008 nyatla
+	(c)2008-2010 nyatla
 	airmail(at)ebony.plala.or.jp
 */
  
@@ -85,10 +85,13 @@ void draw() {
   }
   cam.read();
   //背景を描画
+  hint(DISABLE_DEPTH_TEST);
   image(cam,0,0);
+  hint(ENABLE_DEPTH_TEST);
 
   //マーカの検出。マーカが発見されるとdetectはTRUEを返す。
   if(nya.detect(cam)){
+    hint(DISABLE_DEPTH_TEST);
     //一致度を書く
     textFont(font,25.0);
     fill((int)((1.0-nya.confidence)*100),(int)(nya.confidence*100),0);
@@ -103,6 +106,7 @@ void draw() {
     popMatrix();    
     //マーカの位置を描画
     drawMarkerPos(nya.pos2d);
+    hint(ENABLE_DEPTH_TEST);
     
     PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;
     nya.beginTransform(pgl);//マーカ座標系での描画を開始する。

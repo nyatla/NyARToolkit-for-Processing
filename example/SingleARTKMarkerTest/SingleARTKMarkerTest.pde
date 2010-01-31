@@ -1,5 +1,5 @@
 /**	NyARToolkit for proce55ing/0.3.0
-	(c)2008 nyatla
+	(c)2008-2010 nyatla
 	airmail(at)ebony.plala.or.jp
 */
  
@@ -60,7 +60,9 @@ void draw() {
   }
   cam.read();
   //背景を描画
+  hint(DISABLE_DEPTH_TEST);
   image(cam,0,0);
+  hint(ENABLE_DEPTH_TEST);
   
   //detect結果で処理を分ける。
   switch(nya.detect(cam)){
@@ -75,7 +77,9 @@ void draw() {
     //マーカの位置を更新中・・・
     
     //マーカの位置を描画
+    hint(DISABLE_DEPTH_TEST);
     drawMarkerPos(nya.pos2d);
+    hint(ENABLE_DEPTH_TEST);
     
     //キューブを描画
     PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;
