@@ -68,7 +68,7 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 */
 	public int lostDelay =10;
 	/**
-	 * 連続でマーカを見失った回数。この値は0<n<lostDelayをとります。
+	 * [read only]連続でマーカを見失った回数。この値は0<n<lostDelayをとります。
 	 * <br/>EN:
 	 * It is a number in which it continuously lost the marker.
 	 * This value range is "0&lt;n&lt;lostDelay"
@@ -84,7 +84,7 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 */
 	public double cfThreshold=0.4;
 	/**
-	 * 検出したマーカの一致度です。
+	 * [read only]検出したマーカの一致度です。
 	 * <br/>EN:
 	 * The confidence value of detected marker.
 	 */
@@ -135,14 +135,17 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 * マーカのサイズを指定します。単位はmmです。
 	 * <br/>EN:
 	 * The length of one side of a square marker in millimeter unit.
-	 * @param i_projection_coord_system
-	 * Projection Matrixの座標系を指定します。NyARBoard.CS_RIGHT か NyARBoard.Left(規定値)を指定します。
+	 * @param i_coord_system
+	 * 座標系を指定します。{@link NyARBoard#CS_RIGHT_HAND} か {@link NyARBoard.CS_LEFT_HAND}(規定値)を指定します。
+	 * nyar4psg/0.2.xのCS_LEFTと互換性のある値は、{@link NyARBoard#CS_RIGHT_HAND}です。nyar4psg/0.2.xのCS_RIGHTと互換性のある値はありません。
 	 * <br/>EN:
-	 * Coordinate system flag of projection Matrix. Should be NyARBoard.CS_RIGHT or NyARBoard.Left(default)
+	 * This is coordinate system flag. Should be {@link NyARBoard#CS_RIGHT_HAND} or  {@link NyARBoard.CS_LEFT_HAND}(default)
+	 * The value compatible with CS_LEFT(nyar4psg/0.2.x) is {@link NyARBoard#CS_RIGHT_HAND}.
+	 * There is no value compatible with CS_RIGHT(nyar4psg/0.2.x).
 	 */
-	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width,int i_projection_coord_system)
+	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width,int i_coord_system)
 	{
-		super(parent,i_cparam,i_width,i_height,i_projection_coord_system);
+		super(parent,i_cparam,i_width,i_height,i_coord_system);
 		initInstance(i_width,i_height,i_patt,i_patt_width);
 		return;
 	}
@@ -158,7 +161,7 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 * detect()に渡す入力画像の幅を指定します。
 	 * <br/>EN:
 	 * Width of source image size for "detect()".
-	 * @param i_htight
+	 * @param i_height
 	 * detectに渡す入力画像の高さを指定します。
 	 * <br/>EN:
 	 * Height of source image size for "detect()".
@@ -181,7 +184,7 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 */	
 	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width)
 	{
-		super(parent,i_cparam,i_width,i_height,CS_LEFT);
+		super(parent,i_cparam,i_width,i_height,NyARBoard.CS_RIGHT_HAND);
 		initInstance(i_width,i_height,i_patt,i_patt_width);
 		return;
 	}
@@ -189,17 +192,12 @@ public class NyARBoard extends SingleMarkerBaseClass
 	private void initInstance(int i_width,int i_height,String i_patt,int i_patt_width)
 	{
 		try{
-			this.angle=new PVector();
-			this.trans=new PVector();
-			this.pos2d=new int[4][2];
-			this.transmat=new double[16];			
-			
 			this._raster=new PImageRaster(i_width, i_height);
 			NyARCode code=new NyARCode(16,16);
-			code.loadARPatt(this._pa.createInput(i_patt));
+			code.loadARPatt(this._ref_papplet.createInput(i_patt));
 			this._nya=new NyARSingleDetectMarker(this._ar_param,code,i_patt_width,this._raster.getBufferType());
 		}catch(NyARException e){
-			this._pa.die("Error while setting up NyARToolkit for java", e);
+			this._ref_papplet.die("Error while setting up NyARToolkit for java", e);
 		}
 		return;
 	}
@@ -250,7 +248,7 @@ public class NyARBoard extends SingleMarkerBaseClass
 			}
 			return is_marker_exist;
 		}catch(NyARException e){
-			this._pa.die("Error while marker detecting up NyARToolkit for java", e);
+			this._ref_papplet.die("Error while marker detecting up NyARToolkit for java", e);
 		}
 		return is_marker_exist;
 	}

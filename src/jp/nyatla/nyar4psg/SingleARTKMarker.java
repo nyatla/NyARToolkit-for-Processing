@@ -32,7 +32,6 @@ import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
-import jp.nyatla.nyartoolkit.core.types.*;
 import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.processor.SingleARMarkerProcesser;
 
@@ -103,18 +102,18 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	 * @param i_cparam
 	 * <br/>EN:
 	 * -
-	 * @param i_projection_coord_system
+	 * @param i_coord_system
 	 * <br/>EN:
 	 * -
 	 */
-	public SingleARTKMarker(PApplet parent, int i_width,int i_height,String i_cparam,int i_projection_coord_system)
+	public SingleARTKMarker(PApplet parent, int i_width,int i_height,String i_cparam,int i_coord_system)
 	{
-		super(parent,i_cparam,i_width,i_height,i_projection_coord_system);
+		super(parent,i_cparam,i_width,i_height,i_coord_system);
 		try{
 			this._raster=new PImageRaster(i_width,i_height);
-			this._marker_proc=new MarkerProcessor(this._ar_param,this._raster.getBufferType());
+			this._marker_proc=new MarkerProcessor(this,this._ar_param,this._raster.getBufferType());
 		}catch(NyARException e){
-			this._pa.die("Error on SingleARTKMarker",e);
+			this._ref_papplet.die("Error on SingleARTKMarker",e);
 		}
 		return;
 	}
@@ -135,16 +134,16 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	{
 		if(this._registerd_marker)
 		{
-			this._pa.die("Error already called setARCodes.", new NyARException());
+			this._ref_papplet.die("Error already called setARCodes.", new NyARException());
 		}
 		try{
 	        NyARCode[] codes=new NyARCode[1];
 	        codes[0]=new NyARCode(16,16);
-	        codes[0].loadARPatt(this._pa.createInput(i_patt_name));
+	        codes[0].loadARPatt(this._ref_papplet.createInput(i_patt_name));
 	        this._marker_proc.setARCodeTable(codes,16,i_patt_size);
 	        this._registerd_marker=true;
 		}catch(NyARException e){
-			this._pa.die("Error on setARCodes",e);
+			this._ref_papplet.die("Error on setARCodes",e);
 		}	        
 		return;	
 	}
@@ -165,18 +164,18 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	{
 		if(this._registerd_marker)
 		{
-			this._pa.die("Error already called setARCodes.", new NyARException());
+			this._ref_papplet.die("Error already called setARCodes.", new NyARException());
 		}
 		try{
 	        NyARCode[] codes=new NyARCode[i_patt_names.length];
 	        for(int i=0;i<i_patt_names.length;i++){
 	            codes[i]=new NyARCode(16,16);
-	            codes[i].loadARPatt(this._pa.createInput(i_patt_names[i]));        	
+	            codes[i].loadARPatt(this._ref_papplet.createInput(i_patt_names[i]));        	
 	        }
 	        this._marker_proc.setARCodeTable(codes,16,i_patt_size);
 	        this._registerd_marker=true;
 		}catch(NyARException e){
-			this._pa.die("Error on setARCodes",e);
+			this._ref_papplet.die("Error on setARCodes",e);
 		}	        
 		return;	
 	}	
@@ -235,7 +234,7 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	public int detect(PImage i_image)
 	{
 		if(!this._registerd_marker){
-			this._pa.die("Must call setARCodes function in the first.");
+			this._ref_papplet.die("Must call setARCodes function in the first.");
 		}
 		try{
 			this._raster.wrapBuffer(i_image);
@@ -245,17 +244,9 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 			switch(this._marker_proc.status){
 			case ST_NOMARKER:
 			case ST_REMOVEMARKER:
-				this.transmat=null;
-				this.angle=null;
-				this.pos2d=null;
-				this.trans=null;
 				this.markerid=-1;
 				break;
 			case ST_NEWMARKER:
-				this.transmat=this._marker_proc.gltransmat;
-				this.angle=this._marker_proc.angle;
-				this.pos2d=this._marker_proc.pos2d;
-				this.trans=this._marker_proc.trans;
 				this.markerid=this._marker_proc.current_code;
 				break;
 			case ST_UPDATEMARKER:
@@ -264,29 +255,24 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 				throw new NyARException();
 			}
 		}catch(NyARException e){
-			this._pa.die("Error while marker detecting up NyARToolkit for java", e);
+			this._ref_papplet.die("Error while marker detecting up NyARToolkit for java", e);
 		}
 		return this._marker_proc.status;
 	}
 
 	private class MarkerProcessor extends SingleARMarkerProcesser
 	{	
-		public double[] gltransmat=new double[16];
-		public PVector angle=new PVector();
-		public int[][] pos2d=new int[4][2];
-		public PVector trans=new PVector();
+		private SingleMarkerBaseClass _parent;
 		public int current_code=-1;
 		public int status;
 		
-		private final NyARDoublePoint3d _tmp_d3p=new NyARDoublePoint3d();
-
-
 		private boolean _is_prev_onenter;
 
-		public MarkerProcessor(NyARParam i_cparam,int i_raster_format) throws NyARException
+		public MarkerProcessor(SingleMarkerBaseClass i_parent,NyARParam i_cparam,int i_raster_format) throws NyARException
 		{
 			//アプリケーションフレームワークの初期化
 			super();
+			this._parent=i_parent;
 			initInstance(i_cparam,i_raster_format);
 			this.status=SingleARTKMarker.ST_NOMARKER;
 			return;
@@ -310,23 +296,7 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 
 		protected void onUpdateHandler(NyARSquare i_square, NyARTransMatResult result)
 		{
-			matResult2GLArray(result, gltransmat);
-			//angle
-			result.getZXYAngle(this._tmp_d3p);
-			
-			this.angle.x=(float)this._tmp_d3p.x;
-			this.angle.y=(float)this._tmp_d3p.y;
-			this.angle.z=(float)this._tmp_d3p.z;
-			//trans
-			this.trans.x=(float)result.m03;
-			this.trans.y=(float)result.m13;
-			this.trans.z=(float)result.m23;
-			
-			for(int i=0;i<4;i++){
-				this.pos2d[i][0]=(int)i_square.sqvertex[i].x;
-				this.pos2d[i][1]=(int)i_square.sqvertex[i].y;
-			}
-
+			this._parent.updateTransmat(i_square, result);
 			this.status=this._is_prev_onenter?SingleARTKMarker.ST_NEWMARKER:SingleARTKMarker.ST_UPDATEMARKER;
 			this._is_prev_onenter=false;
 		}

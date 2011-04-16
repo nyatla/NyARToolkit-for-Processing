@@ -7,9 +7,10 @@ import processing.core.PImage;
 
 class PImageRaster extends NyARRgbRaster
 {
+	public final static int BUFFER_TYPE=NyARBufferType.INT1D_X8R8G8B8_32;
 	public PImageRaster(int i_width, int i_height) throws NyARException
 	{
-		super(i_width,i_height,NyARBufferType.INT1D_X8R8G8B8_32,false);
+		super(i_width,i_height,BUFFER_TYPE,false);
 		return;
 	}
 	public void wrapBuffer(PImage i_ref_image) throws NyARException

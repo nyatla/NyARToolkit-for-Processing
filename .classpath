@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="D:/application.files/processing-1.2.1/lib/core.jar"/>
+	<classpathentry kind="lib" path="D:/application.files/processing-1.2.1/lib/pde.jar"/>
+	<classpathentry kind="lib" path="D:/application.files/processing-1.2.1/libraries/opengl/library/jogl.jar"/>
+	<classpathentry kind="lib" path="D:/application.files/processing-1.2.1/libraries/opengl/library/opengl.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/NyARToolKit"/>
-	<classpathentry kind="lib" path="C:/Users/nyatla/Desktop/processing-1.0.9/lib/core.jar"/>
-	<classpathentry kind="lib" path="C:/Users/nyatla/Desktop/processing-1.0.9/lib/pde.jar"/>
-	<classpathentry kind="lib" path="C:/Users/nyatla/Desktop/processing-1.0.9/libraries/opengl/library/jogl.jar"/>
-	<classpathentry kind="lib" path="C:/Users/nyatla/Desktop/processing-1.0.9/libraries/opengl/library/opengl.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

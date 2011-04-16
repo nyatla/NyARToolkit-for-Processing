@@ -32,8 +32,7 @@ import processing.core.*;
 import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
-import jp.nyatla.nyartoolkit.core.types.*;
-import jp.nyatla.nyartoolkit.core.transmat.*;
+import jp.nyatla.nyartoolkit.core.transmat.NyARTransMatResult;
 import jp.nyatla.nyartoolkit.nyidmarker.data.INyIdMarkerData;
 import jp.nyatla.nyartoolkit.nyidmarker.data.NyIdMarkerDataEncoder_RawBit;
 import jp.nyatla.nyartoolkit.nyidmarker.data.NyIdMarkerData_RawBit;
@@ -106,17 +105,18 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 	 * @param i_cparam
 	 * <br/>EN:
 	 * -
-	 * @param i_projection_coord_system
+	 * @param i_coord_system
+	 * 
 	 * <br/>EN:
 	 * -
 	 */
-	public SingleNyIdMarker(PApplet parent, int i_width,int i_height,String i_cparam,int i_projection_coord_system)
+	public SingleNyIdMarker(PApplet parent, int i_width,int i_height,String i_cparam,int i_coord_system)
 	{
-		super(parent,i_cparam,i_width,i_height,i_projection_coord_system);
+		super(parent,i_cparam,i_width,i_height,i_coord_system);
 		try{
 			this._raster=new PImageRaster(i_width,i_height);		
 		}catch(NyARException e){
-			this._pa.die("Error on SingleNyIdMarker",e);
+			this._ref_papplet.die("Error on SingleNyIdMarker",e);
 		}
 	}
 	/**
@@ -132,12 +132,12 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 	{
 		if(this._registerd_marker)
 		{
-			this._pa.die("Error already called setIdMarkerSize.", new NyARException());
+			this._ref_papplet.die("Error already called setIdMarkerSize.", new NyARException());
 		}
 		try{
-			this._marker_proc=new MarkerProcessor(this._ar_param,this._raster.getBufferType());
+			this._marker_proc=new MarkerProcessor(this,this._ar_param,this._raster.getBufferType());
 		}catch(NyARException e){
-			this._pa.die("Error on setIdMarkerSize",e);
+			this._ref_papplet.die("Error on setIdMarkerSize",e);
 		}
 		this._registerd_marker=true;
 		return;
@@ -177,7 +177,7 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 	public int detect(PImage i_image)
 	{
 		if(!this._registerd_marker){
-			this._pa.die("Must call setIdMarkerSize function in the first.");
+			this._ref_papplet.die("Must call setIdMarkerSize function in the first.");
 		}
 		try{
 			this._raster.wrapBuffer(i_image);
@@ -187,17 +187,9 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 			switch(this._marker_proc.status){
 			case ST_NOMARKER:
 			case ST_REMOVEMARKER:
-				this.transmat=null;
-				this.angle=null;
-				this.pos2d=null;
-				this.trans=null;
 				this.markerid=-1;
 				break;
 			case ST_NEWMARKER:
-				this.transmat=this._marker_proc.gltransmat;
-				this.angle=this._marker_proc.angle;
-				this.pos2d=this._marker_proc.pos2d;
-				this.trans=this._marker_proc.trans;
 				this.markerid=this._marker_proc.current_id;
 				break;
 			case ST_UPDATEMARKER:
@@ -206,7 +198,7 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 				throw new NyARException();
 			}
 		}catch(NyARException e){
-			this._pa.die("Error while marker detecting up NyARToolkit for java", e);
+			this._ref_papplet.die("Error while marker detecting up NyARToolkit for java", e);
 		}
 		return this._marker_proc.status;
 	}
@@ -214,26 +206,21 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 
 	private class MarkerProcessor extends SingleNyIdMarkerProcesser
 	{	
-		public double[] gltransmat=new double[16];
-		public PVector angle=new PVector();
-		public int[][] pos2d=new int[4][2];
-		public PVector trans=new PVector();
 		public int current_id=-1;
 		public int status;
+		private SingleMarkerBaseClass _parent;
 		
-		private final NyARDoublePoint3d _tmp_d3p=new NyARDoublePoint3d();
-
-
 		private boolean _is_prev_onenter;
 
 		public void initSequence()
 		{
 			this.status=this.status==SingleNyIdMarker.ST_REMOVEMARKER?SingleNyIdMarker.ST_NOMARKER:this.status;
 		}
-		public MarkerProcessor(NyARParam i_cparam,int i_raster_format) throws NyARException
+		public MarkerProcessor(SingleMarkerBaseClass i_parent,NyARParam i_cparam,int i_raster_format) throws NyARException
 		{
 			//アプリケーションフレームワークの初期化
 			super();
+			this._parent=i_parent;
 			initInstance(i_cparam, new NyIdMarkerDataEncoder_RawBit(),100, i_raster_format);
 			return;
 		}
@@ -246,23 +233,7 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 
 		protected void onUpdateHandler(NyARSquare i_square, NyARTransMatResult result)
 		{
-			matResult2GLArray(result, gltransmat);
-			//angle
-			result.getZXYAngle(this._tmp_d3p);
-			
-			this.angle.x=(float)this._tmp_d3p.x;
-			this.angle.y=(float)this._tmp_d3p.y;
-			this.angle.z=(float)this._tmp_d3p.z;
-			//trans
-			this.trans.x=(float)result.m03;
-			this.trans.y=(float)result.m13;
-			this.trans.z=(float)result.m23;
-			
-			for(int i=0;i<4;i++){
-				this.pos2d[i][0]=(int)i_square.sqvertex[i].x;
-				this.pos2d[i][1]=(int)i_square.sqvertex[i].y;
-			}
-
+			this._parent.updateTransmat(i_square, result);
 			this.status=this._is_prev_onenter?SingleNyIdMarker.ST_NEWMARKER:SingleNyIdMarker.ST_UPDATEMARKER;
 			this._is_prev_onenter=false;
 		}
