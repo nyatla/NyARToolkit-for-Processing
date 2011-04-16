@@ -21,7 +21,7 @@ void setup() {
   cam=new Capture(this,width,height);
   //平面検出クラスを作成
   //Left hand projection matrix
-  nya=new SingleNyIdMarker(this,width,height,"camera_para.dat",SingleNyIdMarker.CS_LEFT);
+  nya=new SingleNyIdMarker(this,width,height,"camera_para.dat",SingleNyIdMarker.CS_LEFT_HAND);
   nya.setIdMarkerSize(80);
   println(nya.VERSION);
 }

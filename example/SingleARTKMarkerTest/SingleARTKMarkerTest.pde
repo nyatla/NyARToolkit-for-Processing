@@ -21,7 +21,7 @@ void setup() {
   cam=new Capture(this,width,height);
   //平面検出クラスを作成
   //Left hand projection matrix
-  nya=new SingleARTKMarker(this,width,height,"camera_para.dat",SingleARTKMarker.CS_LEFT);
+  nya=new SingleARTKMarker(this,width,height,"camera_para.dat",SingleARTKMarker.CS_LEFT_HAND);
   println(nya.VERSION);
   String[] marker={"patt.hiro","patt.kanji"};
   nya.setARCodes(marker,80);
