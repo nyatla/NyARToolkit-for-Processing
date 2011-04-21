@@ -2,12 +2,8 @@ package jp.nyatla.nyar4psg;
 
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
 import jp.nyatla.nyartoolkit.core.transmat.NyARTransMatResult;
-import jp.nyatla.nyartoolkit.core.types.NyARDoublePoint2d;
-import jp.nyatla.nyartoolkit.core.types.NyARDoublePoint3d;
-import processing.core.PApplet;
-import processing.core.PMatrix3D;
-import processing.core.PVector;
-import processing.opengl.PGraphicsOpenGL;
+import jp.nyatla.nyartoolkit.core.types.*;
+import processing.core.*;
 
 /**
  * 単一マーカ認識ユースケースのベースクラス。同時に一つの座標変換行列を提供します。
@@ -84,8 +80,9 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 * 通常は、{@link PApplet#g}をキャストして指定します。
 	 * @deprecated
 	 */
-	public void beginTransform(PGraphicsOpenGL i_pgl)
+	public void beginTransform(PGraphics3D i_pgl)
 	{
+		assert(i_pgl.equals(this._ref_papplet.g));
 		this.beginTransform();
 	}
 	
@@ -97,7 +94,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
-	 * setARPerspective(prev_mat);//prev_matは現在の行列退避用。<br/>
+	 * PMatrix3D prev_mat=setARPerspective();//prev_matは現在の行列退避用。<br/>
 	 * pushMatrix();<br/>
 	 * setMatrix(ar.getMarkerMatrix());<br/>
 	 * :<br/>
@@ -123,7 +120,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 * <hr/>
 	 * :<br/>
 	 * setPerspective(prev_mat);//prev_matはsetARPerspectiveで退避した行列。<br/>
-	 * pushMatrix();<br/>
+	 * popMatrix();<br/>
 	 * setMatrix(ar.getMarkerMatrix());<br/>
 	 * :<br/>
 	 * <hr/>

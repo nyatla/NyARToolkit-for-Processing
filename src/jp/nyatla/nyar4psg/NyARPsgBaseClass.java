@@ -28,10 +28,10 @@
 package jp.nyatla.nyar4psg;
 
 
-import javax.media.opengl.GL;
+import javax.media.opengl.*;
 
 import processing.core.*;
-import processing.opengl.PGraphicsOpenGL;
+import processing.opengl.*;
 
 import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.param.*;
@@ -63,7 +63,7 @@ class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/0.5.1;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
+	public final static String VERSION = "NyAR4psg/0.9.0;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
 	/**　ProcessingスタイルのProjectionMatrixです。*/
 	protected PMatrix3D _ps_projection=new PMatrix3D();
 	/**　参照するAppletのインスタンスです。*/
@@ -132,8 +132,8 @@ class NyARPsgBaseClass
 	 */	
 	public PMatrix3D setPerspective(PMatrix3D i_projection)
 	{
-		if(!(this._ref_papplet.g instanceof PGraphicsOpenGL)){
-			this._ref_papplet.die("NyAR4Psg require PGraphicsOpenGL instance.");
+		if(!(this._ref_papplet.g instanceof PGraphics3D)){
+			this._ref_papplet.die("NyAR4Psg require PGraphics3D instance.");
 		}
 		PGraphics3D g=(PGraphics3D)this._ref_papplet.g;
 		//現在のProjectionMatrixを保存する。
@@ -141,6 +141,7 @@ class NyARPsgBaseClass
 		ret.set(g.projection);
 		//ProjectionMatrixの設定
 		g.projection.set(i_projection);
+		//OpenGLの時はちょっと細工
 		if(this._ref_papplet.g instanceof PGraphicsOpenGL)
 		{
 			GL gl=((PGraphicsOpenGL)g).gl;

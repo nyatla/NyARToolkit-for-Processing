@@ -82,7 +82,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	 * ここに設定した回数以上、マーカが連続して認識できなかったときに、認識に失敗します。
 	 * デフォルト値は、{@link #DEFAULT_LOST_DELAY}です。
 	 * @param i_val
-	 * 設定する値。0以上の数値が必要です。
+	 * 設定する値。1以上の数値が必要です。
 	 */
 	public void setLostDelay(int i_val)
 	{
@@ -385,9 +385,64 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 			e.printStackTrace();
 			parent.die("Exception occurred at MultiARTookitMarker.initInstance");
 		}
+	}
+	private PMatrix3D _old_matrix=null;
+	/**
+	 * この関数は、ProcessingのProjectionMatrixとModelview行列を、指定idのマーカ平面にセットします。
+	 * 必ず{@link #endTransform}とペアで使います。
+	 * 関数を実行すると、現在のModelView行列とProjection行列がインスタンスに保存され、新しい行列がセットされます。
+	 * これらを復帰するには、{@link #endTransform}を使います。
+	 * 復帰するまでの間は、再度{@link #beginTransform}を使うことはできません。
+	 * <div>
+	 * <div>この関数は、次のコードと等価です。</div>
+	 * <hr/>
+	 * :<br/>
+	 * PMatrix3D prev_mat=setARPerspective();//prev_matは現在の行列退避用。<br/>
+	 * pushMatrix();<br/>
+	 * setMatrix(ar.getMarkerMatrix(i_id));<br/>
+	 * :<br/>
+	 * <hr/>
+	 * </div>
+	 * @param i_id
+	 * マーカidを指定します。
+	 */
+	public void beginTransform(int i_id)
+	{
+		if(this._old_matrix!=null){
+			this._ref_papplet.die("The function beginTransform is already called.", null);			
+		}
+		//projectionの切り替え
+		this._old_matrix=this.setARPerspective();
+		//ModelViewの設定
+		this._ref_papplet.pushMatrix();
+		this._ref_papplet.setMatrix(this.getMarkerMatrix(i_id));
+		return;	
+	}
+	/**
+	 * この関数は、{@link #beginTransform}でセットしたProjectionとModelViewを元に戻します。
+	 * この関数は、必ず{@link #beginTransform}とペアで使います。
+	 * <div>この関数は、次のコードと等価です。</div>
+	 * <hr/>
+	 * :<br/>
+	 * setPerspective(prev_mat);//prev_matはsetARPerspectiveで退避した行列。<br/>
+	 * pushMatrix();<br/>
+	 * setMatrix(ar.getMarkerMatrix());<br/>
+	 * :<br/>
+	 * <hr/>
+	 * </div>
+	 */
+	public void endTransform()
+	{
+		if(this._old_matrix==null){
+			this._ref_papplet.die("The function beginTransform is never called.", null);			
+		}
+		//ModelViewの復帰
+		this._ref_papplet.popMatrix();
+		//Projectionの復帰
+		this.setPerspective(this._old_matrix);
+		this._old_matrix=null;
+		return;
 	}	
-	
-	
 	/**
 	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
 	 * @param i_file_name
@@ -492,7 +547,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 		PMatrix3D p=new PMatrix3D();
 		//存在チェック
 		if(!this.isExistMarker(i_id)){
-			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
+			this._ref_papplet.die("Marker id " +i_id + " is not exist on image.", null);
 		}
 		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
 		matResult2PMatrix3D(item.tmat,this._coord_system,p);
