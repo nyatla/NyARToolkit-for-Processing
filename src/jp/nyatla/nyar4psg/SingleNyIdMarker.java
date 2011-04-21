@@ -39,50 +39,37 @@ import jp.nyatla.nyartoolkit.nyidmarker.data.NyIdMarkerData_RawBit;
 import jp.nyatla.nyartoolkit.processor.*;
 
 
-
 /**
- * このクラスは、１個のNyIdマーカを認識することができます。
- * 映像からマーカを１個検出し、そのID番号と行列を返します。
- * <pre>
- * </pre>
- * <br/>EN:
- * -
- * @author nyatla
- *
+ * このクラスは、NyIdマーカを同時に1個を認識するクラスです。
+ * NyARToolKitの{@link SingleNyIdMarkerProcesser}を使用したクラスです。
+ * 入力画像から、NyIdマーカを1個検出し、そのID番号と行列を返します。
  */
 public class SingleNyIdMarker extends SingleMarkerBaseClass
 {
-	/**
-	 * detectの返すステータス値です。
-	 * <br/>EN:
-	 * -
-	 */
+	/** detectの返すステータス値です。*/
 	public static final int ST_NOMARKER    =0;
-	/**
-	 * detectの返すステータス値です。
-	 * <br/>EN:
-	 * -
-	 */
+	/** detectの返すステータス値です。*/
 	public static final int ST_NEWMARKER   =1;
-	/**
-	 * detectの返すステータス値です。
-	 * <br/>EN:
-	 * -
-	 */
+	/** detectの返すステータス値です。*/
 	public static final int ST_UPDATEMARKER=2;
-	/**
-	 * detectの返すステータス値です。
-	 * <br/>EN:
-	 * -
-	 */
+	/** detectの返すステータス値です。*/
 	public static final int ST_REMOVEMARKER=3;
 
 	/**
-	 * 検知しているNyIdマーカのIDです。
-	 * <br/>EN:
-	 * -
-	 */
+	 * [readonly]
+	 * この変数は互換性の為に残されています。{@link #getNyId}を使用してください。
+	 * @deprecated
+	 */	
 	public int markerid;
+	/**
+	 * 検出しているNyIdマーカの番号を返します。
+	 * @return
+	 * NyId値
+	 */
+	public int getNyId()
+	{
+		return this.markerid;
+	}
 
 	
 	
@@ -91,24 +78,12 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 	private boolean _registerd_marker=false;
 
 	/**
-	 * <br/>EN:
-	 * -
+	 * コンストラクタです。
 	 * @param parent
-	 * <br/>EN:
-	 * -
 	 * @param i_width
-	 * <br/>EN:
-	 * -
 	 * @param i_height
-	 * <br/>EN:
-	 * -
 	 * @param i_cparam
-	 * <br/>EN:
-	 * -
 	 * @param i_coord_system
-	 * 
-	 * <br/>EN:
-	 * -
 	 */
 	public SingleNyIdMarker(PApplet parent, int i_width,int i_height,String i_cparam,int i_coord_system)
 	{
@@ -119,14 +94,11 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 			this._ref_papplet.die("Error on SingleNyIdMarker",e);
 		}
 	}
+
 	/**
-	 * Idマーカノサイズを設定します。
-	 * <br/>EN:
-	 * This function sets size of marker.
+	 * この関数は、Idマーカのサイズを設定します。
 	 * @param i_width
-	 * [mm]単位でのマーカサイズ
-	 * <br/>EN:
-	 * size of marker in [mm] unit.
+	 * Idマーカの物理サイズをmm単位で指定します。
 	 */
 	public void setIdMarkerSize(double i_width)
 	{
@@ -144,35 +116,29 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 			
 	}
 	/**
-	 * <br/>EN:
-	 * -
 	 * @param i_image
-	 * <br/>EN:
-	 * -
 	 * @return
 	 * ステータスコードを返します。
-	 * <pre>
-	 * ST_NOMARKER:
+	 * <ul>
+	 * <li>ST_NOMARKER -
 	 * マーカが認識されていない事を示します。
 	 * マーカパラメータのメンバ変数は使用不可能です。
-	 * </pre>
-	 * <pre>
-	 * ST_NEWMARKER:
+	 * </li>
+	 * <li>
+	 * ST_NEWMARKER -
 	 * マーカが発見された事を示します。
 	 * transmat,angle,trans,markeridメンバ変数が利用可能です。
-	 * </pre>
-	 * <pre>
-	 * ST_UPDATEMARKER:
+	 * </li>
+	 * <li>
+	 * ST_UPDATEMARKER -
 	 * マーカ座標が更新されたことを示します。
 	 * transmat,angle,trans,markeridメンバ変数が利用可能です。
-	 * </pre>
-	 * <pre>
-	 * ST_REMOVEMARKER:
+	 * </li>
+	 * <li>
+	 * ST_REMOVEMARKER -
 	 * マーカが消失したことを示します。
 	 * マーカパラメータのメンバ変数は使用不可能です。
-	 * </pre>
-	 * <br/>EN:
-	 * -
+	 * </li>
 	 */
 	public int detect(PImage i_image)
 	{
@@ -203,7 +169,9 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 		return this._marker_proc.status;
 	}
 
-
+	/**
+	 * カスタマイズしたIdマーカです。
+	 */
 	private class MarkerProcessor extends SingleNyIdMarkerProcesser
 	{	
 		public int current_id=-1;

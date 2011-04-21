@@ -1,7 +1,5 @@
 package jp.nyatla.nyar4psg;
 
-import javax.media.opengl.GL;
-
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
 import jp.nyatla.nyartoolkit.core.transmat.NyARTransMatResult;
 import jp.nyatla.nyartoolkit.core.types.NyARDoublePoint2d;
@@ -18,58 +16,60 @@ import processing.opengl.PGraphicsOpenGL;
  *
  */
 class SingleMarkerBaseClass extends NyARPsgBaseClass
-{			
+{
+	
 	/**
 	 * [read only]マーカのx,y,zの傾き角度です。
 	 * この角度は、ARToolKit座標系での値です。
-	 * <br/>EN:
-	 * The angle value in radian unit of "x,y,z" .
 	 * @deprecated
-	 * この変数は互換性の為に残されています。{@link #allocMarkerMatrix()}で得られる値から計算してください。
+	 * この変数は互換性の為に残されています。{@link #getMarkerMatrix()}で得られる値から計算してください。
 	 */
 	public final PVector angle=new PVector();
 	/**
 	 * [read only]マーカのx,y,zの平行移動量です。
 	 * この角度は、ARToolKit座標系での値になります。
-	 * <br/>EN:
-	 * The translation value in radian unit of "x,y,z".
 	 * @deprecated
-	 * この変数は互換性の為に残されています。{@link #allocMarkerMatrix()}で得られる値から計算してください。
+	 * この変数は互換性の為に残されています。{@link #getMarkerMatrix()}で得られる値から計算してください。
 	 */
 	public final PVector trans=new PVector();
 	/**
 	 * [read only]検出したマーカの4隅の２次元画像上の位置です。
-	 * <br/>EN:
-	 * The position of 4 corner of marker.
 	 * @deprecated
-	 * この変数は互換性の為に残されています。{@link #allocMarkerVertex2D()}の値を使用してください。
+	 * この変数は互換性の為に残されています。{@link #getMarkerVertex2D()}の値を使用してください。
 	 */
 	public final int[][] pos2d=new int[4][2];
 	/**
 	 * [read only]検出したマーカの変換行列です。
 	 * この角度は、ARToolKit座標系での値になります。
-	 * <br/>EN:
-	 * The transform matrix of detected marker.
 	 * @deprecated
-	 * この変数は互換性の為に残されています。{@link #allocMarkerMatrix()}で得られる値を使用してください。
+	 * この変数は互換性の為に残されています。{@link #getMarkerMatrix()}で得られる値を使用してください。
 	 */
 	public final double[] transmat=new double[16];
+	/**
+	 * [read only] OpenGLスタイルのProjectionMatrixです。
+	 * @deprecated
+	 * この変数は互換性の為に残されています。{@link #getProjectionMatrix()}で得られる値を使用してください。
+	 */
+	public final double[] projection=new double[16];
+	/** モデルビュー行列を保持します。*/
+	protected final PMatrix3D _pmodelview_mat=new PMatrix3D();
+	/** begin-endシーケンスで使う。*/
+	private PMatrix3D _old_matrix;
 	
-	protected final PMatrix3D _pmat=new PMatrix3D();
 	/**
 	 * この関数は、マーカの座標変換行列を返します。
 	 * 返却する行列はProcessing座標系です。
 	 * @return
 	 */
-	public PMatrix3D allocMarkerMatrix()
+	public PMatrix3D getMarkerMatrix()
 	{
-		return new PMatrix3D(this._pmat);
+		return new PMatrix3D(this._pmodelview_mat);
 	}
 	/**
 	 * この関数は、マーカのスクリーン上の4頂点を返します。
 	 * @return
 	 */
-	public PVector[] allocMarkerVertex2D()
+	public PVector[] getMarkerVertex2D()
 	{
 		PVector[] r=new PVector[4];
 		for(int i=0;i<4;i++){
@@ -77,69 +77,73 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 		}
 		return r;
 	}
-	
 	/**
-	 * 座標変換を実行したMatrixを準備します。
-	 * この関数を実行すると、processingの座標系がマーカ表面に設定されます。
-	 * 描画終了後には、必ずendTransform関数を呼び出して座標系を戻してください。
-	 * <br/>EN:
-	 * This function sets corresponding transform matrix to the surface of the marker to OpenGL.
-	 * The coordinate system of processing moves to the surface of the marker when this function is executed.
-	 * Must return the coordinate system by using endTransform function at the end.
+	 * この関数は互換性の為に残されています。
+	 * {@link #beginTransform()}を使ってください。
 	 * @param i_pgl
-	 * PGraphicsOpenGLインスタンスを設定します。processingのgメンバをキャストして設定してください。
-	 * <br/>EN:
-	 * Specify PGraphicsOpenGL instance.
-	 * Set cast "g" member of processing graphics object.
+	 * 通常は、{@link PApplet#g}をキャストして指定します。
+	 * @deprecated
 	 */
 	public void beginTransform(PGraphicsOpenGL i_pgl)
 	{
-		if(this._gl!=null){
+		this.beginTransform();
+	}
+	
+	/**
+	 * この関数は、ProcessingのModelviewとProjectionをマーカ平面にセットします。
+	 * この関数は、必ず{@link #endTransform}とペアで使います。
+	 * 関数を実行すると、現在のModelView行列とProjection行列がインスタンスに保存され、新しい行列がセットされます。
+	 * これらを復帰するには、{@link #endTransform}を使います。
+	 * <div>この関数は、次のコードと等価です。</div>
+	 * <hr/>
+	 * :<br/>
+	 * setARPerspective(prev_mat);//prev_matは現在の行列退避用。<br/>
+	 * pushMatrix();<br/>
+	 * setMatrix(ar.getMarkerMatrix());<br/>
+	 * :<br/>
+	 * <hr/>
+	 * </div>
+	 */
+	public void beginTransform()
+	{
+		if(this._old_matrix!=null){
 			this._ref_papplet.die("The function beginTransform is already called.", null);			
 		}
-		this._pgl=i_pgl;
-		this._gl=i_pgl.gl;
-		{	//projectionの切り替え
-			this._gl.glMatrixMode(GL.GL_PROJECTION);
-			this._gl.glPushMatrix();
-			this._gl.glLoadMatrixd(this.projection,0);
-			this._old_matrix=this._pgl.projection;
-			this._pgl.projection=this._ps_projection;
-			this._gl.glMatrixMode(GL.GL_MODELVIEW);
-		}
-		{	//ModelViewの設定
-			this._ref_papplet.pushMatrix();
-			this._ref_papplet.setMatrix(this._pmat);
-		}
+		//projectionの切り替え
+		this._old_matrix=this.setARPerspective();
+		//ModelViewの設定
+		this._ref_papplet.pushMatrix();
+		this._ref_papplet.setMatrix(this._pmodelview_mat);
 		return;	
 	}
 	/**
-	 * beginTransformによる座標変換を解除して元に戻します。
-	 * <br/>EN:
-	 * This function recover coordinate system that was changed by beginTransform function.
+	 * {@link #beginTransform}でセットしたProjectionとModelViewを元に戻します。
+	 * この関数は、必ず{@link #beginTransform}とペアで使います。
+	 * <div>この関数は、次のコードと等価です。</div>
+	 * <hr/>
+	 * :<br/>
+	 * setPerspective(prev_mat);//prev_matはsetARPerspectiveで退避した行列。<br/>
+	 * pushMatrix();<br/>
+	 * setMatrix(ar.getMarkerMatrix());<br/>
+	 * :<br/>
+	 * <hr/>
+	 * </div>
 	 */
 	public void endTransform()
 	{
-		if(this._gl==null){
+		if(this._old_matrix==null){
 			this._ref_papplet.die("The function beginTransform is never called.", null);			
 		}
-		{	//ModelViewの復帰
-			this._ref_papplet.popMatrix();
-		}
-		{	//projectionの復帰
-			this._pgl.projection=this._old_matrix;
-			this._gl.glMatrixMode(GL.GL_PROJECTION);
-			this._gl.glPopMatrix();
-			this._gl.glMatrixMode(GL.GL_MODELVIEW);
-		}
-		
-		this._gl=null;
-		this._pgl=null;
+		//ModelViewの復帰
+		this._ref_papplet.popMatrix();
+		//Projectionの復帰
+		this.setPerspective(this._old_matrix);
+		this._old_matrix=null;
 		return;
 	}	
 	protected void updateTransmat(NyARSquare i_square,NyARTransMatResult i_src)
 	{
-		matResult2PMatrix3D(i_src,this._coord_system,this._pmat);
+		matResult2PMatrix3D(i_src,this._coord_system,this._pmodelview_mat);
 		matResult2GLArray(i_src,this.transmat);
 		//angle
 		i_src.getZXYAngle(this._tmp_d3p);
@@ -165,15 +169,19 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 * 	protected/private
 	 *******/
 	private final NyARDoublePoint3d _tmp_d3p=new NyARDoublePoint3d();
-	
-	
-	//キャッシュたち
-	private GL _gl=null;
-	private PGraphicsOpenGL _pgl=null;	
-	private PMatrix3D _old_matrix;
-	protected SingleMarkerBaseClass(PApplet parent,String i_cparam_file, int i_width,int i_htight,int i_coord_system)
+	protected void initInstance(PApplet parent,String i_cparam_file, int i_width,int i_height,int i_coord_system)
 	{
-		super(parent,i_cparam_file,i_width,i_htight,i_coord_system);
+		super.initInstance(parent,i_cparam_file,i_width,i_height,i_coord_system);
+		//互換性の維持目的
+		PMatrix2GLProjection(this._ps_projection,this.transmat);
+	}
+	
+	
+
+	protected SingleMarkerBaseClass(PApplet parent,String i_cparam_file, int i_width,int i_height,int i_coord_system)
+	{
+		super();
+		this.initInstance(parent,i_cparam_file,i_width,i_height,i_coord_system);
 	}
 
 

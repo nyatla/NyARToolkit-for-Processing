@@ -37,63 +37,39 @@ import jp.nyatla.nyartoolkit.detector.*;
 
 
 /**
- * このクラスは、PImageからARToolKit準拠の変換行列を求めるクラスです。
- * マーカを１枚の板に見立てて、そこを中心にした座標系を計算します。
- * 同時検出可能なマーカは１種類、１個です。
- * <pre>
+ * このクラスは、マーカを１枚の板に見立てて、そこを中心にした座標系を計算します。
+ * PImageから1個のARマーカを検出します。
+ *  * 同時検出可能なマーカは１種類、１個です。
+ * <p>
  * NyARBoardは、２つの外部設定ファイル"マーカファイル"と"カメラパラメータ"ファイルを必要とします。
  * これらはARToolKitのものと互換性があります。
  * これらはスケッチのdataディレクトリ以下に配置をして下さい。（exampleを見てください。）
- * </pre>
- * <br/>EN:
- * This class calculate a ARToolKit base transformation matrix from PImage.
- * This class handles one marker, and calculates the transformation matrix that displays the object above the marker.
- * <pre>
- * NyARBoard needs two external configuration file "Marker file" and "Camera parameter" files.
- * These are compatible with the original ARToolKit. 
- * Place those files to under the data directory of the sketch. (see example.)
- * </pre>
- * <br/>JP:
- * @author nyatla
- *
+ * </p>
  */
 public class NyARBoard extends SingleMarkerBaseClass
 {
 	/**
-	 * 消失遅延数。マーカ消失後、指定回数は過去の情報を維持します。
-	 * 値は0以上であること。
-	 * <br/>EN:
-	 * NyARBoard ignores that it lost the marker while under specified number.
-	 * Must be "n&gt;=0".
+	 * この値は、マーカ消失時の遅延数を設定します。
+	 * 値は0以上を指定します。
 	 */
 	public int lostDelay =10;
 	/**
-	 * [read only]連続でマーカを見失った回数。この値は0<n<lostDelayをとります。
-	 * <br/>EN:
-	 * It is a number in which it continuously lost the marker.
-	 * This value range is "0&lt;n&lt;lostDelay"
+	 * [read only]連続でマーカを見失った回数。この値は0&lt;n&lt;lostDelayをとります。
 	 */
 	public int lostCount = 0;
 	/**
-	 * マーカの座標変換を行う閾値。0.0&lt;n&lt;1.0の値をとります。
+	 * マーカの座標変換を行う閾値です。
+	 * 0.0&lt;n&lt;1.0の値をとります。
 	 * この数値より一致度が大きい場合のみ、マーカを検出したと判定され、座標計算が行われます。
-	 * <br/>EN:
-	 * The threshold value of marker pattern confidence.
-	 * This value range is "0.0&lt;n&lt;1.0".
-	 * When marker confidence is larger than this value, NyARBoard detects the marker.
 	 */
 	public double cfThreshold=0.4;
 	/**
 	 * [read only]検出したマーカの一致度です。
-	 * <br/>EN:
-	 * The confidence value of detected marker.
+	 * 0&lt;n&lt;1.0の値を取ります。
 	 */
 	public double confidence=0.0;
 	/**
 	 * マーカ検出時のグレースケール閾値を指定します。この値は、0&lt;=n&lt;=255をります。
-	 * <br/>EN:
-	 * The threshold value of labeling process from gray scale image.
-	 * This value range is "0&lt;=n&lt;=255".
 	 */
 	public int gsThreshold=110;
 	
@@ -105,43 +81,22 @@ public class NyARBoard extends SingleMarkerBaseClass
 	
 	/**
 	 * この関数はコンストラクタです。
-	 * <br/>EN:
-	 * This function is constructor.
 	 * @param parent
-	 * processingのインスタンスをしていします。
-	 * <br/>EN:
-	 * Specify processing instance.
+	 * processingの{@link PApplet}インスタンスをしていします。
 	 * @param i_width
 	 * detect()に渡す入力画像の幅を指定します。
-	 * <br/>EN:
-	 * Width of source image size for "detect()".
 	 * @param i_htight
 	 * detectに渡す入力画像の高さを指定します。
-	 * <br/>EN:
-	 * Height of source image size for "detect()".
 	 * @param i_cparam
 	 * ARToolKitのパラメータファイル名を指定します。パラメータファイルはdataディレクトリにおいて下さい。
-	 * <br/>EN:
-	 * The file name of the camera parameter of ARToolKit format.
-	 * Place the file to "data" directory at sketch.
 	 * @param i_patt
 	 * マーカのパターンファイル名を指定します。パターンファイルは、dataディレクトリにおいて下さい。
 	 * マーカの解像度は、16x16である必要があります。
-	 * <br/>EN:
-	 * The file name of the marker pattern file of ARToolkit.
-	 * Place the file to "data" directory at sketch.
-	 * The marker resolution must be 16x16.
 	 * @param i_patt_width
 	 * マーカのサイズを指定します。単位はmmです。
-	 * <br/>EN:
-	 * The length of one side of a square marker in millimeter unit.
 	 * @param i_coord_system
 	 * 座標系を指定します。{@link NyARBoard#CS_RIGHT_HAND} か {@link NyARBoard.CS_LEFT_HAND}(規定値)を指定します。
 	 * nyar4psg/0.2.xのCS_LEFTと互換性のある値は、{@link NyARBoard#CS_RIGHT_HAND}です。nyar4psg/0.2.xのCS_RIGHTと互換性のある値はありません。
-	 * <br/>EN:
-	 * This is coordinate system flag. Should be {@link NyARBoard#CS_RIGHT_HAND} or  {@link NyARBoard.CS_LEFT_HAND}(default)
-	 * The value compatible with CS_LEFT(nyar4psg/0.2.x) is {@link NyARBoard#CS_RIGHT_HAND}.
-	 * There is no value compatible with CS_RIGHT(nyar4psg/0.2.x).
 	 */
 	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width,int i_coord_system)
 	{
@@ -150,37 +105,20 @@ public class NyARBoard extends SingleMarkerBaseClass
 		return;
 	}
 	/**
-	 * この関数はi_projection_coord_systemにCS_LEFTを設定するコンストラクタです。
-	 * <br/>EN:
-	 * This function is constructor same as i_projection_coord_system=CS_LEFT.
+	 * この関数はコンストラクタです。
+	 * i_projection_coord_system引数にCS_LEFTを設定するコンストラクタと同一です。
 	 * @param parent
-	 * processingのインスタンスを指定します。
-	 * <br/>EN:
-	 * Specify processing instance.
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
 	 * @param i_width
-	 * detect()に渡す入力画像の幅を指定します。
-	 * <br/>EN:
-	 * Width of source image size for "detect()".
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
 	 * @param i_height
-	 * detectに渡す入力画像の高さを指定します。
-	 * <br/>EN:
-	 * Height of source image size for "detect()".
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
 	 * @param i_cparam
-	 * ARToolKitのパラメータファイル名を指定します。パラメータファイルはdataディレクトリにおいて下さい。
-	 * <br/>EN:
-	 * The file name of the camera parameter of ARToolKit format.
-	 * Place the file to "data" directory at sketch.
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
 	 * @param i_patt
-	 * マーカのパターンファイル名を指定します。パターンファイルは、dataディレクトリにおいて下さい。
-	 * マーカの解像度は、16x16である必要があります。
-	 * <br/>EN:
-	 * The file name of the marker pattern file of ARToolkit.
-	 * Place the file to "data" directory at sketch.
-	 * The marker resolution must be 16x16.
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
 	 * @param i_patt_width
-	 * マーカのサイズを指定します。単位はmmです。
-	 * <br/>EN:
-	 * The length of one side of a square marker in millimeter unit.
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
 	 */	
 	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width)
 	{
@@ -189,13 +127,13 @@ public class NyARBoard extends SingleMarkerBaseClass
 		return;
 	}
 	
-	private void initInstance(int i_width,int i_height,String i_patt,int i_patt_width)
+	private void initInstance(int i_width,int i_height,String i_patt,int i_marker_width)
 	{
 		try{
 			this._raster=new PImageRaster(i_width, i_height);
 			NyARCode code=new NyARCode(16,16);
 			code.loadARPatt(this._ref_papplet.createInput(i_patt));
-			this._nya=new NyARSingleDetectMarker(this._ar_param,code,i_patt_width,this._raster.getBufferType());
+			this._nya=new NyARSingleDetectMarker(this._ar_param,code,i_marker_width,this._raster.getBufferType());
 		}catch(NyARException e){
 			this._ref_papplet.die("Error while setting up NyARToolkit for java", e);
 		}
@@ -205,18 +143,11 @@ public class NyARBoard extends SingleMarkerBaseClass
 	/**
 	 * i_imageから最も一致度の高いマーカを検出し、cfThreshold以上の一致度であれば、
 	 * pos2d,angle,trans,confidence,transmatのプロパティを更新します。
-	 * <br/>EN:
-	 * This function detect a marker which is must higher confidence in i_image.
-	 * When function detects marker, properties (pos2d,angle,trans,confidence,transmat) are updated.
 	 * @param i_image
-	 * 検出するイメージを設定します。
-	 * <br/>EN:
-	 * Specify source image.
+	 * 検出する画像を指定します。この画像は、入力画像に設定した値と同じでなければなりません。
 	 * @return
 	 * マーカが検出され、有効な値が得られればTRUEを返します。
-	 * TRUEであれば、プロパティが更新されています。
-	 * <br/>EN:
-	 * TRUE if marker found;otherwise FALSE.
+	 * TRUEの時には、新しいマーカの位置情報が更新されます。
 	 */
 	public boolean detect(PImage i_image)
 	{

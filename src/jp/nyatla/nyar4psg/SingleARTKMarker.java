@@ -38,48 +38,36 @@ import jp.nyatla.nyartoolkit.processor.SingleARMarkerProcesser;
 
 
 /**
- * このクラスは、１個のARToolKitマーカを認識することができます。
- * 入力画像から、事前に登録したパターンに最も一致するマーカ1個を認識して、
- * その座標と認識したマーカの番号を出力します。
- * <br/>EN:
- * -
- * @author nyatla
- *
+ * このクラスは、登録した複数のマーカのうち、同時に1個を認識するクラスです。
+ * NyARToolKitの{@link SingleARMarkerProcesser}を使用したクラスです。
+ * 入力画像から、事前に登録したパターンに最も一致するマーカ1個を認識して、その座標と認識したマーカの番号を出力します。
  */
 public class SingleARTKMarker extends SingleMarkerBaseClass
 {
-	/**
-	 * detectの返すステータス値です。
-	 * <br/>EN:
-	 * -
-	 */
+	/**　detectの返すステータス値です。*/
 	public static final int ST_NOMARKER    =0;
-	/**
-	 * detectの返すステータス値です。
-	 * <br/>EN:
-	 * -
-	 */
+	/**　detectの返すステータス値です。*/
 	public static final int ST_NEWMARKER   =1;
-	/**
-	 * detectの返すステータス値です。
-	 * <br/>EN:
-	 * -
-	 */
+	/**　detectの返すステータス値です。*/
 	public static final int ST_UPDATEMARKER=2;
-	/**
-	 * detectの返すステータス値です。
-	 * <br/>EN:
-	 * -
-	 */
+	/** detectの返すステータス値です。*/
 	public static final int ST_REMOVEMARKER=3;
+
+	/**
+	 * [readonly]
+	 * この変数は互換性の為に残されています。{@link #getMarkerId}を使用してください。
+	 * @deprecated
+	 */
+	public int markerid;
 
 	/**
 	 * 検出したマーカのIDを示します。この値は、setARCodesで登録したマーカの0からはじまる
 	 * 順番を返します。たとえば、マーカを1個しか登録しなかった場合、常に0となります。
-	 * <br/>EN:
-	 * -
 	 */
-	public int markerid;
+	public int getMarkerId()
+	{
+		return this.markerid;
+	}
 
 	
 	private PImageRaster _raster;
@@ -87,24 +75,12 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	private boolean _registerd_marker=false;
 
 	/**
-	 * インスタンスを作成します。
-	 * <br/>EN:
-	 * -
+	 * コンストラクタです。
 	 * @param parent
-	 * <br/>EN:
-	 * -
 	 * @param i_width
-	 * <br/>EN:
-	 * -
 	 * @param i_height
-	 * <br/>EN:
-	 * -
 	 * @param i_cparam
-	 * <br/>EN:
-	 * -
 	 * @param i_coord_system
-	 * <br/>EN:
-	 * -
 	 */
 	public SingleARTKMarker(PApplet parent, int i_width,int i_height,String i_cparam,int i_coord_system)
 	{
@@ -118,17 +94,13 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 		return;
 	}
 	/**
-	 * 1個のマーカを登録します。detect関数を呼び出す前に、1度だけ呼び出してください。
-	 * <br/>EN:
-	 * -
+	 * この関数は、1個のARマーカをテーブルに登録します。
+	 * コンストラクタの後で1度だけ呼び出してください。
 	 * @param i_patt_name
-	 * マーカパターンの名前を指定します。マーカーのIDは、0になります。
-	 * <br/>EN:
-	 * -
+	 * マーカパターンの名前配列を指定します。配列の先頭から、マーカーのIDは、0,1,2...の順になります。
+	 * 登録できるマーカの種類は、エッジサイズ25%、解像度16x16のみです。
 	 * @param i_patt_size
-	 * マーカのサイズをmm単位で指定します。
-	 * <br/>EN:
-	 * -
+	 * マーカの物理サイズを[mm]で指定します。
 	 */
 	public void setARCodes(String i_patt_name,int i_patt_size)
 	{
@@ -148,19 +120,15 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 		return;	
 	}
 	/**
-	 * 複数のマーカを登録します。detect関数を呼び出す前に、1度だけ呼び出してください。
-	 * <br/>EN:
-	 * -
+	 * この関数は、マーカリストをテーブルに登録します。
+	 * コンストラクタの後で1度だけ呼び出してください。
 	 * @param i_patt_names
 	 * マーカパターンの名前配列を指定します。配列の先頭から、マーカーのIDは、0,1,2...の順になります。
-	 * <br/>EN:
-	 * -
-	 * @param i_patt_size
-	 * マーカのサイズをmm単位で指定します。
-	 * <br/>EN:
-	 * -
+	 * 登録できるマーカの種類は、エッジサイズ25%、解像度16x16のみです。
+	 * @param i_marker_size
+	 * マーカの物理サイズを[mm]で指定します。このサイズは、全てのマーカで共通です。
 	 */
-	public void setARCodes(String[] i_patt_names,int i_patt_size)
+	public void setARCodes(String[] i_patt_names,int i_marker_size)
 	{
 		if(this._registerd_marker)
 		{
@@ -172,26 +140,21 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	            codes[i]=new NyARCode(16,16);
 	            codes[i].loadARPatt(this._ref_papplet.createInput(i_patt_names[i]));        	
 	        }
-	        this._marker_proc.setARCodeTable(codes,16,i_patt_size);
+	        this._marker_proc.setARCodeTable(codes,16,i_marker_size);
 	        this._registerd_marker=true;
 		}catch(NyARException e){
 			this._ref_papplet.die("Error on setARCodes",e);
 		}	        
 		return;	
-	}	
+	}
 	/**
-	 * 認識処理を行うマーカの一致度を指定します。
-	 * <br/>EN:
-	 * -
+	 * この関数は、マーカパターンの一致度敷居値を指定します。
+	 * この敷居値よりも低いマーカは、認識しません。
 	 * @param i_new_cf
-	 * 初めてマーカを認識するときの敷居値を指定します。値範囲は、0&lt;&lt;n&lt;100です。
-	 * <br/>EN:
-	 * -
+	 * 新しくマーカを認識するために必要なマーカノ一致度です。値範囲は、0&lt;&lt;n&lt;100です。
 	 * @param i_exist_cf
-	 * 連続してマーカを認識するときの敷居値を指定します。値範囲は、0&lt;&lt;n&lt;100です。
+	 * 継続してマーカを認識するために必要なマーカノ一致度です。値範囲は、0&lt;&lt;n&lt;100です。
 	 * i_new_cfより低い値を指定してください。
-	 * <br/>EN:
-	 * -
 	 */
 	public void setConfidenceThreshold(double i_new_cf,double i_exist_cf)
 	{
@@ -201,35 +164,25 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	/**
 	 * 画像から、マーカの認識処理を行い、プロパティを更新します。
 	 * 認識処理の結果は、戻り値にステータスコードで格納します。
-	 * <br/>EN:
-	 * -
+	 * 二値化敷居値はPTail法により、自動的に決定します。
 	 * @param i_image
-	 * <br/>EN:
-	 * -
 	 * @return
 	 * ステータスコードを返します。
-	 * <pre>
-	 * ST_NOMARKER:
+	 * <ul>
+	 * <li>ST_NOMARKER -
 	 * マーカが認識されていない事を示します。
-	 * マーカパラメータのメンバ変数は使用不可能です。
-	 * </pre>
-	 * <pre>
-	 * ST_NEWMARKER:
+	 * マーカパラメータのメンバ変数は使用不可能です。</li>
+	 * <li>ST_NEWMARKER -
 	 * マーカが発見された事を示します。
-	 * transmat,angle,trans,markeridメンバ変数が利用可能です。
-	 * </pre>
-	 * <pre>
-	 * ST_UPDATEMARKER:
+	 * transmat,angle,trans,markeridメンバ変数が利用可能です。</li>
+	 * <li>ST_UPDATEMARKER -
 	 * マーカ座標が更新されたことを示します。
 	 * transmat,angle,trans,markeridメンバ変数が利用可能です。
-	 * </pre>
-	 * <pre>
-	 * ST_REMOVEMARKER:
+	 * </li>
+	 * <li>ST_REMOVEMARKER -
 	 * マーカが消失したことを示します。
 	 * マーカパラメータのメンバ変数は使用不可能です。
-	 * </pre>
-	 * <br/>EN:
-	 * -
+	 * </li>
 	 */
 	public int detect(PImage i_image)
 	{
@@ -259,7 +212,9 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 		}
 		return this._marker_proc.status;
 	}
-
+	/**
+	 * {@link SingleARTKMarker}用にカスタマイズした{@link SingleARMarkerProcesser}です。
+	 */
 	private class MarkerProcessor extends SingleARMarkerProcesser
 	{	
 		private SingleMarkerBaseClass _parent;

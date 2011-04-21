@@ -28,31 +28,17 @@
 package jp.nyatla.nyar4psg;
 
 
+import javax.media.opengl.GL;
+
 import processing.core.*;
+import processing.opengl.PGraphicsOpenGL;
 
 import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 
-class NyPsUtils
-{
-	public static void dumpObject(PMatrix3D i_mat)
-	{
-		PApplet.println("PMatrix3D");
-		PApplet.println(String.format("%f %f %f %f",i_mat.m00,i_mat.m01,i_mat.m02,i_mat.m03));
-		PApplet.println(String.format("%f %f %f %f",i_mat.m10,i_mat.m11,i_mat.m12,i_mat.m13));
-		PApplet.println(String.format("%f %f %f %f",i_mat.m20,i_mat.m21,i_mat.m22,i_mat.m23));
-		PApplet.println(String.format("%f %f %f %f",i_mat.m30,i_mat.m31,i_mat.m32,i_mat.m33));
-	}
-	public static void dumpObject(double[] i_val)
-	{
-		PApplet.println("double[]");
-		for(int i=0;i<i_val.length;i++){
-			PApplet.println(i_val[i]);
-		}
-	}
-}
+
 
 /**
  * このクラスは、NyARToolkit for Processingのベースクラスです。
@@ -63,8 +49,7 @@ class NyARPsgBaseClass
 	/**
 	 * 定数値です。この値はコンストラクタで使います。
 	 * RightHand系の座標を構築します。
-	 * RightHand座標系は、ARToolKitと互換性のある座標系ですが、Processingの座標系と互換性がありません。（そのため、text等の出力が鏡像になります。）
-	 * <br/>EN: -
+	 * RightHand座標系は、ARToolKitと互換性のある座標系ですが、Processingの座標系と互換性がないため、text等の出力が鏡像になります。
 	 */
 	public final static int CS_RIGHT_HAND=0;
 	/**
@@ -72,37 +57,28 @@ class NyARPsgBaseClass
 	 * LeftHand座標系を構築します。
 	 * RightHand座標系は、ARToolKitと互換性のない座標系ですが、Processingの座標系と互換性があります。
 	 * processing関数で描画する場合は、こちらを選択してください。
-	 * <br/>EN: -
 	 */
 	public final static int CS_LEFT_HAND =1;
 	/**
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
-	 * <br/>EN:
-	 * version string.
 	 */
-	public final String VERSION = "NyAR4psg/0.4.1;NyARToolkit for java/3.0.0;ARToolKit/2.72.1";
-	/**
-	 * OpenGLスタイルのProjectionMatrixです。
-	 * <br/>EN:
-	 * OpenGL form projection matrix.
-	 */
-	public final double[] projection=new double[16];
-	/**
-	 * ProcessingスタイルのProjectionMatrixです。
-	 */
+	public final static String VERSION = "NyAR4psg/0.5.1;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
+	/**　ProcessingスタイルのProjectionMatrixです。*/
 	protected PMatrix3D _ps_projection=new PMatrix3D();
-	/**
-	 * 参照するAppletのインスタンスです。
-	 */
-	protected PApplet _ref_papplet;
-	/**
-	 * ARToolkitパラメータのインスタンスです。
-	 */
+	/**　参照するAppletのインスタンスです。*/
+	protected PApplet _ref_papplet;	
+	/**　ARToolkitパラメータのインスタンスです。*/
 	protected NyARParam _ar_param;
 	protected NyARFrustum _frustum;
 	protected int _coord_system;
-	protected NyARPsgBaseClass(PApplet parent,String i_cparam_file, int i_width,int i_height,int i_coord_system)
+	/**
+	 * コンストラクタです。
+	 */
+	protected NyARPsgBaseClass()
+	{
+	}
+	protected void initInstance(PApplet parent,String i_cparam_file, int i_width,int i_height,int i_coord_system)
 	{
 		checkCoordinateSystemRange(parent,i_coord_system);
 		this._ref_papplet=parent;
@@ -114,11 +90,11 @@ class NyARPsgBaseClass
 			this._ar_param.changeScreenSize(i_width, i_height);
 
 			//ProcessingのprojectionMatrixの計算と、Frustumの計算
-			arPerspectiveMat2Projection(this._ar_param.getPerspectiveProjectionMatrix(),i_width,i_height,this._ps_projection,this.projection,this._frustum);
+			arPerspectiveMat2Projection(this._ar_param.getPerspectiveProjectionMatrix(),i_width,i_height,this._ps_projection,this._frustum);
 		}catch(NyARException e){
 			this._ref_papplet.die("Error while setting up NyARToolkit for java", e);
 		}
-		return;
+		return;		
 	}
 	private final static double view_distance_min = 100;
 	private final static double view_distance_max = 100000;
@@ -132,26 +108,108 @@ class NyARPsgBaseClass
 			i_pa.die("Please set constant CS_LEFT_HAND or CS_RIGHT_HAND.");
 		}
 	}
-	private static void arPerspectiveMat2Projection(NyARPerspectiveProjectionMatrix i_prjmat,int i_w,int i_h,PMatrix3D o_projection,double[] o_gl_projection,NyARFrustum o_frustum)
+
+	private float[] _tmpf=new float[16];
+
+	/**
+	 * この関数は、ARToolKit準拠のProjectionMatrixをProcessingにセットします。
+	 * 関数を実行すると、ProcessingのProjectionMatrixがARToolKitのカメラパラメータのものに変わり、映像にマッチした描画ができるようになります。
+	 * ProcessingのデフォルトFrustumに戻すときは、{@link PGraphics3D#perspective()}を使います。
+	 * Frustumの有効期間は、次に{@link PGraphics3D#perspective()}か{@link PGraphics3D#perspective()}をコールするまでです。
+	 * @return
+	 * 置き換えら得る前のprojectionMatrixを返します。
+	 */
+	public PMatrix3D setARPerspective()
+	{
+		return this.setPerspective(this._ps_projection);
+	}
+	/**
+	 * この関数は、ProjectionMatrixをProcessingにセットします。
+	 * @param i_projection
+	 * 設定するProjectionMatrixを指定します。
+	 * @return
+	 * 置き換えら得る前のprojectionMatrixを返します。
+	 */	
+	public PMatrix3D setPerspective(PMatrix3D i_projection)
+	{
+		if(!(this._ref_papplet.g instanceof PGraphicsOpenGL)){
+			this._ref_papplet.die("NyAR4Psg require PGraphicsOpenGL instance.");
+		}
+		PGraphics3D g=(PGraphics3D)this._ref_papplet.g;
+		//現在のProjectionMatrixを保存する。
+		PMatrix3D ret=new PMatrix3D();
+		ret.set(g.projection);
+		//ProjectionMatrixの設定
+		g.projection.set(i_projection);
+		if(this._ref_papplet.g instanceof PGraphicsOpenGL)
+		{
+			GL gl=((PGraphicsOpenGL)g).gl;
+			gl.glMatrixMode(GL.GL_PROJECTION);
+			PMatrix2GLProjection(i_projection,_tmpf);
+			gl.glLoadMatrixf(_tmpf,0);
+		}
+		return ret;
+	}
+
+	protected static void PMatrix2GLProjection(PMatrix3D i_in,float[] o_out)
+	{
+		o_out[ 0]=i_in.m00;
+		o_out[ 1]=i_in.m10;
+		o_out[ 2]=i_in.m20;
+		o_out[ 3]=i_in.m30;
+		o_out[ 4]=i_in.m01;
+		o_out[ 5]=i_in.m11;
+		o_out[ 6]=i_in.m21;
+		o_out[ 7]=i_in.m31;
+		o_out[ 8]=i_in.m02;
+		o_out[ 9]=i_in.m12;
+		o_out[10]=i_in.m22;
+		o_out[11]=i_in.m32;
+		o_out[12]=i_in.m03;
+		o_out[13]=i_in.m13;
+		o_out[14]=i_in.m23;
+		o_out[15]=i_in.m33;		
+	}
+	protected static void PMatrix2GLProjection(PMatrix3D i_in,double[] o_out)
+	{
+		o_out[ 0]=i_in.m00;
+		o_out[ 1]=i_in.m10;
+		o_out[ 2]=i_in.m20;
+		o_out[ 3]=i_in.m30;
+		o_out[ 4]=i_in.m01;
+		o_out[ 5]=i_in.m11;
+		o_out[ 6]=i_in.m21;
+		o_out[ 7]=i_in.m31;
+		o_out[ 8]=i_in.m02;
+		o_out[ 9]=i_in.m12;
+		o_out[10]=i_in.m22;
+		o_out[11]=i_in.m32;
+		o_out[12]=i_in.m03;
+		o_out[13]=i_in.m13;
+		o_out[14]=i_in.m23;
+		o_out[15]=i_in.m33;	
+	}
+	
+	private static void arPerspectiveMat2Projection(NyARPerspectiveProjectionMatrix i_prjmat,int i_w,int i_h,PMatrix3D o_projection,NyARFrustum o_frustum)
 	{
 		NyARDoubleMatrix44 tmp=new NyARDoubleMatrix44();
 		i_prjmat.makeCameraFrustumRH(i_w, i_h, view_distance_min, view_distance_max,tmp);
-		o_projection.m00=(float)(o_gl_projection[ 0]=tmp.m00);
-		o_projection.m01=(float)(o_gl_projection[ 1]=tmp.m10);
-		o_projection.m02=(float)(o_gl_projection[ 2]=tmp.m20);
-		o_projection.m03=(float)(o_gl_projection[ 3]=tmp.m30);
-		o_projection.m10=(float)(o_gl_projection[ 4]=tmp.m01);
-		o_projection.m11=(float)(o_gl_projection[ 5]=tmp.m11);
-		o_projection.m12=(float)(o_gl_projection[ 6]=tmp.m21);
-		o_projection.m13=(float)(o_gl_projection[ 7]=tmp.m31);
-		o_projection.m20=(float)(o_gl_projection[ 8]=tmp.m02);
-		o_projection.m21=(float)(o_gl_projection[ 9]=tmp.m12);
-		o_projection.m22=(float)(o_gl_projection[10]=tmp.m22);
-		o_projection.m23=(float)(o_gl_projection[11]=tmp.m32);
-		o_projection.m30=(float)(o_gl_projection[12]=tmp.m03);
-		o_projection.m31=(float)(o_gl_projection[13]=tmp.m13);
-		o_projection.m32=(float)(o_gl_projection[14]=tmp.m23);
-		o_projection.m33=(float)(o_gl_projection[15]=tmp.m33);
+		o_projection.m00=(float)(tmp.m00);
+		o_projection.m01=(float)(tmp.m01);
+		o_projection.m02=(float)(tmp.m02);
+		o_projection.m03=(float)(tmp.m03);
+		o_projection.m10=(float)(tmp.m10);
+		o_projection.m11=(float)(tmp.m11);
+		o_projection.m12=(float)(tmp.m12);
+		o_projection.m13=(float)(tmp.m13);
+		o_projection.m20=(float)(tmp.m20);
+		o_projection.m21=(float)(tmp.m21);
+		o_projection.m22=(float)(tmp.m22);
+		o_projection.m23=(float)(tmp.m23);
+		o_projection.m30=(float)(tmp.m30);
+		o_projection.m31=(float)(tmp.m31);
+		o_projection.m32=(float)(tmp.m32);
+		o_projection.m33=(float)(tmp.m33);
 		o_frustum.setValue(tmp, i_w, i_h);
 	}
 	protected static void matResult2GLArray(NyARTransMatResult i_src,double[] o_gl_array)
