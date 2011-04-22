@@ -15,6 +15,8 @@ import jp.nyatla.nyartoolkit.core.rasterreader.NyARPerspectiveRasterReader;
 import jp.nyatla.nyartoolkit.core.squaredetect.*;
 import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.core.types.*;
+import jp.nyatla.nyartoolkit.nyidmarker.*;
+import jp.nyatla.nyartoolkit.nyidmarker.data.*;
 import processing.core.*;
 
 
@@ -31,24 +33,37 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	 */
 	private class TMarkerData
 	{
-		/** パターン情報。比較のための、ARToolKitマーカを格納します。*/
+		public static final int MK_AR=0;
+		public static final int MK_NyId=1;
+		/** マーカタイプです。*/
+		public final int mktype;
+		/** MK_ARの情報。比較のための、ARToolKitマーカを格納します。*/
 		public final NyARMatchPatt_Color_WITHOUT_PCA matchpatt;
-		/** パターンのサイズ。パターンの物理サイズをmm単位で格納します。*/
-		public double marker_size;
+		/** MK_ARの情報。パターンのサイズ。パターンの物理サイズをmm単位で格納します。*/
+		public final double marker_size;
+		/** MK_ARの情報。検出した矩形の格納変数。マーカの一致度を格納します。*/
+		public double cf;
+		/** MK_ARの情報。パターンの解像度。*/
+		public final int patt_resolution;
+		/** MK_ARの情報。パターンのエッジ割合。*/
+		public final int patt_edge_percentage;
+				
+		/** MK_NyIdの情報。 反応するidの開始レンジ*/
+		public final long nyid_range_s;
+		/** MK_NyIdの情報。 反応するidの終了レンジ*/
+		public final long nyid_range_e;
+		/** MK_NyIdの情報。 実際のid値*/
+		public long nyid;
+		
 		/** 検出した矩形の格納変数。理想形二次元座標を格納します。*/
 		public final NyARSquare sq=new NyARSquare();
 		/** 検出した矩形の格納変数。マーカの姿勢行列を格納します。*/
 		public final NyARTransMatResult tmat=new NyARTransMatResult();
-		/** 検出した矩形の格納変数。マーカの一致度を格納します。*/
-		public double cf;
 		/** 矩形の検出状態の格納変数。 連続して見失った回数を格納します。*/
 		public int lost_count=Integer.MAX_VALUE;
-		/** パターンの解像度。*/
-		public int patt_resolution;
-		/** パターンのエッジ割合。*/
-		public int patt_edge_percentage;
+		
 		/**
-		 * コンストラクタです。初期値からインスタンスを生成します。
+		 * コンストラクタです。初期値からARマーカのインスタンスを生成します。
 		 * @param i_patt
 		 * @param i_patt_resolution
 		 * @param i_patt_edge_percentage
@@ -58,14 +73,37 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 		public TMarkerData(InputStream i_patt,int i_patt_resolution,int i_patt_edge_percentage,double i_patt_size) throws NyARException
 		{
 			NyARCode c=new NyARCode(i_patt_resolution,i_patt_resolution);
+			this.mktype=MK_AR;
 			c.loadARPatt(i_patt);
 			this.matchpatt=new NyARMatchPatt_Color_WITHOUT_PCA(c);
 			this.marker_size=i_patt_size;
 			this.patt_resolution=i_patt_resolution;
 			this.patt_edge_percentage=i_patt_edge_percentage;
+			//padding
+			this.nyid_range_e=this.nyid_range_s=0;
 			return;
 		}
-	}	
+		/**
+		 * コンストラクタです。初期値から、Idマーカのインスタンスを生成します。
+		 * @param i_range_s
+		 * @param i_range_e
+		 * @param i_patt_size
+		 * @throws NyARException
+		 */
+		public TMarkerData(int i_nyid_range_s,int i_nyid_range_e,double i_patt_size)
+		{
+			this.mktype=MK_NyId;
+			this.marker_size=i_patt_size;
+			this.nyid_range_s=i_nyid_range_s;
+			this.nyid_range_e=i_nyid_range_e;
+			//padding
+			this.patt_resolution=0;
+			this.patt_edge_percentage=0;
+			this.matchpatt=null;
+			return;
+		}
+	}
+	
 	/**
 	 * この関数は、マーカパターン一致率の閾値を設定します。
 	 * この値よりも一致率が低いマーカを認識しなくなります。
@@ -191,13 +229,15 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	 */
 	private class RleDetector extends NyARSquareContourDetector_Rle
 	{
+		private final NyIdMarkerPickup _id_pickup = new NyIdMarkerPickup();		
 		private final MultiResolutionPattPickup _mpickup=new MultiResolutionPattPickup();
 		private final NyARIntPoint2d[] _vertexs=new NyARIntPoint2d[4];
 		private NyARCoord2Linear _coordline;
 		private final NyARMatchPattResult _patt_result=new NyARMatchPattResult();;
 		private INyARRgbRaster _ref_src_raster;
-		public final ArrayList<TMarkerData> marker_sl=new ArrayList<TMarkerData>();
 		private NyARRectOffset _offset=new NyARRectOffset();
+		
+		public final ArrayList<TMarkerData> marker_sl=new ArrayList<TMarkerData>();
 		public double _cf_threshold=DEFAULT_CF_THRESHOLD;
 		public int _max_lost_delay=DEFAULT_LOST_DELAY;
 		public RleDetector(MultiARTookitMarker i_parent,NyARParam i_param) throws NyARException
@@ -206,60 +246,106 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 			//インスタンスの生成
 			this._coordline=new NyARCoord2Linear(i_param.getScreenSize(),i_param.getDistortionFactor());
 		}
+		
+		//Idマーカのエンコーダなど
+		private final NyIdMarkerPattern _id_patt=new NyIdMarkerPattern();
+		private final NyIdMarkerParam _id_param=new NyIdMarkerParam();
+		private final NyIdMarkerDataEncoder_RawBitId _id_encoder=new NyIdMarkerDataEncoder_RawBitId();
+		private final NyIdMarkerData_RawBitId _id_data=new NyIdMarkerData_RawBitId();
+
+
+	
+		
 		protected void onSquareDetect(NyARIntCoordinates i_coord,int[] i_vertex_index) throws NyARException
 		{
 			//画像取得配列の生成
 			for(int i2=0;i2<4;i2++){
 				this._vertexs[i2]=i_coord.items[i_vertex_index[i2]];
 			}
-			//パターンを作成する
-			if(!this._mpickup.makePattDeviationColorData(this._ref_src_raster,this._vertexs)){
-				return;
-			}
-			//検出状態をリセットするよ。
-			double best_cf=0;
-			int best_id=-1;
-			int best_dir=NyARMatchPattResult.DIRECTION_UNKNOWN;
-			//全てのマーカについて、一番一致したパターンIDを求める。
-			for(int i=marker_sl.size()-1;i>=0;i--)
+			//idピックアップを試行してみる。(itemとdirに矩形情報を保存してね。)
+			if(this._id_pickup.pickFromRaster(this._ref_src_raster, this._vertexs, this._id_patt, this._id_param))
 			{
-				TMarkerData item=marker_sl.get(i);
-				//マーカのパターン解像度に一致したサンプリング画像と比較する。
-				if(!item.matchpatt.evaluate(this._mpickup.refDeviationColorData(item),this._patt_result)){
-					continue;
+			//NyIdの場合
+				//エンコードしてみる
+				if(!this._id_encoder.encode(this._id_patt,this._id_data)){
+					return;
 				}
-				//敷居値
-				if(this._patt_result.confidence<this._cf_threshold)
+				//対象NyIdがあるかチェック
+				for(int i=marker_sl.size()-1;i>=0;i--)
 				{
-					continue;
-				}				
-				//一致率の比較
-				if(best_cf>this._patt_result.confidence){
-					continue;
+					TMarkerData item=marker_sl.get(i);
+					if(item.mktype!=TMarkerData.MK_NyId){
+						continue;
+					}
+					//レンジチェック
+					long s=this._id_data.marker_id;
+					if(item.nyid_range_s>s || s>item.nyid_range_e)
+					{
+						continue;
+					}
+					//一致したよー。
+					item.nyid=s;
+					item.lost_count=0;
+					setItemSquare(this._id_param.direction,i_coord,i_vertex_index,item.sq);
+					break;
 				}
-				//結果の保存
-				best_cf=this._patt_result.confidence;
-				best_dir=this._patt_result.direction;
-				best_id=i;
-			}
-			if(best_id<0){
+				//ここで終了
 				return;
-			}
-			//一番評価の高いidで、過去のものより高評価なら差し替え
-			TMarkerData item=this.marker_sl.get(best_id);
-			if(item.cf>best_cf){
-				return;
-			}
-			//結果をコピーする
-			item.lost_count=0;
-			item.cf=best_cf;
+			}else{
+			//ARマーカパターン
+				//パターン作製
+				if(!this._mpickup.makePattDeviationColorData(this._ref_src_raster,this._vertexs)){
+					return;
+				}
+				//検出状態をリセットするよ。
+				double best_cf=0;
+				int best_id=-1;
+				int best_dir=NyARMatchPattResult.DIRECTION_UNKNOWN;			
+				//全てのマーカについて、一番一致したパターンIDを求める。
+				for(int i=marker_sl.size()-1;i>=0;i--)
+				{
+					TMarkerData item=marker_sl.get(i);
+					//マーカのパターン解像度に一致したサンプリング画像と比較する。
+					if(!item.matchpatt.evaluate(this._mpickup.refDeviationColorData(item),this._patt_result)){
+						continue;
+					}
+					//敷居値
+					if(this._patt_result.confidence<this._cf_threshold)
+					{
+						continue;
+					}				
+					//一致率の比較
+					if(best_cf>this._patt_result.confidence){
+						continue;
+					}
+					//結果の保存
+					best_cf=this._patt_result.confidence;
+					best_dir=this._patt_result.direction;
+					best_id=i;
+				}
+				if(best_id<0){
+					return;
+				}
+				//一番評価の高いidで、過去のものより高評価なら差し替え
+				TMarkerData item=this.marker_sl.get(best_id);
+				if(item.cf>best_cf){
+					return;
+				}
+				//結果をコピーする
+				item.cf=best_cf;
+				item.lost_count=0;
+				setItemSquare(best_dir,i_coord,i_vertex_index,item.sq);
+			}			
+		}
+		private void setItemSquare(int i_dir,NyARIntCoordinates i_coord,int[] i_vertex_index,NyARSquare i_sq) throws NyARException
+		{
 			for(int i=0;i<4;i++){
-				int idx=(i+4 - best_dir) % 4;
-				this._coordline.coord2Line(i_vertex_index[idx],i_vertex_index[(idx+1)%4],i_coord,item.sq.line[i]);
+				int idx=(i+4 - i_dir) % 4;
+				this._coordline.coord2Line(i_vertex_index[idx],i_vertex_index[(idx+1)%4],i_coord,i_sq.line[i]);
 			}
 			for (int i = 0; i < 4; i++) {
 				//直線同士の交点計算
-				if(!item.sq.line[i].crossPos(item.sq.line[(i + 3) % 4],item.sq.sqvertex[i])){
+				if(!i_sq.line[i].crossPos(i_sq.line[(i + 3) % 4],i_sq.sqvertex[i])){
 					throw new NyARException();//まずない。ありえない。
 				}
 			}			
@@ -270,7 +356,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 		public void prevDetection(INyARRgbRaster i_src)
 		{
 			this._ref_src_raster=i_src;
-			//状態のリセット
+			//状態のリセット(ARマーカ)
 			for(int i=this.marker_sl.size()-1;i>=0;i--){
 				TMarkerData item=this.marker_sl.get(i);
 				item.cf=0;
@@ -278,6 +364,8 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 					item.lost_count++;
 				}
 			}
+			//状態のリセット(Idマーカ)
+			
 		}
 		/**
 		 * 検出の後処理
@@ -285,12 +373,13 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 		 */
 		public void finishDetection(NyARTransMat i_transmat) throws NyARException
 		{
-			//全部のマーカについて、変換行列を計算しておきましょうか。
+			//ARマーカ全てについて、変換行列を計算。
 			for(int i=this.marker_sl.size()-1;i>=0;i--){
 				TMarkerData item=this.marker_sl.get(i);
 				this._offset.setSquare(item.marker_size);
 				i_transmat.transMat(item.sq,this._offset, item.tmat);
-			}	
+			}
+			//Idマーカについてはサイズが判らんので、
 		}
 	}
 	/** 敷居値判定用 */
@@ -406,7 +495,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	 * @param i_id
 	 * マーカidを指定します。
 	 */
-	public void beginTransform(int i_id)
+	public void beginARMarkerTransform(int i_id)
 	{
 		if(this._old_matrix!=null){
 			this._ref_papplet.die("The function beginTransform is already called.", null);			
@@ -442,64 +531,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 		this.setPerspective(this._old_matrix);
 		this._old_matrix=null;
 		return;
-	}	
-	/**
-	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
-	 * @param i_file_name
-	 * マーカパターンファイル名を指定します。
-	 * @param i_patt_resolution
-	 * マーカパターンの解像度を指定します。
-	 * @param i_edge_percentage
-	 * マーカのエッジ幅を割合で指定します。
-	 * 0&lt;n&lt;50の数値です。
-	 * @param i_width
-	 * マーカの物理サイズをmm単位で指定します。
-	 * @return
-	 * 0から始まるマーカーIDを返します。この数値は、{@link #addARMarker}をコールするたびにインクリメントされます。
-	 */
-	public int addARMarker(String i_file_name,int i_patt_resolution,int i_edge_percentage,float i_width)
-	{
-		//初期化済みのアイテムを生成
-		try{
-			TMarkerData item=new TMarkerData(this._ref_papplet.createInput(i_file_name),i_patt_resolution,i_edge_percentage,i_width);
-			this._rel_detector.marker_sl.add(item);
-		}catch(Exception e){
-			e.printStackTrace();
-			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.addMarker");
-		}
-		return this._rel_detector.marker_sl.size()-1;
 	}
-	/**
-	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
-	 * エッジ割合はARToolKitの標準マーカと同じ25%です。
-	 * @param i_file_name
-	 * {@link #addARMarker(String, int, int, double)}を参照。
-	 * @param i_patt_resolution
-	 * {@link #addARMarker(String, int, int, double)}を参照。
-	 * @param i_width
-	 * {@link #addARMarker(String, int, int, double)}を参照。
-	 * @return
-	 * {@link #addARMarker(String, int, int, double)}を参照。
-	 */
-	public int addARMarker(String i_file_name,int i_patt_resolution,float i_width)
-	{
-		return this.addARMarker(i_file_name, i_patt_resolution,25, i_width);
-	}
-	/**
-	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
-	 * エッジ割合とパターン解像度は、ARToolKitの標準マーカと同じ25%、16x16です。
-	 * @param i_file_name
-	 * {@link #addARMarker(String, int, int, double)}を参照。
-	 * @param i_width
-	 * {@link #addARMarker(String, int, int, double)}を参照。
-	 * @return
-	 * {@link #addARMarker(String, int, int, double)}を参照。
-	 */
-	public int addARMarker(String i_file_name,float i_width)
-	{
-		return this.addARMarker(i_file_name,16,25, i_width);
-	}
-	
 	/**
 	 * この関数は、画像からマーカーの検出処理を実行します。
 	 * @param i_image
@@ -533,32 +565,142 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 			e.printStackTrace();
 			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.detect");
 		}
-		
+	}
+	
+	
+	
+	/**
+	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
+	 * 同じパターンを複数回登録した場合には、最後に登録したものを優先して認識します。
+	 * @param i_file_name
+	 * マーカパターンファイル名を指定します。
+	 * @param i_patt_resolution
+	 * マーカパターンの解像度を指定します。
+	 * @param i_edge_percentage
+	 * マーカのエッジ幅を割合で指定します。
+	 * 0&lt;n&lt;50の数値です。
+	 * @param i_width
+	 * マーカの物理サイズをmm単位で指定します。
+	 * @return
+	 * 0から始まるマーカーIDを返します。
+	 * この数値は、マーカを区別するためのId値です。0から始まり、{@link #addARMarker}と{@link #addNyIdMarker}関数を呼ぶたびにインクリメントされます。
+	 * {@link #getMarkerMatrix},{@link #getConfidence},{@link #isExistMarker},{@link #addARMarker},
+	 * {@link #screen2MarkerCoordSystem},{@link #pickupMarkerImage},{@link #pickupRectMarkerImage}
+	 * のid値に使います。
+	 */
+	public int addARMarker(String i_file_name,int i_patt_resolution,int i_edge_percentage,float i_width)
+	{
+		//初期化済みのアイテムを生成
+		try{
+			TMarkerData item=new TMarkerData(this._ref_papplet.createInput(i_file_name),i_patt_resolution,i_edge_percentage,i_width);
+			this._rel_detector.marker_sl.add(item);
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.addMarker");
+		}
+		return this._rel_detector.marker_sl.size()-1;
+	}
+	/**
+	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
+	 * エッジ割合はARToolKitの標準マーカと同じ25%です。
+	 * 重複するidを登録した場合には、最後に登録したidを優先して認識します。
+	 * @param i_file_name
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 * @param i_patt_resolution
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 * @param i_width
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 * @return
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 */
+	public int addARMarker(String i_file_name,int i_patt_resolution,float i_width)
+	{
+		return this.addARMarker(i_file_name, i_patt_resolution,25, i_width);
+	}
+	/**
+	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
+	 * エッジ割合とパターン解像度は、ARToolKitの標準マーカと同じ25%、16x16です。
+	 * 重複するidを登録した場合には、最後に登録したidを優先して認識します。
+	 * @param i_file_name
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 * @param i_width
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 * @return
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 */
+	public int addARMarker(String i_file_name,float i_width)
+	{
+		return this.addARMarker(i_file_name,16,25, i_width);
+	}
+	/**
+	 * この関数は、NyIdマーカを追加します。
+	 * 重複するidを登録した場合には、最後に登録したidを優先して認識します。
+	 * @param i_nyid
+	 * NyIdを指定します。範囲は、0から33554431です。512以上の数値はmodel3のマーカが必要になるので、特に大量のマーカが必要でなければ512までの値にしてください。
+	 * @param i_width
+	 * マーカの物理サイズをmm単位で指定します。
+	 * @return
+	 * 0から始まるマーカーIDを返します。
+	 * この数値は、マーカを区別するためのId値です。0から始まり、{@link #addARMarker}と{@link #addNyIdMarker}関数を呼ぶたびにインクリメントされます。
+	 */
+	public int addNyIdMarker(int i_nyid,int i_width)
+	{
+		return addNyIdMarker(i_nyid,i_nyid,i_width);
+	}
+	/**
+	 * この関数は、NyIdマーカを範囲指定で追加します。
+	 * 範囲指定を行うと、例えば1~10番までのマーカ全てを同じマーカとして扱うようになります。
+	 * 範囲中のどのマーカidを認識したかは、{@link #getNyId}で知ることができます。
+	 * 範囲が重なるidを登録した場合には、最後に登録したidを優先して認識します。
+	 * @param i_nyid_s
+	 * NyIdの範囲開始値を指定します。範囲は、{@link #addNyIdMarker(int, int)}を参照してください。
+	 * @param i_nyid_e
+	 * NyIdの範囲終了値を指定します。
+	 * i_nyid_s<=i_nyid_eの関係を満たす値を設定します。
+	 * @param i_width
+	 * マーカの物理サイズをmm単位で指定します。
+	 * @return
+	 * 0から始まるマーカーIDを返します。
+	 * この数値は、マーカを区別するためのId値です。0から始まり、{@link #addARMarker}と{@link #addNyIdMarker}関数を呼ぶたびにインクリメントされます。
+	 */
+	public int addNyIdMarker(int i_nyid_range_s,int i_nyid_range_e,int i_width)
+	{
+		//初期化済みのアイテムを生成
+		try{
+			TMarkerData item=new TMarkerData(i_nyid_range_s,i_nyid_range_e,i_width);
+			this._rel_detector.marker_sl.add(item);
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.addNyIdMarker");
+		}
+		return this._rel_detector.marker_sl.size()-1;		
 	}
 
+	
 	/**
 	 * この関数は、マーカの姿勢行列を返します。
 	 * 返却した行列は{@link PApplet#setMatrix}でProcessingにセットできます。
-	 * @param i_id
+	 * @param i_armk_id
 	 * マーカidを指定します。
+	 * @return
+	 * マーカの姿勢行列を返します。
 	 */
-	public PMatrix3D getMarkerMatrix(int i_id)
+	public PMatrix3D getMarkerMatrix(int i_armk_id)
 	{
 		PMatrix3D p=new PMatrix3D();
 		//存在チェック
-		if(!this.isExistMarker(i_id)){
-			this._ref_papplet.die("Marker id " +i_id + " is not exist on image.", null);
+		if(!this.isExistMarker(i_armk_id)){
+			this._ref_papplet.die("Marker id " +i_armk_id + " is not exist on image.", null);
 		}
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
+		TMarkerData item=this._rel_detector.marker_sl.get(i_armk_id);
 		matResult2PMatrix3D(item.tmat,this._coord_system,p);
 		return p;
 	}
-
 	/**
 	 * この関数は、指定idのARマーカパターンの一致率を返します。
 	 * {@list #isExistMarker}がtrueを返すときだけ有効です。
 	 * @param i_id
-	 * マーカidを指定します。
+	 * マーカidを指定します。{@link #addARMarker}で登録したidである必要があります。
 	 * @return
 	 * マーカの一致率を返します。0から1.0までの数値です。
 	 * この値は、delayが{@link #getLostCount}の時だけ正しい値を返します。それ以外の時には、0を返します。
@@ -566,38 +708,62 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	public double getConfidence(int i_id)
 	{
 		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
+		if(item.mktype!=TMarkerData.MK_AR){
+			this._ref_papplet.die("Marker id " +i_id + " is not AR Marker.", null);
+		}
 		if(!this.isExistMarker(i_id)){
 			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
 		}
 		return item.cf;
 	}
 	/**
-	 * この関数は、指定idのマーカが有効かを返します。
+	 * この関数は、指定idのNyIdマーカから、現在のマーカIdを取得します。
+	 * 値範囲を持つNyIdの場合は、この関数で現在のId値を得ることができます。
 	 * @param i_id
-	 * マーカidを指定します。
+	 * マーカidを指定します。{@link #addNyIdMarker}で登録したidである必要があります。
+	 * @return
+	 * 現在のNyIdマーカを返します。
+	 */
+	public long getNyId(int i_id)
+	{
+		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
+		if(item.mktype!=TMarkerData.MK_NyId){
+			this._ref_papplet.die("Marker id " +i_id + " is not NyId Marker.", null);
+		}
+		if(!this.isExistMarker(i_id)){
+			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
+		}
+		return item.nyid;
+	}
+	
+	/**
+	 * この関数は、指定idのマーカが有効かを返します。
+	 * {@list #isExistMarker}がtrueを返すときだけ有効です。
+	 * @param i_armk_id
+	 * ARマーカidを指定します。
 	 * @return
 	 * マーカが有効ならばtrueです。無効ならfalseです。
 	 */
-	public boolean isExistMarker(int i_id)
+	public boolean isExistMarker(int i_armk_id)
 	{
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
+		TMarkerData item=this._rel_detector.marker_sl.get(i_armk_id);
 		return (item.lost_count<this._rel_detector._max_lost_delay);
 	}
 	
 	/**
 	 * この関数は、指定idのマーカの認識状態を返します。
 	 * 数値は、マーカが連続して認識に失敗した回数です。
-	 * @param i_id
+	 * @param i_armk_id
 	 * マーカidを指定します。
 	 * @return
 	 * 0から{@link #setLostDelay(int)}で設定した範囲の値を返します。
 	 */
-	public int getLostCount(int i_id)
+	public int getLostCount(int i_armk_id)
 	{
-		if(!this.isExistMarker(i_id)){
-			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
+		if(!this.isExistMarker(i_armk_id)){
+			this._ref_papplet.die("Marker id " +i_armk_id + " is not on image.", null);
 		}
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
+		TMarkerData item=this._rel_detector.marker_sl.get(i_armk_id);
 		return item.lost_count;
 	}
 //ちょっとわからんからパス

@@ -1,59 +1,94 @@
+======================================================================
 NyARToolkit for proce55ing
-Copyright (C)2008-2010 R.Iizuka
+ version -------
+======================================================================
 
-version 0.3.0
+Copyright (C)2008-2011 Ryo Iizuka
 
-http://nyatla.jp/
+http://nyatla.jp/nyartoolkit/
 airmail(at)ebony.plala.or.jp
---------------------------------------------------
-・NyARToolkit for proce55ing
+wm(at)nyatla.jp
 
-　NyARToolkit for proce55ingは、processing環境下で拡張現実環境を
-　利用するためのライブラリです。拡張現実ライブラリには、ARToolKit
-　の派生ライブラリNyARToolKit for Javaを使用しています。
+----------------------------------------------------------------------
+ About NyARToolkit
+----------------------------------------------------------------------
 
-　このライブラリは、processingの標準キャプチャクラスCaptureで取り込んだ
-　映像からARToolKitの変換行列を計算し、それをOpenGLに設定する手段を提供
-　します。
-
-　入力画像には任意のPImageを使用できるので、たとえば動画、静止画の解析も
-　可能だと思われます。
-
-
-・準備
-　NyARToolkit for proce55ingの実行には、processing/1.0以上が必要です。
-　サイトからダウンロードして下さい。
-　http://processing.org/download/index.html
-
-　次に、Capture機能とOpenGL機能を使用できるように、コンピュータの設定をして下さい。
-
-　Capture機能は、ProcessingのExamples>Libraries>Video(Capture)以下のサンプルが
-　動作すれば、大丈夫です。
-
-　OpenGL機能は、ProcessingのExamples>Libraries>OpenGL以下のサンプルが動作すれば
-　大丈夫です。
+ * NyARToolkit for proce55ingは、processing環境下でNyARToolkitを利用す
+    るためのライブラリです。
+ * 拡張現実ライブラリには、ARToolKitの派生ライブラリNyARToolKit for Java
+    を使用しています。
+ * Processing version 1.2での動作を確認しています。
+ * このライブラリは、processingのcamera()関数で取り込んだ画像や、PImage
+    画像を元にマーカ検出処理を実行できます。
+ * レンダリングシステムには、OPENGLとPV3Dをサポートします。
 
 
-・サンプルの実行
-　1.example/NyARTest/dataディレクトリにある、pattHiro.pdfを印刷しておいてください。
-　　これがマーカになります。
-　2.example/NyARTestにある、NyARTest/NyARTest.pdeを開いて実行してください。
-　　マーカを撮影すると、そこに立方体が表示されるはずです。
+----------------------------------------------------------------------
+NyARToolkit for proce55ingの特徴
+----------------------------------------------------------------------
+
+ * 左手系・右手系両方の座標系をサポートします。
+ * マルチマーカ、シングルマーカののユースケースに対応します。
+ * NyIdマーカ、ARToolKitマーカの両方に対応します。
+ * 自動敷居値に対応しています。(一部のみ)
+
+----------------------------------------------------------------------
+環境の準備
+----------------------------------------------------------------------
+
+ 1.NyARToolkit for proce55ingの実行には、processing/1.2以上が必要です。
+  サイトからダウンロードして下さい。
+  http://processing.org/download/index.html
+  
+ 2.ProcessingのCapture機能を使用できるようにコンピュータを設定してください。
+   Capture機能は、ProcessingのExamples>Libraries>Video(Capture)以下のサンプル
+   の動作で確認できます。
+  （このステップは、キャプチャ機能を使わないときには必要ありません。）
 
 
-・独自スケッチの作り方
-　1.空のスケッチを作り、NyAR2.jarをSketch>Add File...から追加します。jarファイルは、
-　　example/NyARTest/code以下にあります。
-　2.スケッチのディレクトリにdataディレクトリを作り、そこにexample/NyARTest/data以下
-　　にあるパターンファイル(patt.hiro)とカメラパラメータファイル(camera_para.dat)を
-　　コピーします。
-　3.ファイルが足りないと実行時にエラーが出るので、適時修正してください。
+ 3.ProcessingからOpenGL機能を使用できるように、コンピュータの設定をして下さい。
+   OpenGL機能は、ProcessingのExamples>Libraries>OpenGL以下のサンプルの動作
+   で確認できます。
+  （このステップは、レンダリングにPV3Dを使用するときには必要ありません。）
+
+ 4.以上で準備は完了です。
+
+----------------------------------------------------------------------
+サンプル実行
+----------------------------------------------------------------------
+ exampleにある、NyARTestのサンプルの実行手順です。
+ NyARTestは、Hiroマーカの上に立方体を表示するシンプルなプログラムです。
+
+ 1.example/NyARTest/dataディレクトリにある、pattHiro.pdfを印刷しておいて
+   ください。これがマーカになります。
+
+ 2.example/NyARTestにある、NyARTest/NyARTest.pdeを開いて実行してください。
+   マーカを撮影すると、そこに立方体が表示されるはずです。
 
 
+ 他のサンプルについても、マーカを印刷して、それを撮影することで試す事が
+ できます。
 
-・提供するクラス
-　NyARToolkit for proce55ingは、表示方法をいくつかのパターンでモデル化します。
-　現在は、マーカを表示用の板に見立てる、NyARBoradクラスのみが実装されています。
+
+----------------------------------------------------------------------
+スケッチの作り方
+----------------------------------------------------------------------
+ NyARToolkitを使ったスケッチには、2つのjarライブラリと、使用するマーカ
+ のパターンファイル、カメラのパラメータファイルが必要になります。
+
+ マーカファイルとカメラパターンファイルは、ARToolKitの仕様に沿ったもの
+ を用意して、スケッチのdataフォルダの中に配置します。
+ 
+ ライブラリは、libraryフォルダの中にある2つのファイルを、codeフォルダの
+ 中に配置します。
+
+
+----------------------------------------------------------------------
+NyARToolkit for Processingの提供するクラス
+----------------------------------------------------------------------
+
+ NyARToolkit for proce55ingは、ユースケース毎に、機能の異なる複数の
+ クラスを提供しています。
 
 　・NyARBoradクラス（NyARBoard.java）
 　１種類のマーカを同時に１個認識するクラスです。PImage形式の画像入力から、１個の
@@ -72,35 +107,47 @@ airmail(at)ebony.plala.or.jp
 　Idの仕様は、NyId形式です。
 
 
-・その他
-　カメラパラメータファイル、パターンファイルは、ARToolKitのそれと完全な互換性が
-　あります。このライブラリにはこれらを作成する機能がありませんので、ARToolKit、または
-　FLARToolKitの機能を利用してください。なお、マーカパターンは16x16で作る必要があります。
+----------------------------------------------------------------------
+その他
+----------------------------------------------------------------------
 
-　Windows環境下では、arc@dmzさん作のDirectShow Javaベースのキャプチャライブラリ
-　CaptureDSを使用することをお勧めします。
-　このライブラリは、digitalmuseum http://digitalmuseum.jp/software/nui/processing/
-　よりダウンロードできます。
-
-
-・ライセンス
-　src以下のファイルはMITライセンスですが、NyARToolkitがGPLv3ライセンスのため、
-　jarファイルのライセンスはGPLv3になります。
-
-　NyARToolkitのソースファイルは、http://sourceforge.jp/projects/nyartoolkit/
-　よりダウンロードできます。
+ * パターンファイルやカメラパラメータファイルについて
+  NyARToolKit for Processingの使用するカメラパラメータファイル、パターン
+  ファイルは、ARToolKitと完全な互換性があります。
+  現在のライブラリには、これらを作成する機能がありません。
+  ARToolKit、またはFLARToolKitの機能を利用して作成してください。
+ 
+ * キャプチャライブラリについて
+  Windows環境下では、arc@dmzさん作のDirectShow Javaベースのキャプチャ
+  ライブラリCaptureDSを使用することをお勧めします。
+  このライブラリは、digitalmuseumよりダウンロードできます。
+  http://digitalmuseum.jp/software/nui/processing/
 
 
-・謝辞
-　ARToolkitを開発された加藤博一先生と、Human Interface Technology Lab
-　に感謝します。
-　http://www.hitl.washington.edu/artoolkit/
+----------------------------------------------------------------------
+ライセンス
+----------------------------------------------------------------------
 
-　Processingを開発されたCasey Reas氏と Benjamin Fry氏に感謝します。
-　http://processing.org/
+ * GPLv3での提供になります。但し、src以下のファイルをのみを使用する場合
+ には、MITライセンスでも使用できます。
+ * パッケージに含まれるNyARToolkitのソースファイルは、
+  http://sourceforge.jp/projects/nyartoolkit/よりダウンロードできます。
 
-　CaptureDSを開発されたarc@dmz氏に感謝します。
-　http://digitalmuseum.jp/
+----------------------------------------------------------------------
+謝辞
+----------------------------------------------------------------------
 
-　Processingの座標系問題を解決して頂いた、reco氏に感謝します。
-　http://www.hyde-ysd.com/reco-memo/
+ * ARToolkitを開発された加藤博一先生と、Human Interface Technology Lab
+  に感謝します。
+  http://www.hitl.washington.edu/artoolkit/
+
+ * Processingを開発されたCasey Reas氏と Benjamin Fry氏に感謝します。
+  http://processing.org/
+
+ * CaptureDSを開発された加藤 淳 氏に感謝します。
+  http://digitalmuseum.jp/
+
+ *Processingの座標系問題を解決して頂いた、reco氏に感謝します。
+  http://www.hyde-ysd.com/reco-memo/
+
+ *Version/1.0開発のきっかけとなった、橋本直 氏に感謝します。
