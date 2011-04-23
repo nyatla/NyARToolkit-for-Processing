@@ -261,7 +261,7 @@ class NyARPsgBaseClass
 		o_pmatrix.m31 = 0.0f;
 		o_pmatrix.m32 = 0.0f;
 		o_pmatrix.m33 = 1.0f;
-		if(i_mode==MultiARTookitMarker.CS_LEFT_HAND)
+		if(i_mode==MultiMarker.CS_LEFT_HAND)
 		{
 			o_pmatrix.apply(_lh_mat);
 		}
