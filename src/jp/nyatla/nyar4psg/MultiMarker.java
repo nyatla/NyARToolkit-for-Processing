@@ -26,7 +26,7 @@ import processing.core.*;
  * 
  * 入力画像はPImage形式です。
  */
-public class MultiARTookitMarker extends NyARPsgBaseClass
+public class MultiMarker extends NyARPsgBaseClass
 {
 	/**
 	 * マーカ情報を格納するためのクラスです。
@@ -225,7 +225,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 		
 	}
 	/**
-	 * {@link MultiARTookitMarker}向けの矩形検出器です。
+	 * {@link MultiMarker}向けの矩形検出器です。
 	 */
 	private class RleDetector extends NyARSquareContourDetector_Rle
 	{
@@ -240,7 +240,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 		public final ArrayList<TMarkerData> marker_sl=new ArrayList<TMarkerData>();
 		public double _cf_threshold=DEFAULT_CF_THRESHOLD;
 		public int _max_lost_delay=DEFAULT_LOST_DELAY;
-		public RleDetector(MultiARTookitMarker i_parent,NyARParam i_param) throws NyARException
+		public RleDetector(MultiMarker i_parent,NyARParam i_param) throws NyARException
 		{
 			super(i_param.getScreenSize());
 			//インスタンスの生成
@@ -412,7 +412,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	 * ARToolKit座標系のタイプを指定します。{@link #CS_LEFT_HAND}か{@link #CS_RIGHT_HAND}を指定してください。
 	 * @throws NyARException
 	 */
-	public MultiARTookitMarker(PApplet parent, int i_width,int i_height,String i_cparam_file,int i_projection_coord_system)
+	public MultiMarker(PApplet parent, int i_width,int i_height,String i_cparam_file,int i_projection_coord_system)
 	{
 		this.initInstance(parent, i_cparam_file, i_width, i_height, i_projection_coord_system);
 	}
@@ -420,14 +420,14 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	 * コンストラクタです。
 	 * 省略された入力画像サイズパラメータには、{@link PApplet#width}と{@link PApplet#height}を使います。
 	 * @param parent
-	 * {@link MultiARTookitMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
+	 * {@link MultiMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
 	 * @param i_cparam_file
-	 * {@link MultiARTookitMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
+	 * {@link MultiMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
 	 * @param i_projection_coord_system
-	 * {@link MultiARTookitMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
+	 * {@link MultiMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
 	 * @throws NyARException
 	 */
-	public MultiARTookitMarker(PApplet parent,String i_cparam_file,int i_projection_coord_system)
+	public MultiMarker(PApplet parent,String i_cparam_file,int i_projection_coord_system)
 	{
 		this.initInstance(parent,i_cparam_file,parent.width,parent.height, i_projection_coord_system);
 	}
@@ -436,14 +436,14 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	 * 省略された入力画像サイズパラメータには、{@link PApplet#width}と{@link PApplet#height}を使います。
 	 * 座標系は、{@link #CS_RIGHT_HAND}が選択された物とします。
 	 * @param parent
-	 * {@link MultiARTookitMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
+	 * {@link MultiMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
 	 * @param i_cparam_file
-	 * {@link MultiARTookitMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
+	 * {@link MultiMarker#MultiARTookitMarker(PApplet, int, int, String, int, int)}を参照。
 	 * @throws NyARException
 	 */
-	public MultiARTookitMarker(PApplet parent,String i_cparam_file)
+	public MultiMarker(PApplet parent,String i_cparam_file)
 	{
-		this.initInstance(parent, i_cparam_file, parent.width, parent.height, MultiARTookitMarker.CS_RIGHT_HAND);
+		this.initInstance(parent, i_cparam_file, parent.width, parent.height, MultiMarker.CS_RIGHT_HAND);
 	}
 	private NyARPerspectiveRasterReader _preader;
 	
@@ -793,17 +793,7 @@ public class MultiARTookitMarker extends NyARPsgBaseClass
 	 */
 	public PVector screen2MarkerCoordSystem(int i_id,int i_x,int i_y)
 	{
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
-		PVector ret=new PVector();
-		NyARDoublePoint3d tmp=new NyARDoublePoint3d();
-		this._frustum.unProjectOnMatrix(i_x, i_y, item.tmat,tmp);
-		ret.x=(float)tmp.x;
-		ret.y=(float)tmp.y;
-		ret.z=(float)tmp.z;
-		if(this._coord_system==MultiARTookitMarker.CS_LEFT_HAND){
-			ret.x*=-1;
-		}
-		return ret;
+		return this.screen2MarkerCoordSystem(this._rel_detector.marker_sl.get(i_id).tmat, i_x, i_y);
 	}
 	/**
 	 * この関数は、idで指定したマーカの画像のXY平面上の4頂点でかこまれた領域から、画像を取得します。

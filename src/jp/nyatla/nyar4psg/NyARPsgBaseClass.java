@@ -33,9 +33,11 @@ import javax.media.opengl.*;
 import processing.core.*;
 import processing.opengl.*;
 
+
 import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.transmat.*;
+import jp.nyatla.nyartoolkit.core.types.NyARDoublePoint3d;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 
 
@@ -261,10 +263,31 @@ class NyARPsgBaseClass
 		o_pmatrix.m31 = 0.0f;
 		o_pmatrix.m32 = 0.0f;
 		o_pmatrix.m33 = 1.0f;
-		if(i_mode==MultiMarker.CS_LEFT_HAND)
+		if(i_mode==CS_LEFT_HAND)
 		{
 			o_pmatrix.apply(_lh_mat);
 		}
+	}
+	/**
+	 * この関数は、i_mat平面から、自由変形した画像を取得します。
+	 * @param i_mat
+	 * @param i_id
+	 * @param i_x
+	 * @param i_y
+	 * @return
+	 */
+	protected PVector screen2MarkerCoordSystem(NyARDoubleMatrix44 i_mat,int i_x,int i_y)
+	{
+		PVector ret=new PVector();
+		NyARDoublePoint3d tmp=new NyARDoublePoint3d();
+		this._frustum.unProjectOnMatrix(i_x, i_y,i_mat,tmp);
+		ret.x=(float)tmp.x;
+		ret.y=(float)tmp.y;
+		ret.z=(float)tmp.z;
+		if(this._coord_system==CS_LEFT_HAND){
+			ret.x*=-1;
+		}
+		return ret;
 	}	
 	/**
 	 * この関数は、スクリーン座標を撮像点座標に変換します。
