@@ -16,7 +16,7 @@ void setup() {
   size(640,480,P3D);
   colorMode(RGB, 100);
   cam=new Capture(this,640,480);
-  nya=new MultiMarker(this,width,height,"camera_para.dat");
+  nya=new MultiMarker(this,width,height,"camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
   nya.addNyIdMarker(0,80);
 }
 
