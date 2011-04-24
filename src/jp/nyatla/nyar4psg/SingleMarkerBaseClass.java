@@ -10,7 +10,6 @@ import processing.core.*;
 /**
  * 単一マーカ認識ユースケースのベースクラス。同時に一つの座標変換行列を提供します。
  * 座標変換行列の管理関数とプロパティ機能を提供します。
- * @author nyatla
  *
  */
 class SingleMarkerBaseClass extends NyARPsgBaseClass

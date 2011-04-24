@@ -109,17 +109,17 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 * この関数はコンストラクタです。
 	 * i_config引数に{@link NyAR4PsgConfig#CONFIG_DEFAULT}を設定するコンストラクタと同一です。
 	 * @param parent
-	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, NyAR4PsgConfig)}を参照してください。
 	 * @param i_width
-	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, NyAR4PsgConfig)}を参照してください。
 	 * @param i_height
-	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, NyAR4PsgConfig)}を参照してください。
 	 * @param i_cparam
-	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, NyAR4PsgConfig)}を参照してください。
 	 * @param i_patt
-	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, NyAR4PsgConfig)}を参照してください。
 	 * @param i_patt_width
-	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
+	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, NyAR4PsgConfig)}を参照してください。
 	 */	
 	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width)
 	{

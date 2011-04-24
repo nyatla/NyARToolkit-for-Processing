@@ -453,13 +453,13 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * コンストラクタです。
 	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}のコンフィギュレーションに、{@link NyAR4PsgConfig#CONFIG_DEFAULT}を指定した物と同じです。
 	 * @param parent
-	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, int, int)}を参照。
+	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照。
 	 * @param i_width
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_height
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_cparam_file
-	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, int, int)}を参照。
+	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照。
 	 * @throws NyARException
 	 */
 	public MultiMarker(PApplet parent,int i_width,int i_height,String i_cparam_file)
