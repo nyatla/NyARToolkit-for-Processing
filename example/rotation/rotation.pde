@@ -17,6 +17,8 @@ PFont font=createFont("FFScala", 32);
 void setup() {
   size(640,480,P3D);
   colorMode(RGB, 100);
+  println(MultiMarker.VERSION);
+  
   //キャプチャを作成
   cam=new Capture(this,640,480);
   nya_l=new MultiMarker(this,width,height,"camera_para.dat",new NyAR4PsgConfig(NyAR4PsgConfig.CS_LEFT_HAND,NyAR4PsgConfig.TM_NYARTK));

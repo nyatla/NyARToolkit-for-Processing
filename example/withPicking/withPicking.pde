@@ -2,7 +2,9 @@
   NyARToolkit for proce55ing/1.0.0
   (c)2008-2011 nyatla
   airmail(at)ebony.plala.or.jp
-  Pickingと一緒に使うために、NyAR4Psgをbegin-endシーケンス以外の方法で使います。
+  Pickingと一緒に使うサンプルです。
+  Picking Libraryはこちらからダウンロードしてください。
+  http://code.google.com/p/processing-picking-library/
 
 */
 import processing.video.*;
@@ -37,22 +39,18 @@ void draw()
   }
   cam.read();
   nya.detect(cam);
-  perspective();
   hint(DISABLE_DEPTH_TEST);
   image(cam,0,0);
   hint(ENABLE_DEPTH_TEST);
-  //復帰
   if(!nya.isExistMarker(0)){
     return;
   }
-  nya.setARPerspective();
   picker.start(0);
-  pushMatrix();
-  setMatrix(nya.getMarkerMatrix(0));
+  nya.beginTransform(0);
   fill(cr,cg,cb);
   translate(0,0,20);
   box(40);
-  popMatrix();
+  nya.endTransform();
 }
 
 void mouseClicked() {

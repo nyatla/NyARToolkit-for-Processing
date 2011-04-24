@@ -13,6 +13,7 @@ NyARBoard nya;
 void setup() {
   size(640,480,P3D);
   colorMode(RGB, 100);
+  println(NyARBoard.VERSION);
   cam=new Capture(this,width,height);
   nya=new NyARBoard(this,width,height,"camera_para.dat","patt.hiro",80); //SingleMarker検出インスタンス
   nya.gsThreshold=120;//画像２値化の閾値(0<n<255) default=110

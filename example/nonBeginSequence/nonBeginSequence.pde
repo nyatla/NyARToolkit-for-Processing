@@ -12,7 +12,6 @@ Capture cam;
 MultiMarker nya;
 int cr,cg,cb;
 PFont font=createFont("FFScala", 32);
-Picker picker;
 
 void setup() {
   size(640,480,P3D);
