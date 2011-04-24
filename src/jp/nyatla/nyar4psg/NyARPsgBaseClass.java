@@ -28,11 +28,7 @@
 package jp.nyatla.nyar4psg;
 
 
-import javax.media.opengl.*;
-
 import processing.core.*;
-import processing.opengl.*;
-
 
 import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.param.*;
@@ -56,7 +52,7 @@ class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/1.0.1;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
+	public final static String VERSION = "NyAR4psg/1.0.3;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
 	/**　ProcessingスタイルのProjectionMatrixです。*/
@@ -70,7 +66,6 @@ class NyARPsgBaseClass
 	protected PImageRaster _src_raster;
 	/** 画像抽出用のオブジェクトです。{@link #_src_raster}を参照します。*/
 	protected NyARPerspectiveRasterReader _preader;
-	private int _g_type;
 	/**
 	 * コンストラクタです。
 	 */
@@ -84,7 +79,6 @@ class NyARPsgBaseClass
 		this._src_raster=new PImageRaster(i_width,i_height);
 		this._preader=new NyARPerspectiveRasterReader(this._src_raster.getBufferType());
 		try{
-			this._g_type=getGraphicsType(parent.g);
 			this._ar_param.loadARParam(this._ref_papplet.createInput(i_cparam_file));
 			this._ar_param.changeScreenSize(i_width, i_height);
 
@@ -95,30 +89,9 @@ class NyARPsgBaseClass
 		}
 		return;		
 	}
-	private final static double view_distance_min = 100;
-	private final static double view_distance_max = 100000;
-	private final static int GT_P3D=0;
-	private final static int GT_OPENGL=1;
-	/**
-	 * {@link PGraphics}をグラフィクス定数に変換します。
-	 * @param i_g
-	 * @return
-	 * @throws NyARException
-	 */
-	private static int getGraphicsType(PGraphics i_g) throws NyARException 
-	{
-		String n=i_g.getClass().getName();
-		if(n.compareTo("processing.opengl.PGraphicsOpenGL")==0){
-			return GT_OPENGL;
-		}else if(n.compareTo("processing.core.PGraphics3D")==0){
-			return GT_P3D;
-		}
-		throw new NyARException("Unknown Graphics");
-		
-	}
+	private final static float view_distance_min = 100;
+	private final static float view_distance_max = 100000;
 
-
-	private float[] _tmpf=new float[16];
 
 	/**
 	 * この関数は、ARToolKit準拠のProjectionMatrixをProcessingにセットします。
@@ -138,6 +111,11 @@ class NyARPsgBaseClass
 	 * 設定するProjectionMatrixを指定します。
 	 * @return
 	 * 置き換えら得る前のprojectionMatrixを返します。
+	 * 
+	 * <p>
+	 * Processing/1.3になったら、{@link PApplet#matrixMode}使ってきちんと使えるようになると思う。
+	 * 今は無理なので、frustum経由
+	 * </p>
 	 */	
 	public PMatrix3D setPerspective(PMatrix3D i_projection)
 	{
@@ -148,16 +126,15 @@ class NyARPsgBaseClass
 		//現在のProjectionMatrixを保存する。
 		PMatrix3D ret=new PMatrix3D();
 		ret.set(g.projection);
-		//ProjectionMatrixの設定
-		g.projection.set(i_projection);
-		//OpenGLの時はちょっと細工
-		if(this._g_type==GT_OPENGL)
-		{
-			GL gl=((PGraphicsOpenGL)g).gl;
-			gl.glMatrixMode(GL.GL_PROJECTION);
-			PMatrix2GLProjection(i_projection,_tmpf);
-			gl.glLoadMatrixf(_tmpf,0);
-		}
+		//Projectionをfrustum経由で設定。
+		float far=i_projection.m23/(i_projection.m22+1);
+		float near=i_projection.m23/(i_projection.m22-1);
+		this._ref_papplet.frustum(
+				(i_projection.m02-1)*near/i_projection.m00,
+				(i_projection.m02+1)*near/i_projection.m00,
+				(i_projection.m12-1)*near/i_projection.m11,
+				(i_projection.m12+1)*near/i_projection.m11,
+				near,far);
 		return ret;
 	}
 
