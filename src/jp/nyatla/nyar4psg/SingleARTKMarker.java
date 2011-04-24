@@ -41,6 +41,7 @@ import jp.nyatla.nyartoolkit.processor.SingleARMarkerProcesser;
  * このクラスは、登録した複数のマーカのうち、同時に1個を認識するクラスです。
  * NyARToolKitの{@link SingleARMarkerProcesser}を使用したクラスです。
  * 入力画像から、事前に登録したパターンに最も一致するマーカ1個を認識して、その座標と認識したマーカの番号を出力します。
+ * 
  */
 public class SingleARTKMarker extends SingleMarkerBaseClass
 {
@@ -70,7 +71,6 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	}
 
 	
-	private PImageRaster _raster;
 	private MarkerProcessor _marker_proc;
 	private boolean _registerd_marker=false;
 
@@ -80,19 +80,32 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 	 * @param i_width
 	 * @param i_height
 	 * @param i_cparam
-	 * @param i_coord_system
+	 * @param i_config
+	 * コンフィギュレーションオブジェクトを指定します。
+	 * このクラスは、{@link NyAR4PsgConfig#env_transmat_mode}の値を無視します。（常に{@link NyAR4PsgConfig#TM_NYARTK}を使います。 ）
 	 */
-	public SingleARTKMarker(PApplet parent, int i_width,int i_height,String i_cparam,int i_coord_system)
+	public SingleARTKMarker(PApplet parent, int i_width,int i_height,String i_cparam,NyAR4PsgConfig i_config)
 	{
-		super(parent,i_cparam,i_width,i_height,i_coord_system);
+		super();
 		try{
-			this._raster=new PImageRaster(i_width,i_height);
-			this._marker_proc=new MarkerProcessor(this,this._ar_param,this._raster.getBufferType());
+			this.initInstance(parent, i_cparam, i_width, i_height, i_config);
+			this._marker_proc=new MarkerProcessor(this,this._ar_param,this._src_raster.getBufferType());
 		}catch(NyARException e){
 			this._ref_papplet.die("Error on SingleARTKMarker",e);
 		}
 		return;
 	}
+	public SingleARTKMarker(PApplet parent, int i_width,int i_height,String i_cparam)
+	{
+		super();
+		try{
+			this.initInstance(parent, i_cparam, i_width, i_height,NyAR4PsgConfig.CONFIG_DEFAULT);
+			this._marker_proc=new MarkerProcessor(this,this._ar_param,this._src_raster.getBufferType());
+		}catch(NyARException e){
+			this._ref_papplet.die("Error on SingleARTKMarker",e);
+		}
+		return;
+	}	
 	/**
 	 * この関数は、1個のARマーカをテーブルに登録します。
 	 * コンストラクタの後で1度だけ呼び出してください。
@@ -190,9 +203,9 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 			this._ref_papplet.die("Must call setARCodes function in the first.");
 		}
 		try{
-			this._raster.wrapBuffer(i_image);
+			this._src_raster.wrapBuffer(i_image);
 			this._marker_proc.initSequence();
-			this._marker_proc.detectMarker(this._raster);
+			this._marker_proc.detectMarker(this._src_raster);
 			//ステータスチェック
 			switch(this._marker_proc.status){
 			case ST_NOMARKER:

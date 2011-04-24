@@ -73,27 +73,53 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 
 	
 	
-	private PImageRaster _raster;
 	private MarkerProcessor _marker_proc;
 	private boolean _registerd_marker=false;
 
 	/**
 	 * コンストラクタです。
 	 * @param parent
+	 * {@link PApplet}を指定します。
 	 * @param i_width
+	 * 入力する映像サイズを指定します。
 	 * @param i_height
+	 * 入力する映像サイズを指定します。
 	 * @param i_cparam
-	 * @param i_coord_system
+	 *　カメラパラメータファイル名を指定します。
+	 * @param i_config
+	 * コンフィギュレーションオブジェクトを指定します。
+	 * このクラスは、{@link NyAR4PsgConfig#env_transmat_mode}の値を無視します。（常に{@link NyAR4PsgConfig#TM_NYARTK}を使います。 ）
 	 */
-	public SingleNyIdMarker(PApplet parent, int i_width,int i_height,String i_cparam,int i_coord_system)
+	public SingleNyIdMarker(PApplet parent, int i_width,int i_height,String i_cparam,NyAR4PsgConfig i_config)
 	{
-		super(parent,i_cparam,i_width,i_height,i_coord_system);
+		super();
 		try{
-			this._raster=new PImageRaster(i_width,i_height);		
+			this.initInstance(parent,i_cparam,i_width,i_height,i_config);
 		}catch(NyARException e){
 			this._ref_papplet.die("Error on SingleNyIdMarker",e);
 		}
 	}
+	/**
+	 * コンストラクタです。
+	 * {@link SingleNyIdMarker#SingleNyIdMarker(PApplet, int, int, String, NyAR4PsgConfig)}のコンフィギュレーションに、{@link NyAR4PsgConfig#CONFIG_DEFAULT}を指定した物と同じです。
+	 * @param parent
+	 * {@link SingleNyIdMarker#SingleNyIdMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照してください。
+	 * @param i_width
+	 * {@link SingleNyIdMarker#SingleNyIdMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照してください。
+	 * @param i_height
+	 * {@link SingleNyIdMarker#SingleNyIdMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照してください。
+	 * @param i_cparam
+	 * {@link SingleNyIdMarker#SingleNyIdMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照してください。
+	 */
+	public SingleNyIdMarker(PApplet parent, int i_width,int i_height,String i_cparam)
+	{
+		super();
+		try{
+			this.initInstance(parent,i_cparam,i_width,i_height,NyAR4PsgConfig.CONFIG_DEFAULT);
+		}catch(NyARException e){
+			this._ref_papplet.die("Error on SingleNyIdMarker",e);
+		}
+	}	
 
 	/**
 	 * この関数は、Idマーカのサイズを設定します。
@@ -107,7 +133,7 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 			this._ref_papplet.die("Error already called setIdMarkerSize.", new NyARException());
 		}
 		try{
-			this._marker_proc=new MarkerProcessor(this,this._ar_param,this._raster.getBufferType());
+			this._marker_proc=new MarkerProcessor(this,this._ar_param,this._src_raster.getBufferType());
 		}catch(NyARException e){
 			this._ref_papplet.die("Error on setIdMarkerSize",e);
 		}
@@ -146,9 +172,9 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 			this._ref_papplet.die("Must call setIdMarkerSize function in the first.");
 		}
 		try{
-			this._raster.wrapBuffer(i_image);
+			this._src_raster.wrapBuffer(i_image);
 			this._marker_proc.initSequence();			
-			this._marker_proc.detectMarker(this._raster);
+			this._marker_proc.detectMarker(this._src_raster);
 			//ステータスチェック
 			switch(this._marker_proc.status){
 			case ST_NOMARKER:

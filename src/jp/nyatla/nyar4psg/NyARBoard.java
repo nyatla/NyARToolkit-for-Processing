@@ -75,9 +75,7 @@ public class NyARBoard extends SingleMarkerBaseClass
 	
 	
 	
-	private final NyARTransMatResult _result=new NyARTransMatResult();
 	private NyARSingleDetectMarker _nya;
-	private PImageRaster _raster;
 	
 	/**
 	 * この関数はコンストラクタです。
@@ -94,19 +92,22 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 * マーカの解像度は、16x16である必要があります。
 	 * @param i_patt_width
 	 * マーカのサイズを指定します。単位はmmです。
-	 * @param i_coord_system
-	 * 座標系を指定します。{@link NyARBoard#CS_RIGHT_HAND} か {@link NyARBoard.CS_LEFT_HAND}(規定値)を指定します。
-	 * nyar4psg/0.2.xのCS_LEFTと互換性のある値は、{@link NyARBoard#CS_RIGHT_HAND}です。nyar4psg/0.2.xのCS_RIGHTと互換性のある値はありません。
+	 * @param i_config
+	 * コンフィギュレーションオブジェクトを指定します。
 	 */
-	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width,int i_coord_system)
+	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width,NyAR4PsgConfig i_config)
 	{
-		super(parent,i_cparam,i_width,i_height,i_coord_system);
-		initInstance(i_width,i_height,i_patt,i_patt_width);
+		super();
+		try{
+			this.initInstance(parent, i_cparam,i_patt, i_width, i_height, i_patt_width, i_config);
+		}catch(Exception e){
+			this._ref_papplet.die("Error at NyARBoard", e);
+		}
 		return;
 	}
 	/**
 	 * この関数はコンストラクタです。
-	 * i_projection_coord_system引数にCS_LEFTを設定するコンストラクタと同一です。
+	 * i_config引数に{@link NyAR4PsgConfig#CONFIG_DEFAULT}を設定するコンストラクタと同一です。
 	 * @param parent
 	 * {@link NyARBoard#NyARBoard(PApplet, int, int, String, String, int, int)}を参照してください。
 	 * @param i_width
@@ -122,24 +123,27 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 */	
 	public NyARBoard(PApplet parent, int i_width,int i_height,String i_cparam,String i_patt,int i_patt_width)
 	{
-		super(parent,i_cparam,i_width,i_height,NyARBoard.CS_RIGHT_HAND);
-		initInstance(i_width,i_height,i_patt,i_patt_width);
-		return;
-	}
-	
-	private void initInstance(int i_width,int i_height,String i_patt,int i_marker_width)
-	{
+		super();
 		try{
-			this._raster=new PImageRaster(i_width, i_height);
-			NyARCode code=new NyARCode(16,16);
-			code.loadARPatt(this._ref_papplet.createInput(i_patt));
-			this._nya=new NyARSingleDetectMarker(this._ar_param,code,i_marker_width,this._raster.getBufferType());
-		}catch(NyARException e){
-			this._ref_papplet.die("Error while setting up NyARToolkit for java", e);
+			this.initInstance(parent, i_cparam,i_patt,i_width, i_height, i_patt_width,NyAR4PsgConfig.CONFIG_DEFAULT);
+		}catch(Exception e){
+			this._ref_papplet.die("Error at NyARBoard", e);
 		}
-		return;
+		return;		
 	}
 	
+	private void initInstance(PApplet parent,String i_cparam,String i_patt,int i_width,int i_height,int i_marker_width,NyAR4PsgConfig i_config) throws NyARException
+	{
+		super.initInstance(parent, i_cparam, i_width, i_height, i_config);
+		NyARCode code=new NyARCode(16,16);
+		code.loadARPatt(this._ref_papplet.createInput(i_patt));		
+		//モード選択
+		int tm_type=(i_config.env_transmat_mode==NyAR4PsgConfig.TM_ARTK)?NyARSingleDetectMarker.PF_ARTOOLKIT_COMPATIBLE:NyARSingleDetectMarker.PF_NYARTOOLKIT;
+		this._nya=new NyARSingleDetectMarker(this._ar_param,code,i_marker_width,this._src_raster.getBufferType(),tm_type);
+		this._nya.setContinueMode(true);
+		return;
+	}
+	private final NyARTransMatResult _rettmp=new NyARTransMatResult();
 	/**
 	 * i_imageから最も一致度の高いマーカを検出し、cfThreshold以上の一致度であれば、
 	 * pos2d,angle,trans,confidence,transmatのプロパティを更新します。
@@ -153,9 +157,9 @@ public class NyARBoard extends SingleMarkerBaseClass
 	{
 		boolean is_marker_exist=false;
 		try{
-			this._raster.wrapBuffer(i_image);
+			this._src_raster.wrapBuffer(i_image);
 			//マーカの検出をするよ。
-			is_marker_exist = this._nya.detectMarkerLite(this._raster,this.gsThreshold);
+			is_marker_exist = this._nya.detectMarkerLite(this._src_raster,this.gsThreshold);
 			//マーカ見つかったら一致度確認
 			if(is_marker_exist){
 				double cf=this._nya.getConfidence();
@@ -168,8 +172,8 @@ public class NyARBoard extends SingleMarkerBaseClass
 				this.confidence=this._nya.getConfidence();
 				this.lostCount=0;
 				//座標変換
-				this._nya.getTransmationMatrix(this._result);
-				updateTransmat(this._nya.refSquare(), this._result);
+				this._nya.getTransmationMatrix(this._rettmp);
+				updateTransmat(this._nya.refSquare(), this._rettmp);
 
 			}else if(this.lostCount<this.lostDelay){
 				this.lostCount++;

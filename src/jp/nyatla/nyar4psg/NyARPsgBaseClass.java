@@ -36,7 +36,9 @@ import processing.opengl.*;
 
 import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.param.*;
+import jp.nyatla.nyartoolkit.core.rasterreader.NyARPerspectiveRasterReader;
 import jp.nyatla.nyartoolkit.core.transmat.*;
+import jp.nyatla.nyartoolkit.core.types.NyARDoublePoint2d;
 import jp.nyatla.nyartoolkit.core.types.NyARDoublePoint3d;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 
@@ -48,46 +50,41 @@ import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
  */
 class NyARPsgBaseClass
 {
-	/**
-	 * 定数値です。この値はコンストラクタで使います。
-	 * RightHand系の座標を構築します。
-	 * RightHand座標系は、ARToolKitと互換性のある座標系ですが、Processingの座標系と互換性がないため、text等の出力が鏡像になります。
-	 */
-	public final static int CS_RIGHT_HAND=0;
-	/**
-	 * 定数値です。この値はコンストラクタで使います。
-	 * LeftHand座標系を構築します。
-	 * RightHand座標系は、ARToolKitと互換性のない座標系ですが、Processingの座標系と互換性があります。
-	 * processing関数で描画する場合は、こちらを選択してください。
-	 */
-	public final static int CS_LEFT_HAND =1;
+
+
 	/**
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/0.9.0;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
-	/**　ProcessingスタイルのProjectionMatrixです。*/
-	protected PMatrix3D _ps_projection=new PMatrix3D();
+	public final static String VERSION = "NyAR4psg/1.0.1;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
+	/**　ProcessingスタイルのProjectionMatrixです。*/
+	protected final PMatrix3D _ps_projection=new PMatrix3D();
 	/**　ARToolkitパラメータのインスタンスです。*/
-	protected NyARParam _ar_param;
-	protected NyARFrustum _frustum;
-	protected int _coord_system;
+	protected final NyARParam _ar_param=new NyARParam();
+	protected final NyARFrustum _frustum=new NyARFrustum();;
+	protected NyAR4PsgConfig _config;
+	
+	/** 入力画像ラスタです。{@link PImage}をラップします。継承クラスで入力画像をセットします。*/
+	protected PImageRaster _src_raster;
+	/** 画像抽出用のオブジェクトです。{@link #_src_raster}を参照します。*/
+	protected NyARPerspectiveRasterReader _preader;
+	private int _g_type;
 	/**
 	 * コンストラクタです。
 	 */
 	protected NyARPsgBaseClass()
 	{
 	}
-	protected void initInstance(PApplet parent,String i_cparam_file, int i_width,int i_height,int i_coord_system)
+	protected void initInstance(PApplet parent,String i_cparam_file, int i_width,int i_height,NyAR4PsgConfig i_config) throws NyARException
 	{
-		checkCoordinateSystemRange(parent,i_coord_system);
 		this._ref_papplet=parent;
-		this._coord_system=i_coord_system;
+		this._config=i_config;
+		this._src_raster=new PImageRaster(i_width,i_height);
+		this._preader=new NyARPerspectiveRasterReader(this._src_raster.getBufferType());
 		try{
-			this._frustum=new NyARFrustum();
-			this._ar_param=new NyARParam();
+			this._g_type=getGraphicsType(parent.g);
 			this._ar_param.loadARParam(this._ref_papplet.createInput(i_cparam_file));
 			this._ar_param.changeScreenSize(i_width, i_height);
 
@@ -100,16 +97,26 @@ class NyARPsgBaseClass
 	}
 	private final static double view_distance_min = 100;
 	private final static double view_distance_max = 100000;
-	private final static void checkCoordinateSystemRange(PApplet i_pa,int i_cs)
+	private final static int GT_P3D=0;
+	private final static int GT_OPENGL=1;
+	/**
+	 * {@link PGraphics}をグラフィクス定数に変換します。
+	 * @param i_g
+	 * @return
+	 * @throws NyARException
+	 */
+	private static int getGraphicsType(PGraphics i_g) throws NyARException 
 	{
-		switch(i_cs){
-		case NyARPsgBaseClass.CS_LEFT_HAND:
-		case NyARPsgBaseClass.CS_RIGHT_HAND:
-			return;
-		default:
-			i_pa.die("Please set constant CS_LEFT_HAND or CS_RIGHT_HAND.");
+		String n=i_g.getClass().getName();
+		if(n.compareTo("processing.opengl.PGraphicsOpenGL")==0){
+			return GT_OPENGL;
+		}else if(n.compareTo("processing.core.PGraphics3D")==0){
+			return GT_P3D;
 		}
+		throw new NyARException("Unknown Graphics");
+		
 	}
+
 
 	private float[] _tmpf=new float[16];
 
@@ -144,7 +151,7 @@ class NyARPsgBaseClass
 		//ProjectionMatrixの設定
 		g.projection.set(i_projection);
 		//OpenGLの時はちょっと細工
-		if(this._ref_papplet.g instanceof PGraphicsOpenGL)
+		if(this._g_type==GT_OPENGL)
 		{
 			GL gl=((PGraphicsOpenGL)g).gl;
 			gl.glMatrixMode(GL.GL_PROJECTION);
@@ -245,7 +252,7 @@ class NyARPsgBaseClass
 	 * @param i_mode
 	 * @param o_pmatrix
 	 */
-	protected static void matResult2PMatrix3D(NyARTransMatResult i_src,int i_mode,PMatrix3D o_pmatrix)
+	protected static void matResult2PMatrix3D(NyARDoubleMatrix44 i_src,int i_mode,PMatrix3D o_pmatrix)
 	{
 		o_pmatrix.m00 = (float)i_src.m00; 
 		o_pmatrix.m01 = (float)i_src.m01;
@@ -263,7 +270,7 @@ class NyARPsgBaseClass
 		o_pmatrix.m31 = 0.0f;
 		o_pmatrix.m32 = 0.0f;
 		o_pmatrix.m33 = 1.0f;
-		if(i_mode==CS_LEFT_HAND)
+		if(i_mode==NyAR4PsgConfig.CS_LEFT_HAND)
 		{
 			o_pmatrix.apply(_lh_mat);
 		}
@@ -271,7 +278,6 @@ class NyARPsgBaseClass
 	/**
 	 * この関数は、i_mat平面から、自由変形した画像を取得します。
 	 * @param i_mat
-	 * @param i_id
 	 * @param i_x
 	 * @param i_y
 	 * @return
@@ -284,10 +290,57 @@ class NyARPsgBaseClass
 		ret.x=(float)tmp.x;
 		ret.y=(float)tmp.y;
 		ret.z=(float)tmp.z;
-		if(this._coord_system==CS_LEFT_HAND){
+		if(this._config._coordinate_system==NyAR4PsgConfig.CS_LEFT_HAND){
 			ret.x*=-1;
 		}
 		return ret;
+	}
+	/**
+	 * PImageをラップしたラスタから画像を得ます。
+	 * @param i_mat
+	 * @param i_x1
+	 * @param i_y1
+	 * @param i_x2
+	 * @param i_y2
+	 * @param i_x3
+	 * @param i_y3
+	 * @param i_x4
+	 * @param i_y4
+	 * @param i_out_w_pix
+	 * @param i_out_h_pix
+	 * @return
+	 */
+	protected PImage pickupMarkerImage(NyARDoubleMatrix44 i_mat,int i_x1,int i_y1,int i_x2,int i_y2,int i_x3,int i_y3,int i_x4,int i_y4,int i_out_w_pix,int i_out_h_pix)
+	{
+		//WrapRasterの内容チェック
+		if(!this._src_raster.hasBuffer()){
+			this._ref_papplet.die("_rel_detector is null.(Function detect() was never called. )");
+		}
+		PImage img=new PImage(i_out_w_pix,i_out_h_pix);
+		img.parent=this._ref_papplet;
+		try{
+			NyARDoublePoint3d[] pos=NyARDoublePoint3d.createArray(4);
+			i_mat.transform3d(i_x1, i_y1,0,	pos[1]);
+			i_mat.transform3d(i_x2, i_y2,0,	pos[0]);
+			i_mat.transform3d(i_x3, i_y3,0,	pos[3]);
+			i_mat.transform3d(i_x4, i_y4,0,	pos[2]);
+			//4頂点を作る。
+			NyARDoublePoint2d[] pos2=NyARDoublePoint2d.createArray(4);
+			for(int i=3;i>=0;i--){
+				this._frustum.project(pos[i],pos2[i]);
+			}
+			PImageRaster out_raster=new PImageRaster(i_out_w_pix,i_out_h_pix);
+			out_raster.wrapBuffer(img);
+			if(!this._preader.read4Point(this._src_raster,pos2,0,0,1,out_raster))
+			{
+				throw new Exception("this._preader.read4Point failed.");
+			}
+			return img;
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.pickupImage");
+			return null;
+		}
 	}	
 	/**
 	 * この関数は、スクリーン座標を撮像点座標に変換します。
