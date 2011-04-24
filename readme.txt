@@ -15,7 +15,7 @@ wm(at)nyatla.jp
 
  * NyARToolkit for proce55ingは、processing環境下でNyARToolkitを利用す
     るためのライブラリです。
- * 拡張現実ライブラリには、ARToolKitの派生ライブラリNyARToolKit for Java
+ * 拡張現実感ライブラリには、ARToolKitの派生ライブラリNyARToolKit for Java
     を使用しています。
  * Processing version 1.2での動作を確認しています。
  * このライブラリは、processingのcamera()関数で取り込んだ画像や、PImage
@@ -139,7 +139,7 @@ NyARToolkit for Processingの提供するクラス
 謝辞
 ----------------------------------------------------------------------
 
- * ARToolkitを開発された加藤博一先生と、Human Interface Technology Lab
+ * ARToolKitを開発された加藤博一先生と、Human Interface Technology Lab
   に感謝します。
   http://www.hitl.washington.edu/artoolkit/
 
