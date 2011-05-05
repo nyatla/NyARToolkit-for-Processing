@@ -98,7 +98,8 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
-	 * PMatrix3D prev_mat=setARPerspective();//prev_matは現在の行列退避用。<br/>
+	 * PMatrix3D prev_mat=new PMatrix3D(((PGraphics3D)g).projection);
+	 * setARPerspective();//prev_matは現在の行列退避用。<br/>
 	 * pushMatrix();<br/>
 	 * setMatrix(ar.getMarkerMatrix());<br/>
 	 * :<br/>
@@ -110,8 +111,12 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 		if(this._old_matrix!=null){
 			this._ref_papplet.die("The function beginTransform is already called.", null);			
 		}
+		if(!(this._ref_papplet.g instanceof PGraphics3D)){
+			this._ref_papplet.die("NyAR4Psg require PGraphics3D instance.");
+		}		
 		//projectionの切り替え
-		this._old_matrix=this.setARPerspective();
+		this._old_matrix=new PMatrix3D(((PGraphics3D)this._ref_papplet.g).projection);
+		this.setARPerspective();
 		//ModelViewの設定
 		this._ref_papplet.pushMatrix();
 		this._ref_papplet.setMatrix(this.getMarkerMatrix());

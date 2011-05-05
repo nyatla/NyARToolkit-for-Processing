@@ -518,7 +518,9 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
-	 * PMatrix3D prev_mat=setARPerspective();//prev_matは現在の行列退避用。<br/>
+	 * //prev_matは現在の行列退避用。endTransformで使用する。<br/>
+	 * PMatrix3D prev_mat=new PMatrix3D(((PGraphics3D)g).projection);<br/>
+	 * setARPerspective();<br/>
 	 * pushMatrix();<br/>
 	 * setMatrix(ar.getMarkerMatrix(i_id));<br/>
 	 * :<br/>
@@ -532,8 +534,11 @@ public class MultiMarker extends NyARPsgBaseClass
 		if(this._old_matrix!=null){
 			this._ref_papplet.die("The function beginTransform is already called.", null);			
 		}
-		//projectionの切り替え
-		this._old_matrix=this.setARPerspective();
+		if(!(this._ref_papplet.g instanceof PGraphics3D)){
+			this._ref_papplet.die("NyAR4Psg require PGraphics3D instance.");
+		}
+		//古いMatrixの保存
+		this._old_matrix=new PMatrix3D(((PGraphics3D)this._ref_papplet.g).projection);
 		//ModelViewの設定
 		this._ref_papplet.pushMatrix();
 		this._ref_papplet.setMatrix(this.getMarkerMatrix(i_id));
@@ -561,6 +566,7 @@ public class MultiMarker extends NyARPsgBaseClass
 		this._ref_papplet.popMatrix();
 		//Projectionの復帰
 		this.setPerspective(this._old_matrix);
+		//退避した古いmatrixの破棄
 		this._old_matrix=null;
 		return;
 	}

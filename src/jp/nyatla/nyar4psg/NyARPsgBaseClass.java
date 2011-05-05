@@ -36,6 +36,7 @@ import jp.nyatla.nyartoolkit.core.rasterreader.NyARPerspectiveRasterReader;
 import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.core.types.NyARDoublePoint2d;
 import jp.nyatla.nyartoolkit.core.types.NyARDoublePoint3d;
+import jp.nyatla.nyartoolkit.core.types.NyARIntSize;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 
 
@@ -46,13 +47,20 @@ import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
  */
 class NyARPsgBaseClass
 {
-
+	/**
+	 * nearクリップ面のデフォルト値です。
+	 */
+	public final float FRUSTUM_DEFAULT_NEAR_CLIP=100;
+	/**
+	 * farクリップ面のデフォルト値です。
+	 */
+	public final float FRUSTUM_DEFAULT_FAR_CLIP=100000;
 
 	/**
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/1.0.3;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
+	public final static String VERSION = "NyAR4psg/1.1.0;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
 	/**　ProcessingスタイルのProjectionMatrixです。*/
@@ -66,6 +74,10 @@ class NyARPsgBaseClass
 	protected PImageRaster _src_raster;
 	/** 画像抽出用のオブジェクトです。{@link #_src_raster}を参照します。*/
 	protected NyARPerspectiveRasterReader _preader;
+	
+	private float _clip_far;
+	private float _clip_near;
+
 	/**
 	 * コンストラクタです。
 	 */
@@ -80,52 +92,104 @@ class NyARPsgBaseClass
 		this._preader=new NyARPerspectiveRasterReader(this._src_raster.getBufferType());
 		try{
 			this._ar_param.loadARParam(this._ref_papplet.createInput(i_cparam_file));
-			this._ar_param.changeScreenSize(i_width, i_height);
+			this._ar_param.changeScreenSize(i_width, i_height);//w,hはここでコピー
 
 			//ProcessingのprojectionMatrixの計算と、Frustumの計算
-			arPerspectiveMat2Projection(this._ar_param.getPerspectiveProjectionMatrix(),i_width,i_height,this._ps_projection,this._frustum);
+			this.setARClipping(FRUSTUM_DEFAULT_NEAR_CLIP,FRUSTUM_DEFAULT_FAR_CLIP);
 		}catch(NyARException e){
 			this._ref_papplet.die("Error while setting up NyARToolkit for java", e);
 		}
-		return;		
+		return;
 	}
-	private final static float view_distance_min = 100;
-	private final static float view_distance_max = 100000;
-
-
+	/**
+	 * この関数は、PImageをバックグラウンドへ描画します。PImageはfarclip面に描画されます。
+	 * <div>この関数は、次のコードと等価です。</div>
+	 * <hr/>
+	 * :<br/>
+	 * PMatrix3D om=new PMatrix3D(((PGraphics3D)g).projection);<br/>
+	 * ortho(-width/2, width/2,-height/2,height/2,near,far);<br/>
+	 * pushMatrix();<br/>
+	 * translate(0,0,far);<br/>
+	 * image(img,-width/2,-height/2);<br/>
+	 * popMatrix();<br/>
+	 * setPerspective(om);<br/>
+	 * :<br/>
+	 * <hr/>
+	 * この関数は、PrjectionMatrixとModelViewMatrixを復帰するため、若干のオーバヘッドがあります。
+	 * 高速な処理が必要な場合には、展開してください。
+	 * @param i_img
+	 * 背景画像を指定します。
+	 */
+	public void drawBackground(PImage i_img)
+	{
+		PApplet pa=this._ref_papplet;
+		PMatrix3D om=new PMatrix3D(((PGraphics3D)pa.g).projection);
+		this.setAROrtho(i_img.width,i_img.height);
+		pa.pushMatrix();
+		pa.resetMatrix();
+		pa.translate(0,0,this._clip_far);
+		pa.image(i_img,-i_img.width/2,-i_img.height/2);
+		pa.popMatrix();
+		//行列の復帰
+		this.setPerspective(om);
+	}
+	
+	/**
+	 * この関数は、視錐台のクリップ面を設定します。この値のデフォルト値は、{@link #FRUSTUM_DEFAULT_NEAR_CLIP}と{@link #FRUSTUM_DEFAULT_FAR_CLIP}です。
+	 * 設定値は、次回の{@link #setARPerspective()}から影響を及ぼします。現在の設定値にただちに影響を及ぼすものではありません。
+	 * @param i_near
+	 * NearPlaneの値を設定します。単位は[mm]です。
+	 * @param i_far
+	 * FarPlaneの値を設定します。単位は[mm]です。
+	 */
+	public void setARClipping(float i_near,float i_far)
+	{
+		this._clip_far=i_far;
+		this._clip_near=i_near;
+		arPerspectiveMat2Projection(this._ar_param,i_near,i_far,this._ps_projection,this._frustum);		
+	}
+	/**
+	 * この関数は、正射影行列をProcessingへセットします。
+	 * 画面の中心が0,0にセットされます。near,farクリップは、{@link #setARClipping}でセットしたクリップ面をそのまま指定します。
+	 * <div>この関数は、次のコードと等価です。</div>
+	 * <hr/>
+	 * :<br/>
+	 * ortho(-i_width/2, i_width/2,-i_height/2,i_height/2,near,far);<br/>
+	 * :<br/>
+	 * <hr/>
+	 * @param i_width
+	 * 幅を指定します。
+	 * @param i_height
+	 * 高さを指定します。
+	 */
+	public void setAROrtho(int i_width,int i_height)
+	{		
+		float half_w=i_width/2;
+		float half_h=i_height/2;
+		this._ref_papplet.ortho(-half_w, half_w,-half_h,half_h,this._clip_near,this._clip_far);
+	}
 	/**
 	 * この関数は、ARToolKit準拠のProjectionMatrixをProcessingにセットします。
 	 * 関数を実行すると、ProcessingのProjectionMatrixがARToolKitのカメラパラメータのものに変わり、映像にマッチした描画ができるようになります。
 	 * ProcessingのデフォルトFrustumに戻すときは、{@link PGraphics3D#perspective()}を使います。
 	 * Frustumの有効期間は、次に{@link PGraphics3D#perspective()}か{@link PGraphics3D#perspective()}をコールするまでです。
-	 * @return
-	 * 置き換えら得る前のprojectionMatrixを返します。
 	 */
-	public PMatrix3D setARPerspective()
+	public void setARPerspective()
 	{
-		return this.setPerspective(this._ps_projection);
+		this.setPerspective(this._ps_projection);
 	}
 	/**
 	 * この関数は、ProjectionMatrixをProcessingにセットします。
 	 * @param i_projection
 	 * 設定するProjectionMatrixを指定します。
-	 * @return
-	 * 置き換えら得る前のprojectionMatrixを返します。
 	 * 
 	 * <p>
 	 * Processing/1.3になったら、{@link PApplet#matrixMode}使ってきちんと使えるようになると思う。
 	 * 今は無理なので、frustum経由
 	 * </p>
 	 */	
-	public PMatrix3D setPerspective(PMatrix3D i_projection)
+	public void setPerspective(PMatrix3D i_projection)
 	{
-		if(!(this._ref_papplet.g instanceof PGraphics3D)){
-			this._ref_papplet.die("NyAR4Psg require PGraphics3D instance.");
-		}
-		PGraphics3D g=(PGraphics3D)this._ref_papplet.g;
-		//現在のProjectionMatrixを保存する。
-		PMatrix3D ret=new PMatrix3D();
-		ret.set(g.projection);
 		//Projectionをfrustum経由で設定。
 		float far=i_projection.m23/(i_projection.m22+1);
 		float near=i_projection.m23/(i_projection.m22-1);
@@ -135,7 +199,7 @@ class NyARPsgBaseClass
 				(i_projection.m12-1)*near/i_projection.m11,
 				(i_projection.m12+1)*near/i_projection.m11,
 				near,far);
-		return ret;
+		return;
 	}
 
 	protected static void PMatrix2GLProjection(PMatrix3D i_in,float[] o_out)
@@ -177,10 +241,11 @@ class NyARPsgBaseClass
 		o_out[15]=i_in.m33;	
 	}
 	
-	private static void arPerspectiveMat2Projection(NyARPerspectiveProjectionMatrix i_prjmat,int i_w,int i_h,PMatrix3D o_projection,NyARFrustum o_frustum)
+	private static void arPerspectiveMat2Projection(NyARParam i_param,float i_near,float i_far,PMatrix3D o_projection,NyARFrustum o_frustum)
 	{
 		NyARDoubleMatrix44 tmp=new NyARDoubleMatrix44();
-		i_prjmat.makeCameraFrustumRH(i_w, i_h, view_distance_min, view_distance_max,tmp);
+		NyARIntSize s=i_param.getScreenSize();
+		i_param.getPerspectiveProjectionMatrix().makeCameraFrustumRH(s.w,s.h,i_near,i_far,tmp);
 		o_projection.m00=(float)(tmp.m00);
 		o_projection.m01=(float)(tmp.m01);
 		o_projection.m02=(float)(tmp.m02);
@@ -197,7 +262,7 @@ class NyARPsgBaseClass
 		o_projection.m31=(float)(tmp.m31);
 		o_projection.m32=(float)(tmp.m32);
 		o_projection.m33=(float)(tmp.m33);
-		o_frustum.setValue(tmp, i_w, i_h);
+		o_frustum.setValue(tmp, s.w, s.h);
 	}
 	protected static void matResult2GLArray(NyARTransMatResult i_src,double[] o_gl_array)
 	{
@@ -221,7 +286,11 @@ class NyARPsgBaseClass
 	/**
 	 * 左手系変換用の行列
 	 */
-	private final static PMatrix3D _lh_mat=new PMatrix3D(-1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+	private final static PMatrix3D _lh_mat=new PMatrix3D(
+		-1,0,0,0,
+		 0,1,0,0,
+		 0,0,1,0,
+		 0,0,0,1);
 	
 	/**
 	 * 変換行列をProcessingのMatrixへ変換します。
