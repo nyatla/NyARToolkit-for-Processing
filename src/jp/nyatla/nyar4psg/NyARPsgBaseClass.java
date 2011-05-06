@@ -60,11 +60,14 @@ class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/1.1.0;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
+	public final static String VERSION = "NyAR4psg/1.1.4;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
 	/**　ProcessingスタイルのProjectionMatrixです。*/
 	protected final PMatrix3D _ps_projection=new PMatrix3D();
+	/**　バックグラウンド用のModelviewMatrixです。*/
+	protected final PMatrix3D _ps_background_mv=new PMatrix3D();
+	
 	/**　ARToolkitパラメータのインスタンスです。*/
 	protected final NyARParam _ar_param=new NyARParam();
 	protected final NyARFrustum _frustum=new NyARFrustum();;
@@ -102,14 +105,15 @@ class NyARPsgBaseClass
 		return;
 	}
 	/**
-	 * この関数は、PImageをバックグラウンドへ描画します。PImageはfarclip面に描画されます。
+	 * この関数は、PImageをバックグラウンドへ描画します。PImageはfarclip面+1の部分に描画します。
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
 	 * PMatrix3D om=new PMatrix3D(((PGraphics3D)g).projection);<br/>
-	 * ortho(-width/2, width/2,-height/2,height/2,near,far);<br/>
+	 * setBackgroundOrtho(img.width,img.height)<br/>
 	 * pushMatrix();<br/>
-	 * translate(0,0,far);<br/>
+	 * resetMatrix();<br/>
+	 * translate(0,0,-(far*0.99f));<br/>
 	 * image(img,-width/2,-height/2);<br/>
 	 * popMatrix();<br/>
 	 * setPerspective(om);<br/>
@@ -124,10 +128,9 @@ class NyARPsgBaseClass
 	{
 		PApplet pa=this._ref_papplet;
 		PMatrix3D om=new PMatrix3D(((PGraphics3D)pa.g).projection);
-		this.setAROrtho(i_img.width,i_img.height);
+		this.setBackgroundOrtho(i_img.width,i_img.height);
 		pa.pushMatrix();
-		pa.resetMatrix();
-		pa.translate(0,0,this._clip_far);
+		pa.setMatrix(this._ps_background_mv);
 		pa.image(i_img,-i_img.width/2,-i_img.height/2);
 		pa.popMatrix();
 		//行列の復帰
@@ -146,15 +149,19 @@ class NyARPsgBaseClass
 	{
 		this._clip_far=i_far;
 		this._clip_near=i_near;
-		arPerspectiveMat2Projection(this._ar_param,i_near,i_far,this._ps_projection,this._frustum);		
+		arPerspectiveMat2Projection(this._ar_param,i_near,i_far,this._ps_projection,this._frustum);
+		this._ps_background_mv.reset();
+		this._ps_background_mv.translate(0,0,-i_far);
 	}
 	/**
 	 * この関数は、正射影行列をProcessingへセットします。
-	 * 画面の中心が0,0にセットされます。near,farクリップは、{@link #setARClipping}でセットしたクリップ面をそのまま指定します。
+	 * 画面の中心が0,0にセットされます。
+	 * nearクリップには、{@link #setARClipping}でセットしたクリップ面を指定します。
+	 *　farクリップには、{@link #setARClipping}でセットしたクリップ面+1を指定します。
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
-	 * ortho(-i_width/2, i_width/2,-i_height/2,i_height/2,near,far);<br/>
+	 * ortho(-i_width/2, i_width/2,-i_height/2,i_height/2,near,far+1);<br/>
 	 * :<br/>
 	 * <hr/>
 	 * @param i_width
@@ -162,17 +169,20 @@ class NyARPsgBaseClass
 	 * @param i_height
 	 * 高さを指定します。
 	 */
-	public void setAROrtho(int i_width,int i_height)
+	public void setBackgroundOrtho(int i_width,int i_height)
 	{		
 		float half_w=i_width/2;
 		float half_h=i_height/2;
-		this._ref_papplet.ortho(-half_w, half_w,-half_h,half_h,this._clip_near,this._clip_far);
+		this._ref_papplet.ortho(-half_w, half_w,-half_h,half_h,this._clip_near,this._clip_far+1);
 	}
 	/**
 	 * この関数は、ARToolKit準拠のProjectionMatrixをProcessingにセットします。
 	 * 関数を実行すると、ProcessingのProjectionMatrixがARToolKitのカメラパラメータのものに変わり、映像にマッチした描画ができるようになります。
 	 * ProcessingのデフォルトFrustumに戻すときは、{@link PGraphics3D#perspective()}を使います。
 	 * Frustumの有効期間は、次に{@link PGraphics3D#perspective()}か{@link PGraphics3D#perspective()}をコールするまでです。
+	 * <p>
+	 * Version 1.1.0より、古いprojection matrixを返さなくなりました。古いprojection matrixが必要な時は、{@link PGraphics3D#projection}を複製して保存して下さい。
+	 * </p>
 	 */
 	public void setARPerspective()
 	{
@@ -182,10 +192,12 @@ class NyARPsgBaseClass
 	 * この関数は、ProjectionMatrixをProcessingにセットします。
 	 * @param i_projection
 	 * 設定するProjectionMatrixを指定します。
-	 * 
 	 * <p>
 	 * Processing/1.3になったら、{@link PApplet#matrixMode}使ってきちんと使えるようになると思う。
 	 * 今は無理なので、frustum経由
+	 * </p>
+	 * <p>
+	 * Version 1.1.0より、古いprojection matrixを返さなくなりました。古いprojection matrixが必要な時は、{@link PGraphics3D#projection}を複製して保存して下さい。
 	 * </p>
 	 */	
 	public void setPerspective(PMatrix3D i_projection)

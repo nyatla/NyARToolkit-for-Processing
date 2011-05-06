@@ -26,9 +26,7 @@ void draw() {
   }
   background(255);
   cam.read();
-  hint(DISABLE_DEPTH_TEST);
-  image(cam,0,0);
-  hint(ENABLE_DEPTH_TEST);
+  nya.drawBackground(cam);//frustumを考慮した背景描画
   switch(nya.detect(cam)){
   case SingleARTKMarker.ST_NOMARKER:
     return;

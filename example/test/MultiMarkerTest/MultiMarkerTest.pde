@@ -5,6 +5,7 @@
 import processing.video.*;
 import processing.core.*;
 import jp.nyatla.nyar4psg.*;
+import processing.opengl.*;
 
 PFont font=createFont("FFScala", 32);
 Capture cam;
@@ -15,6 +16,7 @@ void setup() {
   colorMode(RGB, 100);
   cam=new Capture(this,width,height);
   nya=new MultiMarker(this,width,height,"camera_para.dat",new NyAR4PsgConfig(NyAR4PsgConfig.CS_RIGHT_HAND,NyAR4PsgConfig.TM_NYARTK));
+  nya.setARClipping(100,1000);
   nya.setConfidenceThreshold(0.6);
   nya.addARMarker("patt.hiro",80);
   nya.addARMarker("patt.kanji",80);
@@ -29,9 +31,8 @@ void draw() {
   }
   background(255);
   cam.read();
-  hint(DISABLE_DEPTH_TEST);
-  image(cam,0,0);
-  hint(ENABLE_DEPTH_TEST);
+  //バックグラウンドを描画
+  nya.drawBackground(cam);
   nya.detect(cam);
   if(nya.isExistMarker(0)){
     nya.beginTransform(0);//マーカ座標系に設定

@@ -32,9 +32,8 @@ void draw()
   }
   cam.read();
   nya.detect(cam);
-  hint(DISABLE_DEPTH_TEST);
-  image(cam,0,0);
-  hint(ENABLE_DEPTH_TEST);
+  background(0);
+  nya.drawBackground(cam);//frustumを考慮した背景描画
   for(int i=0;i<4;i++){
     if((!nya.isExistMarker(i))){
       continue;

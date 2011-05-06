@@ -5,6 +5,7 @@
 import processing.video.*;
 import processing.core.*;
 import jp.nyatla.nyar4psg.*;
+import processing.opengl.*;
 
 PFont font=createFont("FFScala", 32);
 Capture cam;
@@ -16,6 +17,7 @@ void setup() {
   println(NyARBoard.VERSION);
   cam=new Capture(this,width,height);
   nya=new NyARBoard(this,width,height,"camera_para.dat","patt.hiro",80); //SingleMarker検出インスタンス
+  nya.setARClipping(100,1000);
   nya.gsThreshold=120;//画像２値化の閾値(0<n<255) default=110
   nya.cfThreshold=0.4;//変換行列計算を行うマーカ一致度(0.0<n<1.0) default=0.4
   print(nya.VERSION); //バージョンの表示
@@ -28,9 +30,7 @@ void draw() {
   }
   background(255);
   cam.read();
-  hint(DISABLE_DEPTH_TEST);
-  image(cam,0,0);
-  hint(ENABLE_DEPTH_TEST);
+  nya.drawBackground(cam);//frustumを考慮した背景描画
   
   if(!nya.detect(cam))  //マーカを検出してる時だけ処理
   {

@@ -1,6 +1,6 @@
 ======================================================================
 NyARToolkit for proce55ing
- version 1.0.3
+ version 1.1.4
 ======================================================================
 
 Copyright (C)2008-2011 Ryo Iizuka
@@ -10,7 +10,7 @@ airmail(at)ebony.plala.or.jp
 wm(at)nyatla.jp
 
 ----------------------------------------------------------------------
- About NyARToolkit
+ About NyARToolkit for Processing
 ----------------------------------------------------------------------
 
  * NyARToolkit for proce55ingは、processing環境下でNyARToolkitを利用す

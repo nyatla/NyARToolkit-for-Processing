@@ -539,6 +539,7 @@ public class MultiMarker extends NyARPsgBaseClass
 		}
 		//古いMatrixの保存
 		this._old_matrix=new PMatrix3D(((PGraphics3D)this._ref_papplet.g).projection);
+		this.setARPerspective();
 		//ModelViewの設定
 		this._ref_papplet.pushMatrix();
 		this._ref_papplet.setMatrix(this.getMarkerMatrix(i_id));
