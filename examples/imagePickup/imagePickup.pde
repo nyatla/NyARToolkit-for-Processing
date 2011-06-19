@@ -2,8 +2,12 @@
   NyARToolkit for proce55ing/1.0.0
   (c)2008-2011 nyatla
   airmail(at)ebony.plala.or.jp
+  
   ARマーカと同じ平面からマーカパターンを得る事ができます。
   Hiroマーカを使います。
+  
+  This program gets the image from around the marker.
+  The marker file is "patt.hiro"
 */
 import processing.video.*;
 import processing.core.*;
@@ -11,7 +15,7 @@ import jp.nyatla.nyar4psg.*;
 
 Capture cam;
 MultiMarker nya;
-PFont font=createFont("FFScala", 32);
+
 
 void setup() {
   size(640,480,P3D);

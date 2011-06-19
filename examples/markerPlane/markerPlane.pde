@@ -2,16 +2,20 @@
   NyARToolkit for proce55ing/1.0.0
   (c)2008-2011 nyatla
   airmail(at)ebony.plala.or.jp
-  スクリーン座標をマーカ座標に変換できます。
+  
+  このサンプルは、スクリーン座標をマーカ座標に変換します。
   Hiroマーカを使います。マーカが認識されたら、マウスカーソルを移動させてみて下さい。
-*/
+  
+  This sample converts to the marker plain position from the screen position. 
+  Please move the mouse cursor on the screen the marker is recognized.
+  The marker is "Patt.hiro" .
+ */
 import processing.video.*;
 import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 
 Capture cam;
 MultiMarker nya;
-PFont font=createFont("FFScala", 32);
 
 void setup() {
   size(640,480,P3D);

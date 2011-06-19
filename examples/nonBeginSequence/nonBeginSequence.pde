@@ -2,7 +2,12 @@
   NyARToolkit for proce55ing/1.0.0
   (c)2008-2011 nyatla
   airmail(at)ebony.plala.or.jp
-  begin-endシーケンスを使わない方法です。
+  
+  begin-endシーケンスを使わない方法です。processingの行列を直接操作して、
+  マーカ座標系を反映します。
+  
+  This sample is not using "begin-end" sequence.
+  Projection matrix and Modelview matrix are set to processing directly.
 */
 import processing.video.*;
 import processing.core.*;
@@ -11,7 +16,6 @@ import jp.nyatla.nyar4psg.*;
 Capture cam;
 MultiMarker nya;
 int cr,cg,cb;
-PFont font=createFont("FFScala", 32);
 
 void setup() {
   size(640,480,P3D);

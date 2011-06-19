@@ -2,10 +2,14 @@
   NyARToolkit for proce55ing/1.0.0
   (c)2008-2011 nyatla
   airmail(at)ebony.plala.or.jp
+  
   Pickingと一緒に使うサンプルです。
   Picking Libraryはこちらからダウンロードしてください。
   http://code.google.com/p/processing-picking-library/
-
+  
+  This sample program is sample with picking library.
+  The cube can be clicked.
+  The marker file is "patt.hiro".  
 */
 import processing.video.*;
 import processing.core.*;
@@ -16,7 +20,6 @@ import picking.*;
 Capture cam;
 MultiMarker nya;
 int cr,cg,cb;
-PFont font=createFont("FFScala", 32);
 Picker picker;
 
 void setup() {

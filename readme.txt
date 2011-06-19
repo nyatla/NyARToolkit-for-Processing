@@ -1,6 +1,6 @@
 ======================================================================
 NyARToolkit for proce55ing
- version 1.1.4
+ version 1.1.5
 ======================================================================
 
 Copyright (C)2008-2011 Ryo Iizuka
@@ -152,4 +152,4 @@ NyARToolkit for Processingの提供するクラス
  *Processingの座標系問題を解決して頂いた、reco氏に感謝します。
   http://www.hyde-ysd.com/reco-memo/
 
- *Version/1.0開発のきっかけとなった、橋本直 氏に感謝します。
+ *Version/1.0開発のきっかけを作って下さった、橋本 直 氏に感謝します。

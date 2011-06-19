@@ -2,8 +2,12 @@
   NyARToolkit for proce55ing/1.0.0
   (c)2008-2011 nyatla
   airmail(at)ebony.plala.or.jp
+  
   ARマーカとIdマーカを同時に使う例です。
   ARマーカはkanji,hiro、idマーカは0,1番のマーカを使う事ができます。
+  
+  This sample handles 2 ARToolkit style markers and 2 NyId markers at same time.
+  The ARToolKit marker files are kanji.patt and hiro.patt. NyId marker ids are #0 and #1.
 */
 import processing.video.*;
 import processing.core.*;
@@ -11,7 +15,6 @@ import jp.nyatla.nyar4psg.*;
 
 Capture cam;
 MultiMarker nya;
-PFont font=createFont("FFScala", 32);
 
 void setup() {
   size(640,480,P3D);

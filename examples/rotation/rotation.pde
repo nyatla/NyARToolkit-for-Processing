@@ -2,7 +2,11 @@
   NyARToolkit for proce55ing/1.0.0
   (c)2008-2011 nyatla
   airmail(at)ebony.plala.or.jp
+  
   人マーカの上に右手系、Hiroマーカの上に左手系の立方体を表示します。
+  
+  This sample program shows rotation of 2 coordinate system.(left and right).
+  The marker is "patt.hiro" and "patt.kanji"
 */
  
 import processing.video.*;
@@ -12,7 +16,6 @@ import jp.nyatla.nyar4psg.*;
 Capture cam;
 MultiMarker nya_r;
 MultiMarker nya_l;
-PFont font=createFont("FFScala", 32);
 
 void setup() {
   size(640,480,P3D);

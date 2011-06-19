@@ -2,7 +2,11 @@
   NyARToolkit for proce55ing/1.0.0
   (c)2008-2011 nyatla
   airmail(at)ebony.plala.or.jp
+  
   複数のARマーカを扱う例です。Hiroマーカと、Kanjiマーカを用意して下さい。
+  
+  This sample proglam handles 2 ARToolKit marker.
+  The markers are "patt.hiro" and "patt.kanji"
 */
 import processing.video.*;
 import processing.core.*;
@@ -10,7 +14,6 @@ import jp.nyatla.nyar4psg.*;
 
 Capture cam;
 MultiMarker nya;
-PFont font=createFont("FFScala", 32);
 
 void setup() {
   size(640,480,P3D);
