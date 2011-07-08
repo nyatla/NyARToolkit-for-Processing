@@ -60,7 +60,7 @@ class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/1.1.4;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
+	public final static String VERSION = "NyAR4psg/1.1.6;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
 	/**　ProcessingスタイルのProjectionMatrixです。*/
@@ -103,6 +103,15 @@ class NyARPsgBaseClass
 			this._ref_papplet.die("Error while setting up NyARToolkit for java", e);
 		}
 		return;
+	}
+	/**
+	 * この関数は、ProjectionMatrixを複製して返します。
+	 * @return
+	 * ProjectionMatrixです。
+	 */
+	public PMatrix3D getProjectionMatrix()
+	{
+		return new PMatrix3D(this._ps_projection);
 	}
 	/**
 	 * この関数は、PImageをバックグラウンドへ描画します。PImageはfarclip面+1の部分に描画します。
