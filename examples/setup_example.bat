@@ -14,6 +14,6 @@ copy ..\library\*.jar test\MultiMarkerTest\code\*
 copy ..\library\*.jar test\NyARBoardTest\code\*
 copy ..\library\*.jar test\SingleARTKMarkerTest\code\*
 copy ..\library\*.jar test\SingleNyIdMarkerTest\code\*
-copy ..\library\*.jar test\withOpenGL\code\*
+copy ..\library\*.jar withOpenGL\code\*
 copy ..\library\*.jar withPicking\code\*
 pause
