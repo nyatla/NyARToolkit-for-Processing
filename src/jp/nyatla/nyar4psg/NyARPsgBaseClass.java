@@ -60,7 +60,7 @@ class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/1.1.6;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
+	public final static String VERSION = "NyAR4psg/1.1.7;NyARToolkit for java/3.0.0+;ARToolKit/2.72.1";
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
 	/**　ProcessingスタイルのProjectionMatrixです。*/
@@ -343,7 +343,7 @@ class NyARPsgBaseClass
 		}
 	}
 	/**
-	 * この関数は、i_mat平面から、自由変形した画像を取得します。
+	 * この関数は、スクリーン座標i_x,i_yを、マーカ座標系に変換します。
 	 * @param i_mat
 	 * @param i_x
 	 * @param i_y

@@ -249,7 +249,6 @@ public class MultiMarker extends NyARPsgBaseClass
 			}
 			return true;
 		}
-		
 	}
 	/**
 	 * {@link MultiMarker}向けの矩形検出器です。
@@ -838,9 +837,34 @@ public class MultiMarker extends NyARPsgBaseClass
 		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
 		return item.life;		
 	}
+	/**
+	 * この関数は、idで示されるマーカ座標系の点をスクリーン座標へ変換します。
+	 * @param i_id
+	 * マーカidを指定します。
+	 * @param i_x
+	 * マーカ座標系のX座標
+	 * @param i_y
+	 * マーカ座標系のY座標
+	 * @param i_z
+	 * マーカ座標系のZ座標
+	 * @return
+	 * スクリーン座標
+	 */
+	public PVector marker2ScreenCoordSystem(int i_id,double i_x,double i_y,double i_z)
+	{
+		NyARDoublePoint3d pos=new NyARDoublePoint3d();
+		this._rel_detector.marker_sl.get(i_id).tmat.transform3d(i_x, i_y, i_z,pos);
+		NyARDoublePoint2d pos2d=new NyARDoublePoint2d();
+		this._frustum.project(pos,pos2d);
+		PVector ret=new PVector();
+		ret.x=(float)pos2d.x;
+		ret.y=(float)pos2d.y;
+		ret.z=0;
+		return ret;
+	}
 
 	/**
-	 * この関数は、スクリーン座標を、idで指定したマーカ平面座標へ変換して返します。
+	 * この関数は、スクリーン座標をidで指定したマーカ平面座標へ変換して返します。
 	 * @param i_id
 	 * マーカidを指定します。
 	 * @param i_x

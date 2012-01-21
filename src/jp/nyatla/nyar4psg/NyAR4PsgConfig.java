@@ -39,8 +39,8 @@ public class NyAR4PsgConfig
 	 * @param i_cs
 	 * 座標系を選択します。
 	 * <ul>
-	 * <li> {@link #TM_NYARTK} - NyARToolKitの姿勢推定を使用します。
-	 * <li> {@link #TM_ARTK} - ARToolKitの姿勢推定を使用します。
+	 * <li> {@link #CS_RIGHT_HAND} 
+	 * <li> {@link #CS_LEFT_HAND}
 	 * </ul>
 	 * @param i_tm
 	 * 姿勢計算アルゴリズムを選択します。

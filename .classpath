@@ -2,9 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/NyARToolKit"/>
-	<classpathentry kind="lib" path="C:/Program Files (x86)/Java/jre6/lib/ext/jogl.jar"/>
 	<classpathentry kind="lib" path="D:/application.files/processing-1.5.1/lib/core.jar"/>
 	<classpathentry kind="lib" path="D:/application.files/processing-1.5.1/lib/pde.jar"/>
+	<classpathentry kind="lib" path="D:/project.sourceforge/NyARToolkit/nyar4psg/trunk/library/NyARToolkit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
