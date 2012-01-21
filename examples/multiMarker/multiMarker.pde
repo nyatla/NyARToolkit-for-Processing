@@ -38,9 +38,6 @@ void draw()
     if((!nya.isExistMarker(i))){
       continue;
     }
-    PVector pos2d=nya.marker2ScreenCoordSystem(i,0,0,0);
-    noFill();
-    ellipse(pos2d.x,pos2d.y,200,200);
     nya.beginTransform(i);
     fill(0,100*(i%2),100*((i+1)%2));
     translate(0,0,20);
