@@ -3,7 +3,6 @@
 
 */
 import processing.video.*;
-import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 import processing.opengl.*;
 
@@ -43,6 +42,10 @@ void draw() {
     nya.endTransform();  //マーカ座標系を終了
     drawMarkerPatt(0);
     drawVertex(0);
+    //マーカのスクリーン座標を中心に円を書く
+    PVector p=nya.marker2ScreenCoordSystem(0,0,0,0);
+    noFill();
+    ellipse(p.x,p.y,200,200);
   }
   if(nya.isExistMarker(1)){
     nya.beginTransform(1);//マーカ座標系に設定
