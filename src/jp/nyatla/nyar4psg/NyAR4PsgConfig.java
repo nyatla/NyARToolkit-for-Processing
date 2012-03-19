@@ -1,7 +1,7 @@
 package jp.nyatla.nyar4psg;
 
 import processing.core.PApplet;
-
+import jp.nyatla.nyartoolkit.markersystem.*;
 
 /**
  * このクラスは、コンフィギュレーション定数を保持します。
@@ -33,6 +33,7 @@ public class NyAR4PsgConfig
 	public final int env_transmat_mode;
 	/**　この値は、座標系の選択値です。*/
 	public final int _coordinate_system;
+
 	/**
 	 * コンストラクタです。
 	 * コンフィギュレーション値を格納したインスタンスを作成します。

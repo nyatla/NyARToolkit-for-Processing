@@ -10,7 +10,6 @@
   The ARToolKit marker files are kanji.patt and hiro.patt. NyId marker ids are #0 and #1.
 */
 import processing.video.*;
-import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 
 Capture cam;

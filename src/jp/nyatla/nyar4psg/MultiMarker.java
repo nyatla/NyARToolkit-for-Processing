@@ -28,21 +28,13 @@ package jp.nyatla.nyar4psg;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import jp.nyatla.nyartoolkit.NyARException;
-import jp.nyatla.nyartoolkit.core.NyARCode;
-import jp.nyatla.nyartoolkit.core.analyzer.raster.threshold.NyARRasterThresholdAnalyzer_SlidePTile;
-import jp.nyatla.nyartoolkit.core.match.*;
-import jp.nyatla.nyartoolkit.core.param.NyARParam;
-import jp.nyatla.nyartoolkit.core.pickup.NyARColorPatt_Perspective_O2;
-import jp.nyatla.nyartoolkit.core.raster.NyARGrayscaleRaster;
-import jp.nyatla.nyartoolkit.core.raster.rgb.INyARRgbRaster;
-import jp.nyatla.nyartoolkit.core.rasterfilter.rgb2gs.NyARRasterFilter_Rgb2Gs_RgbAve192;
-import jp.nyatla.nyartoolkit.core.squaredetect.*;
+
+import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.core.types.*;
-import jp.nyatla.nyartoolkit.nyidmarker.*;
-import jp.nyatla.nyartoolkit.nyidmarker.data.*;
+import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 import processing.core.*;
+import jp.nyatla.nyartoolkit.markersystem.*;
 
 
 /**
@@ -53,83 +45,47 @@ import processing.core.*;
  */
 public class MultiMarker extends NyARPsgBaseClass
 {
-	/**
-	 * マーカ情報を格納するためのクラスです。
-	 */
-	private class TMarkerData
+	class PsgMsCfg extends NyARMarkerSystemConfig
 	{
-		public static final int MK_AR=0;
-		public static final int MK_NyId=1;
-		/** マーカタイプです。*/
-		public final int mktype;
-		/** MK_ARの情報。比較のための、ARToolKitマーカを格納します。*/
-		public final NyARMatchPatt_Color_WITHOUT_PCA matchpatt;
-		/** MK_ARの情報。パターンのサイズ。パターンの物理サイズをmm単位で格納します。*/
-		public final double marker_size;
-		/** MK_ARの情報。検出した矩形の格納変数。マーカの一致度を格納します。*/
-		public double cf;
-		/** MK_ARの情報。パターンの解像度。*/
-		public final int patt_resolution;
-		/** MK_ARの情報。パターンのエッジ割合。*/
-		public final int patt_edge_percentage;
-		/** ライフ値*/
-		public long life;
-				
-		/** MK_NyIdの情報。 反応するidの開始レンジ*/
-		public final long nyid_range_s;
-		/** MK_NyIdの情報。 反応するidの終了レンジ*/
-		public final long nyid_range_e;
-		/** MK_NyIdの情報。 実際のid値*/
-		public long nyid;
-		
-		/** 検出した矩形の格納変数。理想形二次元座標を格納します。*/
-		public final NyARSquare sq=new NyARSquare();
-		/** 検出した矩形の格納変数。マーカの姿勢行列を格納します。*/
-		public final NyARTransMatResult tmat=new NyARTransMatResult();
-		/** 矩形の検出状態の格納変数。 連続して見失った回数を格納します。*/
-		public int lost_count=Integer.MAX_VALUE;
-		
-		/**
-		 * コンストラクタです。初期値からARマーカのインスタンスを生成します。
-		 * @param i_patt
-		 * @param i_patt_resolution
-		 * @param i_patt_edge_percentage
-		 * @param i_patt_size
-		 * @throws NyARException
-		 */
-		public TMarkerData(InputStream i_patt,int i_patt_resolution,int i_patt_edge_percentage,double i_patt_size) throws NyARException
+		private int _tmat_type;
+		public PsgMsCfg(InputStream iArParamStream,int i_tmat_type,int iWidth, int iHeight)throws NyARException
 		{
-			NyARCode c=new NyARCode(i_patt_resolution,i_patt_resolution);
-			this.mktype=MK_AR;
-			c.loadARPatt(i_patt);
-			this.matchpatt=new NyARMatchPatt_Color_WITHOUT_PCA(c);
-			this.marker_size=i_patt_size;
-			this.patt_resolution=i_patt_resolution;
-			this.patt_edge_percentage=i_patt_edge_percentage;
-			//padding
-			this.nyid_range_e=this.nyid_range_s=0;
-			return;
+			super(iArParamStream, iWidth, iHeight);
+			this._tmat_type=i_tmat_type;
 		}
-		/**
-		 * コンストラクタです。初期値から、Idマーカのインスタンスを生成します。
-		 * @param i_range_s
-		 * @param i_range_e
-		 * @param i_patt_size
-		 * @throws NyARException
-		 */
-		public TMarkerData(int i_nyid_range_s,int i_nyid_range_e,double i_patt_size)
+		public INyARTransMat createTransmatAlgorism() throws NyARException
 		{
-			this.mktype=MK_NyId;
-			this.marker_size=i_patt_size;
-			this.nyid_range_s=i_nyid_range_s;
-			this.nyid_range_e=i_nyid_range_e;
-			//padding
-			this.patt_resolution=0;
-			this.patt_edge_percentage=0;
-			this.matchpatt=null;
-			return;
-		}
+			switch(this._tmat_type)
+			{
+			case NyAR4PsgConfig.TM_ARTK:
+				return new NyARTransMat_ARToolKit(this._param);
+			case NyAR4PsgConfig.TM_NYARTK:
+				return new NyARTransMat(this._param);
+			default:
+				throw new NyARException("Invalid Transmat algolism type.");
+			}
+		}		
 	}
+	class PImageSensor extends NyARSensor
+	{
+		private PImageRaster _src;
+		public PImageSensor(NyARIntSize i_size) throws NyARException
+		{
+			super(i_size);
+			this._src=new PImageRaster(i_size.w,i_size.h);
+		}
+		public void update(PImage i_img) throws NyARException
+		{
+			this._src.wrapBuffer(i_img);
+			super.update(this._src);
+		}
+		
+	}
+	
+	protected PImageSensor _ss;
+	protected NyARMarkerSystem _ms;
+
+
 	
 	/**
 	 * この関数は、ARマーカパターン一致率の閾値を設定します。
@@ -140,7 +96,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public void setConfidenceThreshold(double i_val)
 	{
-		this._rel_detector._cf_threshold=i_val;
+		this._ms.setConfidenceThreshold(i_val);
 	}
 	/**
 	 * この関数は、マーカ消失時の遅延数を設定します。
@@ -151,7 +107,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public void setLostDelay(int i_val)
 	{
-		this._rel_detector._max_lost_delay=i_val;
+		this._ms.setLostDelay(i_val);
 	}
 	/**
 	 * この関数は、画像2値化の敷居値を設定します。
@@ -167,264 +123,30 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public void setThreshold(int i_th)
 	{
-		this._threshold=i_th;
+		int th=(i_th==THLESHOLD_AUTO)?NyARMarkerSystem.THLESHOLD_AUTO:i_th;
+		this._ms.setBinThreshold(th);
 	}
 	/**
 	 * この関数は、現在の二値化敷居値を返します。
-	 * 自動敷居値を選択している場合でも、その時の敷居値を取得できます。
+	 * 自動敷居値を選択している場合は、直近の敷居値を返します。
 	 * @return
 	 */
 	public int getCurrentThreshold()
 	{
 		//256スケールに直す。
-		return this._current_th*256/192;
+		return this.getCurrentThreshold();
 	}
 	
 	/** 初期値定数。マーカ一致度の最小敷居値を示します。*/
 	public final static double DEFAULT_CF_THRESHOLD=0.51;
 	/** 初期値定数。マーカ消失時の許容*/
 	public final static int DEFAULT_LOST_DELAY=10;
-
 	/** 敷居値の定数です。敷居値を自動決定します。*/
 	public final static int THLESHOLD_AUTO=-1;
-	
-	/** 複数の解像度に対応したピックアップクラスです。必要に応じてピックアップインスタンスを生成します。
-	 */
-	private class MultiResolutionPattPickup
-	{
-		private class Item{
-			private NyARColorPatt_Perspective_O2 _pickup;
-			private NyARMatchPattDeviationColorData _patt_d;
-			private int _patt_edge;
-			public Item(int i_resolution,int i_edge_percentage)
-			{
-				int r=1;
-				while(i_resolution*r<64){
-					r*=2;
-				}				
-				this._patt_d=new NyARMatchPattDeviationColorData(i_resolution,i_resolution);
-				this._pickup=new NyARColorPatt_Perspective_O2(i_resolution,i_resolution,r,i_edge_percentage,PImageRaster.BUFFER_TYPE);
-				this._patt_edge=i_edge_percentage;
-			}
-		}
-		private ArrayList<Item> items=new ArrayList<Item>();
-		/**
-		 * マーカにマッチした{@link NyARMatchPattDeviationColorData}インスタンスを得る。
-		 */
-		public NyARMatchPattDeviationColorData refDeviationColorData(TMarkerData i_marker)
-		{
-			int mk_resolution=i_marker.patt_resolution;
-			int mk_edge=i_marker.patt_edge_percentage;
-			Item item=null;
-			for(int i=this.items.size()-1;i>=0;i--)
-			{
-				Item ptr=this.items.get(i);
-				if(!ptr._pickup.getSize().isEqualSize(mk_resolution,mk_resolution) || ptr._patt_edge!=mk_edge)
-				{
-					//サイズとエッジサイズが合致しない物はスルー
-					continue;
-				}
-				return this.items.get(i)._patt_d;
-			}
-			item=new Item(mk_resolution,mk_edge);
-			this.items.add(item);
-			return item._patt_d;
-		}
-		/**
-		 * リストにあるパターン全ての差分パラメータを作成。
-		 * @param i_image
-		 * @param i_vertexs
-		 * @return
-		 * @throws NyARException
-		 */
-		public boolean makePattDeviationColorData(INyARRgbRaster i_image, NyARIntPoint2d[] i_vertexs) throws NyARException
-		{
-			for(int i=this.items.size()-1;i>=0;i--)
-			{
-				Item item=this.items.get(i);
-				if(!item._pickup.pickFromRaster(i_image, i_vertexs)){
-					return false;
-				}
-				item._patt_d.setRaster(item._pickup);
-			}
-			return true;
-		}
-	}
-	/**
-	 * {@link MultiMarker}向けの矩形検出器です。
-	 */
-	private class RleDetector extends NyARSquareContourDetector_Rle
-	{
-		private final NyIdMarkerPickup _id_pickup = new NyIdMarkerPickup();		
-		private final MultiResolutionPattPickup _mpickup=new MultiResolutionPattPickup();
-		private final NyARIntPoint2d[] _vertexs=new NyARIntPoint2d[4];
-		private NyARCoord2Linear _coordline;
-		private final NyARMatchPattResult _patt_result=new NyARMatchPattResult();;
-		private INyARRgbRaster _ref_src_raster;
-		private NyARRectOffset _offset=new NyARRectOffset();
-		
-		public final ArrayList<TMarkerData> marker_sl=new ArrayList<TMarkerData>();
-		public double _cf_threshold=DEFAULT_CF_THRESHOLD;
-		public int _max_lost_delay=DEFAULT_LOST_DELAY;
-		public RleDetector(MultiMarker i_parent,NyARParam i_param) throws NyARException
-		{
-			super(i_param.getScreenSize());
-			//インスタンスの生成
-			this._coordline=new NyARCoord2Linear(i_param.getScreenSize(),i_param.getDistortionFactor());
-		}
-		
-		//Idマーカのエンコーダなど
-		private final NyIdMarkerPattern _id_patt=new NyIdMarkerPattern();
-		private final NyIdMarkerParam _id_param=new NyIdMarkerParam();
-		private final NyIdMarkerDataEncoder_RawBitId _id_encoder=new NyIdMarkerDataEncoder_RawBitId();
-		private final NyIdMarkerData_RawBitId _id_data=new NyIdMarkerData_RawBitId();
+	/** PSGのIDとMarkerSystemのマッピング*/
+	private ArrayList<Integer> _id_map=new ArrayList<Integer>();
 
-
-	
-		
-		protected void onSquareDetect(NyARIntCoordinates i_coord,int[] i_vertex_index) throws NyARException
-		{
-			//画像取得配列の生成
-			for(int i2=0;i2<4;i2++){
-				this._vertexs[i2]=i_coord.items[i_vertex_index[i2]];
-			}
-			//idピックアップを試行してみる。(itemとdirに矩形情報を保存してね。)
-			if(this._id_pickup.pickFromRaster(this._ref_src_raster, this._vertexs, this._id_patt, this._id_param))
-			{
-			//NyIdの場合
-				//エンコードしてみる
-				if(!this._id_encoder.encode(this._id_patt,this._id_data)){
-					return;
-				}
-				//対象NyIdがあるかチェック
-				for(int i=marker_sl.size()-1;i>=0;i--)
-				{
-					TMarkerData item=marker_sl.get(i);
-					if(item.mktype!=TMarkerData.MK_NyId){
-						continue;
-					}
-					//レンジチェック
-					long s=this._id_data.marker_id;
-					if(item.nyid_range_s>s || s>item.nyid_range_e)
-					{
-						continue;
-					}
-					//一致したよー。
-					item.nyid=s;
-					item.lost_count=0;
-					setItemSquare(this._id_param.direction,i_coord,i_vertex_index,item.sq);
-					return;
-				}
-				//ここで終了
-				return;
-			}
-			//ARマーカとして再解析
-			//パターン作製
-			if(!this._mpickup.makePattDeviationColorData(this._ref_src_raster,this._vertexs)){
-				return;
-			}
-			//検出状態をリセットするよ。
-			double best_cf=0;
-			int best_id=-1;
-			int best_dir=NyARMatchPattResult.DIRECTION_UNKNOWN;			
-			//全てのマーカについて、一番一致したパターンIDを求める。
-			for(int i=marker_sl.size()-1;i>=0;i--)
-			{
-				TMarkerData item=marker_sl.get(i);
-				//ARマーカの時だけ
-				if(item.mktype!=TMarkerData.MK_AR){
-					continue;
-				}
-				//マーカのパターン解像度に一致したサンプリング画像と比較する。
-				if(!item.matchpatt.evaluate(this._mpickup.refDeviationColorData(item),this._patt_result)){
-					continue;
-				}
-				//敷居値
-				if(this._patt_result.confidence<this._cf_threshold)
-				{
-					continue;
-				}				
-				//一致率の比較
-				if(best_cf>this._patt_result.confidence){
-					continue;
-				}
-				//結果の保存
-				best_cf=this._patt_result.confidence;
-				best_dir=this._patt_result.direction;
-				best_id=i;
-			}
-			if(best_id<0){
-				return;
-			}
-			//一番評価の高いidで、過去のものより高評価なら差し替え
-			TMarkerData item=this.marker_sl.get(best_id);
-			if(item.cf>best_cf){
-				return;
-			}
-			//結果をコピーする
-			item.cf=best_cf;
-			item.lost_count=0;
-			setItemSquare(best_dir,i_coord,i_vertex_index,item.sq);
-		}
-		private void setItemSquare(int i_dir,NyARIntCoordinates i_coord,int[] i_vertex_index,NyARSquare i_sq) throws NyARException
-		{
-			for(int i=0;i<4;i++){
-				int idx=(i+4 - i_dir) % 4;
-				this._coordline.coord2Line(i_vertex_index[idx],i_vertex_index[(idx+1)%4],i_coord,i_sq.line[i]);
-			}
-			for (int i = 0; i < 4; i++) {
-				//直線同士の交点計算
-				if(!i_sq.line[i].crossPos(i_sq.line[(i + 3) % 4],i_sq.sqvertex[i])){
-					throw new NyARException();//まずない。ありえない。
-				}
-			}			
-		}
-		/**
-		 * 検出処理の準備
-		 */
-		public void prevDetection(INyARRgbRaster i_src)
-		{
-			this._ref_src_raster=i_src;
-			//状態のリセット(ARマーカ)
-			for(int i=this.marker_sl.size()-1;i>=0;i--){
-				TMarkerData item=this.marker_sl.get(i);
-				item.cf=0;
-				if(item.lost_count<this._max_lost_delay){
-					item.lost_count++;
-					item.life++;
-				}else{
-					//ディレイ満了のお知らせ→ライフ0
-					item.life=0;//ライフの初期化
-				}
-			}
-			//状態のリセット(Idマーカ)
-			
-		}
-		/**
-		 * 検出の後処理
-		 * @throws NyARException 
-		 */
-		public void finishDetection(INyARTransMat i_transmat) throws NyARException
-		{
-			//ARマーカ全てについて、変換行列を計算。
-			for(int i=this.marker_sl.size()-1;i>=0;i--){
-				TMarkerData item=this.marker_sl.get(i);
-				this._offset.setSquare(item.marker_size);
-				i_transmat.transMatContinue(item.sq,this._offset, item.tmat,item.tmat);
-			}
-		}
-	}
-	/** 敷居値判定用 */
-	private NyARRasterThresholdAnalyzer_SlidePTile _threshold_detect;
-	
-	private int _threshold=THLESHOLD_AUTO;
-	/** 192スケールなので注意*/
-	private int _current_th;
-	private RleDetector _rel_detector;
-	private NyARGrayscaleRaster _gs_raster;
-	private NyARRasterFilter_Rgb2Gs_RgbAve192 _tobin_filter;
-	private INyARTransMat _transmat_inst;
-	private final NyARIntRect _img_rect=new NyARIntRect();
+	private final PMatrix3D _ps_projection=new PMatrix3D();
 	/**
 	 * コンストラクタです。
 	 * @param parent
@@ -470,7 +192,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			parent.die("Exception occurred at MultiMarker.MultiMarker");
 		}			
 	}
-	
+
 	/**
 	 * インスタンスを初期化します。
 	 * @param parent
@@ -483,28 +205,32 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	protected void initInstance(PApplet parent,String i_cparam_file,int i_width,int i_height,NyAR4PsgConfig i_config) throws NyARException
 	{
-		super.initInstance(parent,i_cparam_file, i_width,i_height,i_config);
-		this._rel_detector=new RleDetector(this,this._ar_param);
-
-		this._gs_raster=new NyARGrayscaleRaster(i_width,i_height,true);
-		this._tobin_filter=new NyARRasterFilter_Rgb2Gs_RgbAve192(this._src_raster.getBufferType());
-		switch(i_config.env_transmat_mode)
-		{
-		case NyAR4PsgConfig.TM_ARTK:
-			this._transmat_inst=new NyARTransMat_ARToolKit(this._ar_param);
-			break;
-		case NyAR4PsgConfig.TM_NYARTK:
-			this._transmat_inst=new NyARTransMat(this._ar_param);
-			break;
-		default:
-			throw new NyARException();
-		}
-		this._img_rect.setValue(0, 0, i_width, i_height);
-			//
-		int skip=i_height/120;
-		this._threshold_detect=new NyARRasterThresholdAnalyzer_SlidePTile(15,this._gs_raster.getBufferType(),skip<1?1:skip);
-
+		this._ss=new PImageSensor(new NyARIntSize(i_width,i_height));
+		this._ms=new NyARMarkerSystem(
+				new PsgMsCfg(parent.createInput(i_cparam_file),i_config.env_transmat_mode,i_width,i_height));
+		super.initInstance(parent,i_config);
 	}
+	@Override
+	public PMatrix3D getProjectionMatrix()
+	{
+		return this._ps_projection;
+	}
+	@Override
+	public PMatrix3D getProjectionMatrix(PMatrix3D i_buf)
+	{
+		return new PMatrix3D(this._ps_projection);
+	}	
+	@Override
+	public void setARClipping(float i_near,float i_far)
+	{
+		super.setARClipping(i_near, i_far);
+		this._ms.setProjectionMatrixClipping(i_near,i_far);
+		NyARIntSize s=this._ms.getARParam().getScreenSize();
+		NyARDoubleMatrix44 tmp=new NyARDoubleMatrix44();
+		this._ms.getARParam().getPerspectiveProjectionMatrix().makeCameraFrustumRH(s.w,s.h,i_near,i_far,tmp);
+		nyarMat2PsMat(tmp,this._ps_projection);
+	}	
+	
 	/** bgin-endシーケンスの退避用*/
 	private PMatrix3D _old_matrix=null;
 	/**
@@ -539,6 +265,7 @@ public class MultiMarker extends NyARPsgBaseClass
 		//古いMatrixの保存
 		this._old_matrix=new PMatrix3D(((PGraphics3D)this._ref_papplet.g).projection);
 		this.setARPerspective();
+		
 		//ModelViewの設定
 		this._ref_papplet.pushMatrix();
 		this._ref_papplet.setMatrix(this.getMarkerMatrix(i_id));
@@ -578,26 +305,8 @@ public class MultiMarker extends NyARPsgBaseClass
 	public void detect(PImage i_image)
 	{
 		try{
-			//RGBラスタをラップ
-			this._src_raster.wrapBuffer(i_image);
-			//GS変換
-			this._tobin_filter.doFilter(this._src_raster,this._gs_raster);
-
-			//敷居値決定
-			if(this._threshold==THLESHOLD_AUTO){
-				//GS画像から敷居値を計算(192スケールのGS画像から計算したthを256スケールに修正する。で、平均を計算)
-				this._current_th=(this._threshold_detect.analyzeRaster(this._gs_raster)+this._current_th)/2;
-			}else{
-				//256スケールを192スケールに変換
-				this._current_th=this._threshold*192/256;
-			}
-
-			//検出準備
-			this._rel_detector.prevDetection(this._src_raster);
-
-			//GS画像から検出
-			this._rel_detector.detectMarker(this._gs_raster,this._img_rect,this._current_th);
-			this._rel_detector.finishDetection(this._transmat_inst);
+			this._ss.update(i_image);
+			this._ms.update(this._ss);
 		}catch(Exception e){
 			e.printStackTrace();
 			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.detect");
@@ -628,14 +337,15 @@ public class MultiMarker extends NyARPsgBaseClass
 	public int addARMarker(String i_file_name,int i_patt_resolution,int i_edge_percentage,float i_width)
 	{
 		//初期化済みのアイテムを生成
+		int psid=-1;
 		try{
-			TMarkerData item=new TMarkerData(this._ref_papplet.createInput(i_file_name),i_patt_resolution,i_edge_percentage,i_width);
-			this._rel_detector.marker_sl.add(item);
+			this._id_map.add(this._ms.addARMarker(this._ref_papplet.createInput(i_file_name), i_patt_resolution, i_edge_percentage, i_width));
+			psid=this._id_map.size()-1;
 		}catch(Exception e){
 			e.printStackTrace();
-			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.addMarker");
+			this._ref_papplet.die("Exception occurred at MultiMarker.addMarker");
 		}
-		return this._rel_detector.marker_sl.size()-1;
+		return psid;
 	}
 	/**
 	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
@@ -653,6 +363,36 @@ public class MultiMarker extends NyARPsgBaseClass
 	public int addARMarker(String i_file_name,int i_patt_resolution,float i_width)
 	{
 		return this.addARMarker(i_file_name, i_patt_resolution,25, i_width);
+	}
+	/**
+	 * この関数は、i_imgの画像をARマーカパターンとして登録します。
+	 * @param i_img
+	 * マーカパターンのカラー画像を指定します。
+	 * @param i_patt_resolution
+	 * 作成するマーカパターンの解像度を指定します。ARToolkitと同一であれば16です。
+	 * 数値が高いほどシビアな判定が出来ますが、速度は低下します。
+	 * @param i_edge_percentage
+	 * エッジ割合を指定します。この数値は、元画像と、抽出するマーカパターンの両方に影響を及ぼします。
+	 * ARToolKit互換のパターンの場合、25を指定します。
+	 * @param i_width
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 * @return
+	 * {@link #addARMarker(String, int, int, double)}を参照。
+	 */
+	public int addARMarker(PImage i_img,int i_patt_resolution,int i_edge_percentage,float i_width)
+	{
+		int psid=-1;
+		try{
+			PImageRaster pr=new PImageRaster(i_img);
+			//初期化済みのアイテムを生成
+			this._id_map.add(this._ms.addARMarker(pr, i_patt_resolution, i_edge_percentage, i_width));
+			psid=this._id_map.size()-1;
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Exception occurred at MultiMarker.addMarker");
+			
+		}
+		return psid;
 	}
 	/**
 	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
@@ -702,15 +442,16 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public int addNyIdMarker(int i_nyid_range_s,int i_nyid_range_e,int i_width)
 	{
+		int psid=-1;
 		//初期化済みのアイテムを生成
 		try{
-			TMarkerData item=new TMarkerData(i_nyid_range_s,i_nyid_range_e,i_width);
-			this._rel_detector.marker_sl.add(item);
+			this._id_map.add(this._ms.addNyIdMarker(i_nyid_range_s,i_nyid_range_e,i_width));
+			psid=this._id_map.size()-1;
 		}catch(Exception e){
 			e.printStackTrace();
 			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.addNyIdMarker");
 		}
-		return this._rel_detector.marker_sl.size()-1;		
+		return psid;
 	}
 	/**
 	 * この関数は、マーカのスクリーン上の4頂点を返します。
@@ -718,11 +459,12 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public PVector[] getMarkerVertex2D(int i_id)
 	{
+		int msid=this._id_map.get(i_id);
 		PVector[] r=new PVector[4];
 		try{
-			TMarkerData item=this._rel_detector.marker_sl.get(i_id);
+			NyARIntPoint2d[] pos=this._ms.getMarkerVertex2D(msid);
 			for(int i=0;i<4;i++){
-				r[i]=new PVector((float)(item.sq.sqvertex[i].x),(float)(item.sq.sqvertex[i].y));
+				r[i]=new PVector((float)(pos[i].x),(float)(pos[i].y));
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -746,8 +488,8 @@ public class MultiMarker extends NyARPsgBaseClass
 		if(!this.isExistMarker(i_id)){
 			this._ref_papplet.die("Marker id " +i_id + " is not exist on image.", null);
 		}
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
-		matResult2PMatrix3D(item.tmat,this._config._coordinate_system,p);
+		int msid=this._id_map.get(i_id);
+		matResult2PMatrix3D(this._ms.getMarkerMatrix(msid),this._config._coordinate_system,p);
 		return p;
 	}
 	/**
@@ -757,18 +499,17 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * マーカidを指定します。{@link #addARMarker}で登録したidである必要があります。
 	 * @return
 	 * マーカの一致率を返します。0から1.0までの数値です。
-	 * この値は、delayが{@link #getLostCount}の時だけ正しい値を返します。それ以外の時には、0を返します。
+	 * この値は、{@link #isExistMarker}がtrueの時だけ正しい数を返します。
 	 */
 	public double getConfidence(int i_id)
 	{
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
-		if(item.mktype!=TMarkerData.MK_AR){
-			this._ref_papplet.die("Marker id " +i_id + " is not AR Marker.", null);
+		int msid=this._id_map.get(i_id);
+		try{
+			return this._ms.getConfidence(msid);
+		}catch(Exception e){
+			this._ref_papplet.die("Marker id " +i_id + " is not AR Marker or not exist.", null);
 		}
-		if(!this.isExistMarker(i_id)){
-			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
-		}
-		return item.cf;
+		return Double.NaN;
 	}
 	/**
 	 * この関数は、指定idのNyIdマーカから、現在のマーカIdを取得します。
@@ -780,14 +521,13 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public long getNyId(int i_id)
 	{
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
-		if(item.mktype!=TMarkerData.MK_NyId){
-			this._ref_papplet.die("Marker id " +i_id + " is not NyId Marker.", null);
+		int msid=this._id_map.get(i_id);
+		try{
+			return this._ms.getNyId(msid);
+		}catch(Exception e){
+			this._ref_papplet.die("Marker id " +i_id + " is not NyId Marker or not exist.", null);
 		}
-		if(!this.isExistMarker(i_id)){
-			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
-		}
-		return item.nyid;
+		return -1;
 	}
 	
 	/**
@@ -800,8 +540,8 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public boolean isExistMarker(int i_id)
 	{
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
-		return (item.lost_count<this._rel_detector._max_lost_delay);
+		int msid=this._id_map.get(i_id);
+		return this._ms.isExistMarker(msid);
 	}
 	
 	/**
@@ -817,8 +557,8 @@ public class MultiMarker extends NyARPsgBaseClass
 		if(!this.isExistMarker(i_id)){
 			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
 		}
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
-		return item.lost_count;
+		int msid=this._id_map.get(i_id);
+		return (int)this._ms.getLostCount(msid);
 	}
 	/**
 	 * この関数は、指定idのマーカのライフ値を返します。
@@ -834,8 +574,8 @@ public class MultiMarker extends NyARPsgBaseClass
 		if(!this.isExistMarker(i_id)){
 			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
 		}
-		TMarkerData item=this._rel_detector.marker_sl.get(i_id);
-		return item.life;		
+		int msid=this._id_map.get(i_id);
+		return this._ms.getLife(msid);
 	}
 	/**
 	 * この関数は、idで示されるマーカ座標系の点をスクリーン座標へ変換します。
@@ -852,13 +592,12 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public PVector marker2ScreenCoordSystem(int i_id,double i_x,double i_y,double i_z)
 	{
-		NyARDoublePoint3d pos=new NyARDoublePoint3d();
-		this._rel_detector.marker_sl.get(i_id).tmat.transform3d(i_x, i_y, i_z,pos);
-		NyARDoublePoint2d pos2d=new NyARDoublePoint2d();
-		this._frustum.project(pos,pos2d);
+		int msid=this._id_map.get(i_id);
+		NyARDoublePoint2d pos=new NyARDoublePoint2d();
+		this._ms.getScreenPos(msid, i_x, i_y, i_z,pos);
 		PVector ret=new PVector();
-		ret.x=(float)pos2d.x;
-		ret.y=(float)pos2d.y;
+		ret.x=(float)pos.x;
+		ret.y=(float)pos.y;
 		ret.z=0;
 		return ret;
 	}
@@ -876,7 +615,17 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public PVector screen2MarkerCoordSystem(int i_id,int i_x,int i_y)
 	{
-		return this.screen2MarkerCoordSystem(this._rel_detector.marker_sl.get(i_id).tmat, i_x, i_y);
+		int msid=this._id_map.get(i_id);
+		PVector ret=new PVector();
+		NyARDoublePoint3d tmp=new NyARDoublePoint3d();
+		this._ms.getMarkerPlanePos(msid,i_x, i_y,tmp);
+		ret.x=(float)tmp.x;
+		ret.y=(float)tmp.y;
+		ret.z=(float)tmp.z;
+		if(this._config._coordinate_system==NyAR4PsgConfig.CS_LEFT_HAND){
+			ret.x*=-1;
+		}		
+		return ret;
 	}
 	/**
 	 * この関数は、idで指定したマーカの画像のXY平面上の4頂点でかこまれた領域から、画像を取得します。
@@ -911,9 +660,15 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public PImage pickupMarkerImage(int i_id,int i_x1,int i_y1,int i_x2,int i_y2,int i_x3,int i_y3,int i_x4,int i_y4,int i_out_w_pix,int i_out_h_pix)
 	{
-		return this.pickupMarkerImage(
-			this._rel_detector.marker_sl.get(i_id).tmat,
-			i_x1, i_y1, i_x2, i_y2, i_x3, i_y3, i_x4, i_y4, i_out_w_pix, i_out_h_pix);
+		PImage p=new PImage(i_out_w_pix,i_out_h_pix);
+		try{
+			PImageRaster pr=new PImageRaster(p);
+			int msid=this._id_map.get(i_id);
+			this._ms.getMarkerPlaneImage(msid, this._ss, i_x1, i_y1, i_x2, i_y2, i_x3, i_y3, i_x4, i_y4,pr);
+		}catch(Exception e){
+			this._ref_papplet.die("pickupMarkerImage failed.", null);
+		}
+		return p;
 	}
 	/**
 	 * この関数は、idで指定したマーカのXY平面上の矩形領域から、画像を取得します。
@@ -945,4 +700,5 @@ public class MultiMarker extends NyARPsgBaseClass
 			i_l+i_w-1,i_t,
 			i_out_w_pix,i_out_h_pix);
 	}
+
 }

@@ -28,7 +28,6 @@
 package jp.nyatla.nyar4psg;
 
 import processing.core.*;
-import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
@@ -241,7 +240,7 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 			//アプリケーションフレームワークの初期化
 			super();
 			this._parent=i_parent;
-			initInstance(i_cparam,i_raster_format);
+			initInstance(i_cparam);
 			this.status=SingleARTKMarker.ST_NOMARKER;
 			return;
 		}

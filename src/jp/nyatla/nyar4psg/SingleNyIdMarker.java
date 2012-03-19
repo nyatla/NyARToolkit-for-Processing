@@ -28,8 +28,8 @@
 package jp.nyatla.nyar4psg;
 
 import processing.core.*;
-
 import jp.nyatla.nyartoolkit.*;
+import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
 import jp.nyatla.nyartoolkit.core.transmat.NyARTransMatResult;
@@ -215,7 +215,7 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 			//アプリケーションフレームワークの初期化
 			super();
 			this._parent=i_parent;
-			initInstance(i_cparam, new NyIdMarkerDataEncoder_RawBit(),100, i_raster_format);
+			initInstance(i_cparam, new NyIdMarkerDataEncoder_RawBit(),100);
 			return;
 		}
 		protected void onLeaveHandler()

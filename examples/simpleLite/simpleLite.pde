@@ -10,7 +10,6 @@
   The marker is "patt.hiro".
 */
 import processing.video.*;
-import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 
 Capture cam;

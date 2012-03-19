@@ -6,13 +6,17 @@
   Pickingと一緒に使うサンプルです。
   Picking Libraryはこちらからダウンロードしてください。
   http://code.google.com/p/processing-picking-library/
-  
+  Picking Libraryは version 0.1.5で動作を確認しています。
+  0.1.6ではうまく動作しません。
+  ----
   This sample program is sample with picking library.
   The cube can be clicked.
   The marker file is "patt.hiro".  
+  Download picking library from   http://code.google.com/p/processing-picking-library/
+  Should use version 0.1.5.  Version 0.1.6 may does not work.
+
 */
 import processing.video.*;
-import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 import processing.opengl.*;
 import picking.*;

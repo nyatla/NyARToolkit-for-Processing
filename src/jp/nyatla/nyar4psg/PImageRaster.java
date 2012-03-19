@@ -26,7 +26,7 @@
  */
 package jp.nyatla.nyar4psg;
 
-import jp.nyatla.nyartoolkit.NyARException;
+import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.raster.rgb.*;
 import jp.nyatla.nyartoolkit.core.types.NyARBufferType;
 import processing.core.PImage;
@@ -37,6 +37,17 @@ import processing.core.PImage;
 class PImageRaster extends NyARRgbRaster
 {
 	public final static int BUFFER_TYPE=NyARBufferType.INT1D_X8R8G8B8_32;
+	/**
+	 * i_imgをラップします。グラ意的には、i_imgのpixels配列をラップします。
+	 * @param i_img
+	 * @throws NyARException
+	 */
+	public PImageRaster(PImage i_img) throws NyARException
+	{
+		super(i_img.width,i_img.height,BUFFER_TYPE,false);
+		this.wrapBuffer(i_img);
+		return;
+	}	
 	public PImageRaster(int i_width, int i_height) throws NyARException
 	{
 		super(i_width,i_height,BUFFER_TYPE,false);

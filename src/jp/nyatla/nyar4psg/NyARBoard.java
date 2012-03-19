@@ -29,7 +29,6 @@ package jp.nyatla.nyar4psg;
 
 import processing.core.*;
 
-import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.detector.*;
@@ -139,7 +138,7 @@ public class NyARBoard extends SingleMarkerBaseClass
 		code.loadARPatt(this._ref_papplet.createInput(i_patt));		
 		//モード選択
 		int tm_type=(i_config.env_transmat_mode==NyAR4PsgConfig.TM_ARTK)?NyARSingleDetectMarker.PF_ARTOOLKIT_COMPATIBLE:NyARSingleDetectMarker.PF_NYARTOOLKIT;
-		this._nya=new NyARSingleDetectMarker(this._ar_param,code,i_marker_width,this._src_raster.getBufferType(),tm_type);
+		this._nya=NyARSingleDetectMarker.createInstance(this._ar_param,code,i_marker_width,tm_type);
 		this._nya.setContinueMode(true);
 		return;
 	}

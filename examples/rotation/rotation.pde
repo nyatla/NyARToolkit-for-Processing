@@ -10,12 +10,12 @@
 */
  
 import processing.video.*;
-import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 
 Capture cam;
 MultiMarker nya_r;
 MultiMarker nya_l;
+PFont font=createFont("FFScala", 32);
 
 void setup() {
   size(640,480,P3D);

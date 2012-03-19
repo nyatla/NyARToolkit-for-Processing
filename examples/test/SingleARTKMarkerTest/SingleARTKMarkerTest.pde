@@ -3,7 +3,6 @@
 
 */
 import processing.video.*;
-import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 
 PFont font=createFont("FFScala", 32);

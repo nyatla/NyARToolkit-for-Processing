@@ -9,7 +9,6 @@
   The markers are "patt.hiro" and "patt.kanji"
 */
 import processing.video.*;
-import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 
 Capture cam;

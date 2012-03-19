@@ -10,7 +10,6 @@
   Projection matrix and Modelview matrix are set to processing directly.
 */
 import processing.video.*;
-import processing.core.*;
 import jp.nyatla.nyar4psg.*;
 
 Capture cam;

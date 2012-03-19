@@ -16,4 +16,5 @@ copy ..\library\*.jar test\SingleARTKMarkerTest\code\*
 copy ..\library\*.jar test\SingleNyIdMarkerTest\code\*
 copy ..\library\*.jar withOpenGL\code\*
 copy ..\library\*.jar withPicking\code\*
+copy ..\library\*.jar pngMarker\code\*
 pause

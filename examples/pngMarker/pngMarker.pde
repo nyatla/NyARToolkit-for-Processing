@@ -1,12 +1,14 @@
 /**
-  NyARToolkit for proce55ing/1.0.0
-  (c)2008-2011 nyatla
+  NyARToolkit for proce55ing/1.2.0
+  (c)2008-2012 nyatla
   airmail(at)ebony.plala.or.jp
   
-  NyIdマーカを利用する例です。0番のidマーカを用意して下さい。
+  マーカファイルの変わりにPNGを使います。
+  PNGは任意解像度の正方形である必要があります。
+  エッジ部分のパターンは含めてください。
   
-  This sample is simple NyId sample.
-  The marker id is #0.
+  This sample program uses a PNG image instead of the patt file.
+  The PNG image must be square form that includes edge.
 */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
@@ -20,7 +22,7 @@ void setup() {
   println(MultiMarker.VERSION);
   cam=new Capture(this,640,480);
   nya=new MultiMarker(this,width,height,"camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
-  nya.addNyIdMarker(0,80);
+  nya.addARMarker(loadImage("hiro.png"),16,25,80);
 }
 
 void draw()
@@ -38,7 +40,7 @@ void draw()
   nya.beginTransform(0);
   fill(0,0,255);
   translate(0,0,20);
-  box(40);println(nya.getNyId(0));
+  box(40);
   nya.endTransform();
 }
 

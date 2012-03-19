@@ -1,6 +1,8 @@
 package jp.nyatla.nyar4psg;
 
-import jp.nyatla.nyartoolkit.NyARException;
+import jp.nyatla.nyartoolkit.core.*;
+import jp.nyatla.nyartoolkit.core.param.*;
+import jp.nyatla.nyartoolkit.core.rasterdriver.INyARPerspectiveCopy;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
 import jp.nyatla.nyartoolkit.core.transmat.NyARTransMatResult;
 import jp.nyatla.nyartoolkit.core.types.*;
@@ -14,6 +16,14 @@ import processing.core.*;
  */
 class SingleMarkerBaseClass extends NyARPsgBaseClass
 {
+	protected final PMatrix3D _ps_projection=new PMatrix3D();
+	/**　ARToolkitパラメータのインスタンスです。*/
+	protected final NyARParam _ar_param=new NyARParam();
+	protected final NyARFrustum _frustum=new NyARFrustum();;
+	protected NyAR4PsgConfig _config;
+	
+	/** 入力画像ラスタです。{@link PImage}をラップします。継承クラスで入力画像をセットします。*/
+	protected PImageRaster _src_raster;
 	
 	/**
 	 * [read only]マーカのx,y,zの傾き角度です。
@@ -53,7 +63,29 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	
 	/** begin-endシーケンスで使う。*/
 	private PMatrix3D _old_matrix;
-	
+
+	@Override
+	public PMatrix3D getProjectionMatrix()
+	{
+		// TODO Auto-generated method stub
+		return this._ps_projection;
+	}
+	@Override
+	public PMatrix3D getProjectionMatrix(PMatrix3D iBuf)
+	{
+		// TODO Auto-generated method stub
+		return new PMatrix3D(this._ps_projection);
+	}
+	@Override
+	public void setARClipping(float i_near,float i_far)
+	{
+		super.setARClipping(i_near, i_far);
+		NyARDoubleMatrix44 tmp=new NyARDoubleMatrix44();
+		NyARIntSize s=this._ar_param.getScreenSize();
+		this._ar_param.getPerspectiveProjectionMatrix().makeCameraFrustumRH(s.w,s.h,i_near,i_far,tmp);
+		nyarMat2PsMat(tmp,this._ps_projection);
+		this._frustum.setValue(tmp, s.w, s.h);
+	}
 	/**
 	 * この関数は、マーカの座標変換行列を返します。
 	 * 返却する行列はProcessing座標系です。
@@ -158,7 +190,16 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 */
 	public PVector screen2MarkerCoordSystem(int i_x,int i_y)
 	{
-		return super.screen2MarkerCoordSystem(this._result, i_x, i_y);
+		PVector ret=new PVector();
+		NyARDoublePoint3d tmp=new NyARDoublePoint3d();
+		this._frustum.unProjectOnMatrix(i_x, i_y,this._result,tmp);
+		ret.x=(float)tmp.x;
+		ret.y=(float)tmp.y;
+		ret.z=(float)tmp.z;
+		if(this._config._coordinate_system==NyAR4PsgConfig.CS_LEFT_HAND){
+			ret.x*=-1;
+		}
+		return ret;
 	}
 	/**
 	 * この関数は、マーカの画像のXY平面上の4頂点でかこまれた領域から、画像を取得します。
@@ -191,7 +232,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 */
 	public PImage pickupMarkerImage(int i_x1,int i_y1,int i_x2,int i_y2,int i_x3,int i_y3,int i_x4,int i_y4,int i_out_w_pix,int i_out_h_pix)
 	{
-		return super.pickupMarkerImage(
+		return this.pickupMarkerImage(
 			this._result,
 			i_x1, i_y1, i_x2, i_y2, i_x3, i_y3, i_x4, i_y4, i_out_w_pix, i_out_h_pix);
 	}
@@ -250,9 +291,16 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 * 	protected/private
 	 *******/
 	private final NyARDoublePoint3d _tmp_d3p=new NyARDoublePoint3d();
+	private INyARPerspectiveCopy _pcopy;
 	protected void initInstance(PApplet parent,String i_cparam_file, int i_width,int i_height,NyAR4PsgConfig i_config) throws NyARException
 	{
-		super.initInstance(parent,i_cparam_file,i_width,i_height,i_config);
+		this._config=i_config;
+		this._ar_param.loadARParam(parent.createInput(i_cparam_file));
+		this._ar_param.changeScreenSize(i_width,i_height);
+		this._src_raster=new PImageRaster(i_width,i_height);
+		this._pcopy=(INyARPerspectiveCopy) this._src_raster.createInterface(INyARPerspectiveCopy.class);				
+		super.initInstance(parent,i_config);
+
 		//互換性の維持目的
 		PMatrix2GLProjection(this._ps_projection,this.transmat);
 	}
@@ -265,6 +313,54 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	}
 
 
+	/**
+	 * PImageをラップしたラスタから画像を得ます。
+	 * @param i_mat
+	 * @param i_x1
+	 * @param i_y1
+	 * @param i_x2
+	 * @param i_y2
+	 * @param i_x3
+	 * @param i_y3
+	 * @param i_x4
+	 * @param i_y4
+	 * @param i_out_w_pix
+	 * @param i_out_h_pix
+	 * @return
+	 */
+	protected PImage pickupMarkerImage(NyARDoubleMatrix44 i_mat,int i_x1,int i_y1,int i_x2,int i_y2,int i_x3,int i_y3,int i_x4,int i_y4,int i_out_w_pix,int i_out_h_pix)
+	{
+		//WrapRasterの内容チェック
+		if(!this._src_raster.hasBuffer()){
+			this._ref_papplet.die("_rel_detector is null.(Function detect() was never called. )");
+		}
+		PImage img=new PImage(i_out_w_pix,i_out_h_pix);
+		img.parent=this._ref_papplet;
+		try{
+			NyARDoublePoint3d[] pos=NyARDoublePoint3d.createArray(4);
+			i_mat.transform3d(i_x1, i_y1,0,	pos[1]);
+			i_mat.transform3d(i_x2, i_y2,0,	pos[0]);
+			i_mat.transform3d(i_x3, i_y3,0,	pos[3]);
+			i_mat.transform3d(i_x4, i_y4,0,	pos[2]);
+			//4頂点を作る。
+			NyARDoublePoint2d[] pos2=NyARDoublePoint2d.createArray(4);
+			for(int i=3;i>=0;i--){
+				this._frustum.project(pos[i],pos2[i]);
+			}
+			PImageRaster out_raster=new PImageRaster(i_out_w_pix,i_out_h_pix);
+			out_raster.wrapBuffer(img);
+			if(!this._pcopy.copyPatt(pos2,0,0,1,out_raster))
+			{
+				throw new Exception("this._pcopy.copyPatt failed.");
+			}
+			return img;
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.pickupImage");
+			return null;
+		}
+	}
+	
 	
 	
 	
