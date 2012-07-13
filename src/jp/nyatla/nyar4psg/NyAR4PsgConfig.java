@@ -1,7 +1,6 @@
 package jp.nyatla.nyar4psg;
 
 import processing.core.PApplet;
-import jp.nyatla.nyartoolkit.markersystem.*;
 
 /**
  * このクラスは、コンフィギュレーション定数を保持します。
