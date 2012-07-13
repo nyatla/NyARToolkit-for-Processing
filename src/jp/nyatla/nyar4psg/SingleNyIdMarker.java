@@ -28,7 +28,6 @@
 package jp.nyatla.nyar4psg;
 
 import processing.core.*;
-import jp.nyatla.nyartoolkit.*;
 import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
