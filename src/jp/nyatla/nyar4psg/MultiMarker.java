@@ -167,7 +167,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			this.initInstance(parent, i_cparam_file, i_width, i_height, i_config);
 		}catch(Exception e){
 			e.printStackTrace();
-			parent.die("Exception occurred at MultiMarker.MultiMarker");
+			parent.die("Catch an exception!");
 		}			
 	}
 	/**
@@ -189,7 +189,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			this.initInstance(parent, i_cparam_file, i_width, i_height, NyAR4PsgConfig.CONFIG_DEFAULT);
 		}catch(Exception e){
 			e.printStackTrace();
-			parent.die("Exception occurred at MultiMarker.MultiMarker");
+			parent.die("Catch an exception!");
 		}			
 	}
 
@@ -309,7 +309,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			this._ms.update(this._ss);
 		}catch(Exception e){
 			e.printStackTrace();
-			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.detect");
+			this._ref_papplet.die("Catch an exception!");
 		}
 	}
 	
@@ -343,7 +343,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			psid=this._id_map.size()-1;
 		}catch(Exception e){
 			e.printStackTrace();
-			this._ref_papplet.die("Exception occurred at MultiMarker.addMarker");
+			this._ref_papplet.die("Catch an exception!");
 		}
 		return psid;
 	}
@@ -389,7 +389,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			psid=this._id_map.size()-1;
 		}catch(Exception e){
 			e.printStackTrace();
-			this._ref_papplet.die("Exception occurred at MultiMarker.addMarker");
+			this._ref_papplet.die("Catch an exception!");
 			
 		}
 		return psid;
@@ -449,10 +449,33 @@ public class MultiMarker extends NyARPsgBaseClass
 			psid=this._id_map.size()-1;
 		}catch(Exception e){
 			e.printStackTrace();
-			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.addNyIdMarker");
+			this._ref_papplet.die("Catch an exception!");
 		}
 		return psid;
 	}
+	/**
+	 * この関数は、PSVitaのARプレイカードを検出対象に追加します。
+	 * @param i_psarid
+	 * PSVitaのARプレイカードのIDを指定します。1から6間での数値です。
+	 * @param i_width
+	 * マーカの物理サイズをmm単位で指定します。
+	 * @return
+	 * 0から始まるマーカーIDを返します。
+	 * この数値は、マーカを区別するためのId値です。
+	 */
+	public int addPsARPlayCard(int i_psarid,int i_width)
+	{
+		int psid=-1;
+		//初期化済みのアイテムを生成
+		try{
+			this._id_map.add(this._ms.addPsARPlayCard(i_psarid, i_width));
+			psid=this._id_map.size()-1;
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Catch an exception!");
+		}
+		return psid;
+	}	
 	/**
 	 * この関数は、マーカのスクリーン上の4頂点を返します。
 	 * @return
@@ -468,7 +491,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-			this._ref_papplet.die("Exception occurred at MultiARTookitMarker.addNyIdMarker");
+			this._ref_papplet.die("Catch an exception!");
 		}
 		return r;
 	}
@@ -489,7 +512,12 @@ public class MultiMarker extends NyARPsgBaseClass
 			this._ref_papplet.die("Marker id " +i_id + " is not exist on image.", null);
 		}
 		int msid=this._id_map.get(i_id);
-		matResult2PMatrix3D(this._ms.getMarkerMatrix(msid),this._config._coordinate_system,p);
+		try{
+			matResult2PMatrix3D(this._ms.getMarkerMatrix(msid),this._config._coordinate_system,p);
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Catch an exception!");
+		}			
 		return p;
 	}
 	/**
@@ -541,7 +569,12 @@ public class MultiMarker extends NyARPsgBaseClass
 	public boolean isExistMarker(int i_id)
 	{
 		int msid=this._id_map.get(i_id);
-		return this._ms.isExistMarker(msid);
+		try{
+			return this._ms.isExistMarker(msid);
+		}catch(Exception e){
+			this._ref_papplet.die("Catch an exception!", null);
+			return false;
+		}
 	}
 	
 	/**
@@ -558,7 +591,12 @@ public class MultiMarker extends NyARPsgBaseClass
 			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
 		}
 		int msid=this._id_map.get(i_id);
-		return (int)this._ms.getLostCount(msid);
+		try{
+			return (int)this._ms.getLostCount(msid);
+		}catch(Exception e){
+			this._ref_papplet.die("Catch an exception!", null);
+			return -1;
+		}
 	}
 	/**
 	 * この関数は、指定idのマーカのライフ値を返します。
@@ -571,11 +609,16 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public long getLife(int i_id)
 	{
-		if(!this.isExistMarker(i_id)){
-			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
+		try{
+			if(!this.isExistMarker(i_id)){
+				this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
+			}
+			int msid=this._id_map.get(i_id);
+			return this._ms.getLife(msid);
+		}catch(Exception e){
+			this._ref_papplet.die("Catch an exception!", null);
+			return -1;
 		}
-		int msid=this._id_map.get(i_id);
-		return this._ms.getLife(msid);
 	}
 	/**
 	 * この関数は、idで示されるマーカ座標系の点をスクリーン座標へ変換します。
@@ -592,14 +635,19 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public PVector marker2ScreenCoordSystem(int i_id,double i_x,double i_y,double i_z)
 	{
-		int msid=this._id_map.get(i_id);
-		NyARDoublePoint2d pos=new NyARDoublePoint2d();
-		this._ms.getScreenPos(msid, i_x, i_y, i_z,pos);
-		PVector ret=new PVector();
-		ret.x=(float)pos.x;
-		ret.y=(float)pos.y;
-		ret.z=0;
-		return ret;
+		try{
+			int msid=this._id_map.get(i_id);
+			NyARDoublePoint2d pos=new NyARDoublePoint2d();
+			this._ms.getScreenPos(msid, i_x, i_y, i_z,pos);
+			PVector ret=new PVector();
+			ret.x=(float)pos.x;
+			ret.y=(float)pos.y;
+			ret.z=0;
+			return ret;
+		}catch(Exception e){
+			this._ref_papplet.die("Catch an exception!", null);
+			return null;
+		}
 	}
 
 	/**
@@ -615,17 +663,22 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public PVector screen2MarkerCoordSystem(int i_id,int i_x,int i_y)
 	{
-		int msid=this._id_map.get(i_id);
-		PVector ret=new PVector();
-		NyARDoublePoint3d tmp=new NyARDoublePoint3d();
-		this._ms.getMarkerPlanePos(msid,i_x, i_y,tmp);
-		ret.x=(float)tmp.x;
-		ret.y=(float)tmp.y;
-		ret.z=(float)tmp.z;
-		if(this._config._coordinate_system==NyAR4PsgConfig.CS_LEFT_HAND){
-			ret.x*=-1;
-		}		
-		return ret;
+		try{
+			int msid=this._id_map.get(i_id);
+			PVector ret=new PVector();
+			NyARDoublePoint3d tmp=new NyARDoublePoint3d();
+			this._ms.getMarkerPlanePos(msid,i_x, i_y,tmp);
+			ret.x=(float)tmp.x;
+			ret.y=(float)tmp.y;
+			ret.z=(float)tmp.z;
+			if(this._config._coordinate_system==NyAR4PsgConfig.CS_LEFT_HAND){
+				ret.x*=-1;
+			}		
+			return ret;
+		}catch(Exception e){
+			this._ref_papplet.die("Catch an exception!", null);
+			return null;
+		}			
 	}
 	/**
 	 * この関数は、idで指定したマーカの画像のXY平面上の4頂点でかこまれた領域から、画像を取得します。
