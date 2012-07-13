@@ -40,7 +40,7 @@ import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
  * このクラスは、NyARToolkit for Processingのベースクラスです。
  * ARToolkit座標系の環境定数、環境設定機能を継承クラスに対して提供します。
  */
-abstract class NyARPsgBaseClass
+public abstract class NyARPsgBaseClass
 {
 	/**
 	 * nearクリップ面のデフォルト値です。
