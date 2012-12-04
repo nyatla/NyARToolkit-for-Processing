@@ -31,7 +31,7 @@ import processing.core.*;
 import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
-import jp.nyatla.nyartoolkit.core.transmat.NyARTransMatResult;
+import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 import jp.nyatla.nyartoolkit.nyidmarker.data.INyIdMarkerData;
 import jp.nyatla.nyartoolkit.nyidmarker.data.NyIdMarkerDataEncoder_RawBit;
 import jp.nyatla.nyartoolkit.nyidmarker.data.NyIdMarkerData_RawBit;
@@ -224,7 +224,7 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 			return;			
 		}
 
-		protected void onUpdateHandler(NyARSquare i_square, NyARTransMatResult result)
+		protected void onUpdateHandler(NyARSquare i_square, NyARDoubleMatrix44 result)
 		{
 			this._parent.updateTransmat(i_square, result);
 			this.status=this._is_prev_onenter?SingleNyIdMarker.ST_NEWMARKER:SingleNyIdMarker.ST_UPDATEMARKER;

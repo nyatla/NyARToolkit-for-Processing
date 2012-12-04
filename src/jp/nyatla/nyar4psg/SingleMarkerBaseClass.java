@@ -4,7 +4,6 @@ import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.rasterdriver.INyARPerspectiveCopy;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
-import jp.nyatla.nyartoolkit.core.transmat.NyARTransMatResult;
 import jp.nyatla.nyartoolkit.core.types.*;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 import processing.core.*;
@@ -18,7 +17,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 {
 	protected final PMatrix3D _ps_projection=new PMatrix3D();
 	/**　ARToolkitパラメータのインスタンスです。*/
-	protected final NyARParam _ar_param=new NyARParam();
+	protected NyARParam _ar_param;
 	protected final NyARFrustum _frustum=new NyARFrustum();;
 	protected NyAR4PsgConfig _config;
 	
@@ -263,7 +262,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 			i_l+i_w-1,i_t,
 			i_out_w_pix,i_out_h_pix);
 	}	
-	protected void updateTransmat(NyARSquare i_square,NyARTransMatResult i_src)
+	protected void updateTransmat(NyARSquare i_square,NyARDoubleMatrix44 i_src)
 	{
 		this._result.setValue(i_src);
 		matResult2GLArray(i_src,this.transmat);
@@ -295,7 +294,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	protected void initInstance(PApplet parent,String i_cparam_file, int i_width,int i_height,NyAR4PsgConfig i_config) throws NyARException
 	{
 		this._config=i_config;
-		this._ar_param.loadARParam(parent.createInput(i_cparam_file));
+		this._ar_param=NyARParam.createFromARParamFile(parent.createInput(i_cparam_file));
 		this._ar_param.changeScreenSize(i_width,i_height);
 		this._src_raster=new PImageRaster(i_width,i_height);
 		this._pcopy=(INyARPerspectiveCopy) this._src_raster.createInterface(INyARPerspectiveCopy.class);				

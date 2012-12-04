@@ -32,6 +32,7 @@ import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.*;
 import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
 import jp.nyatla.nyartoolkit.core.transmat.*;
+import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 import jp.nyatla.nyartoolkit.processor.SingleARMarkerProcesser;
 
 
@@ -122,8 +123,7 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 		}
 		try{
 	        NyARCode[] codes=new NyARCode[1];
-	        codes[0]=new NyARCode(16,16);
-	        codes[0].loadARPatt(this._ref_papplet.createInput(i_patt_name));
+	        codes[0]=NyARCode.createFromARPattFile(this._ref_papplet.createInput(i_patt_name),16,16);
 	        this._marker_proc.setARCodeTable(codes,16,i_patt_size);
 	        this._registerd_marker=true;
 		}catch(NyARException e){
@@ -149,8 +149,7 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 		try{
 	        NyARCode[] codes=new NyARCode[i_patt_names.length];
 	        for(int i=0;i<i_patt_names.length;i++){
-	            codes[i]=new NyARCode(16,16);
-	            codes[i].loadARPatt(this._ref_papplet.createInput(i_patt_names[i]));        	
+	            codes[i]=NyARCode.createFromARPattFile(this._ref_papplet.createInput(i_patt_names[i]),16,16);
 	        }
 	        this._marker_proc.setARCodeTable(codes,16,i_marker_size);
 	        this._registerd_marker=true;
@@ -261,12 +260,13 @@ public class SingleARTKMarker extends SingleMarkerBaseClass
 			return;			
 		}
 
-		protected void onUpdateHandler(NyARSquare i_square, NyARTransMatResult result)
+		protected void onUpdateHandler(NyARSquare i_square, NyARDoubleMatrix44 result)
 		{
 			this._parent.updateTransmat(i_square, result);
 			this.status=this._is_prev_onenter?SingleARTKMarker.ST_NEWMARKER:SingleARTKMarker.ST_UPDATEMARKER;
 			this._is_prev_onenter=false;
 		}
+
 	}	
 }
 

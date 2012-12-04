@@ -134,8 +134,7 @@ public class NyARBoard extends SingleMarkerBaseClass
 	private void initInstance(PApplet parent,String i_cparam,String i_patt,int i_width,int i_height,int i_marker_width,NyAR4PsgConfig i_config) throws NyARException
 	{
 		super.initInstance(parent, i_cparam, i_width, i_height, i_config);
-		NyARCode code=new NyARCode(16,16);
-		code.loadARPatt(this._ref_papplet.createInput(i_patt));		
+		NyARCode code=NyARCode.createFromARPattFile(this._ref_papplet.createInput(i_patt),16,16);	
 		//モード選択
 		int tm_type=(i_config.env_transmat_mode==NyAR4PsgConfig.TM_ARTK)?NyARSingleDetectMarker.PF_ARTOOLKIT_COMPATIBLE:NyARSingleDetectMarker.PF_NYARTOOLKIT;
 		this._nya=NyARSingleDetectMarker.createInstance(this._ar_param,code,i_marker_width,tm_type);
