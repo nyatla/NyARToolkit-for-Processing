@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import jp.nyatla.nyartoolkit.core.*;
+import jp.nyatla.nyartoolkit.core.param.NyARParam;
 import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.core.types.*;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
@@ -48,9 +49,14 @@ public class MultiMarker extends NyARPsgBaseClass
 	class PsgMsCfg extends NyARMarkerSystemConfig
 	{
 		private int _tmat_type;
-		public PsgMsCfg(InputStream iArParamStream,int i_tmat_type,int iWidth, int iHeight)throws NyARException
+//		public PsgMsCfg(InputStream iArParamStream,int i_tmat_type,int iWidth, int iHeight)throws NyARException
+//		{
+//			super(iArParamStream, iWidth, iHeight);
+//			this._tmat_type=i_tmat_type;
+//		}
+		public PsgMsCfg(NyARParam i_param,int i_tmat_type)throws NyARException
 		{
-			super(iArParamStream, iWidth, iHeight);
+			super(i_param);
 			this._tmat_type=i_tmat_type;
 		}
 		public INyARTransMat createTransmatAlgorism() throws NyARException
@@ -164,11 +170,14 @@ public class MultiMarker extends NyARPsgBaseClass
 	public MultiMarker(PApplet parent, int i_width,int i_height,String i_cparam_file,NyAR4PsgConfig i_config)
 	{
 		try{
-			this.initInstance(parent, i_cparam_file, i_width, i_height, i_config);
+			NyARParam cp=NyARParam.createFromARParamFile(parent.createInput(i_cparam_file));
+			cp.changeScreenSize(i_width,i_height);
+			this.initInstance(parent,cp,i_config);
 		}catch(Exception e){
 			e.printStackTrace();
 			parent.die("Catch an exception!");
 		}			
+		return;
 	}
 	/**
 	 * コンストラクタです。
@@ -186,13 +195,45 @@ public class MultiMarker extends NyARPsgBaseClass
 	public MultiMarker(PApplet parent,int i_width,int i_height,String i_cparam_file)
 	{
 		try{
-			this.initInstance(parent, i_cparam_file, i_width, i_height, NyAR4PsgConfig.CONFIG_DEFAULT);
+			NyARParam cp=NyARParam.createFromARParamFile(parent.createInput(i_cparam_file));
+			cp.changeScreenSize(i_width,i_height);
+			this.initInstance(parent,cp, NyAR4PsgConfig.CONFIG_DEFAULT);
 		}catch(Exception e){
 			e.printStackTrace();
 			parent.die("Catch an exception!");
-		}			
+		}
+		return;
 	}
-
+	/**
+	 * コンストラクタです。
+	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}のコンフィギュレーションに、{@link NyAR4PsgConfig#CONFIG_DEFAULT}を指定した物と同じです。
+	 * @param parent
+	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照。
+	 * @param i_width
+	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * @param i_height
+	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * @param i_size
+	 * カメラパラメータのサイズ値
+	 * @param i_intrinsic_matrix
+	 * 3x3 matrix
+	 * このパラメータは、OpenCVのcvCalibrateCamera2関数が出力するintrinsic_matrixの値と合致します。
+	 * @param i_distortion_coeffs
+	 * 4x1 matrix
+	 * このパラメータは、OpenCVのcvCalibrateCamera2関数が出力するdistortion_coeffsの値と合致します。
+	 */	
+	public MultiMarker(PApplet parent,int i_width,int i_height,double[] i_intrinsic_matrix,double[] i_distortion_coeffs)
+	{
+		try{
+			NyARParam cp=NyARParam.createFromCvCalibrateCamera2Result(i_width, i_height, i_intrinsic_matrix, i_distortion_coeffs);
+			cp.changeScreenSize(i_width,i_height);
+			this.initInstance(parent,cp, NyAR4PsgConfig.CONFIG_DEFAULT);
+		}catch(Exception e){
+			e.printStackTrace();
+			parent.die("Catch an exception!");
+		}
+		return;
+	}
 	/**
 	 * インスタンスを初期化します。
 	 * @param parent
@@ -203,11 +244,12 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * @param i_projection_coord_system
 	 * @throws NyARException 
 	 */
-	protected void initInstance(PApplet parent,String i_cparam_file,int i_width,int i_height,NyAR4PsgConfig i_config) throws NyARException
+	protected void initInstance(PApplet parent,NyARParam i_param,NyAR4PsgConfig i_config) throws NyARException
 	{
-		this._ss=new PImageSensor(new NyARIntSize(i_width,i_height));
+		NyARIntSize s=i_param.getScreenSize();
+		this._ss=new PImageSensor(new NyARIntSize(s.w,s.h));
 		this._ms=new NyARMarkerSystem(
-				new PsgMsCfg(parent.createInput(i_cparam_file),i_config.env_transmat_mode,i_width,i_height));
+				new PsgMsCfg(i_param,i_config.env_transmat_mode));
 		super.initInstance(parent,i_config);
 	}
 	@Override
