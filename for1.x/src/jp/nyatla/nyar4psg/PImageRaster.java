@@ -33,12 +33,14 @@ import processing.core.PImage;
 
 /**
  * PImageをラップするRGBラスタです。
+ *　ラップした{@link PImage}の{@link PImage#pixels}を参照します。
+ * {@link PImage#pixels}との同期は外部で調整してください。
  */
 class PImageRaster extends NyARRgbRaster
 {
 	public final static int BUFFER_TYPE=NyARBufferType.INT1D_X8R8G8B8_32;
 	/**
-	 * i_imgをラップします。グラ意的には、i_imgのpixels配列をラップします。
+	 * i_imgをラップします。具体的には、i_imgのpixels配列をラップします。
 	 * @param i_img
 	 * @throws NyARException
 	 */

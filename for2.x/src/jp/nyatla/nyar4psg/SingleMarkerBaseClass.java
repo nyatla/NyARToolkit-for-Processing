@@ -7,7 +7,7 @@ import jp.nyatla.nyartoolkit.core.squaredetect.NyARSquare;
 import jp.nyatla.nyartoolkit.core.types.*;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 import processing.core.*;
-
+import processing.opengl.*;
 /**
  * 単一マーカ認識ユースケースのベースクラス。同時に一つの座標変換行列を提供します。
  * 座標変換行列の管理関数とプロパティ機能を提供します。

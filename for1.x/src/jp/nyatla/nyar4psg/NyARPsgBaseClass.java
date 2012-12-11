@@ -55,7 +55,7 @@ public abstract class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/1.2.1;"+NyARVersion.VERSION_STRING;
+	public final static String VERSION = "NyAR4psg/1.3.1;"+NyARVersion.VERSION_STRING;
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
 	/**　バックグラウンド用のModelviewMatrixです。*/
@@ -150,7 +150,10 @@ public abstract class NyARPsgBaseClass
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
+	 * //for 1.x<br/>
 	 * ortho(-i_width/2, i_width/2,-i_height/2,i_height/2,near,far+1);<br/>
+	 * //for 2.x<br/>
+	 * ortho(0,i_width,0,i_height,near,far+1);<br/>
 	 * :<br/>
 	 * <hr/>
 	 * @param i_width

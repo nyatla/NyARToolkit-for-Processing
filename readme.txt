@@ -1,6 +1,6 @@
 ======================================================================
 NyARToolkit for proce55ing
- version 1.2.1
+ version 1.3.0
 ======================================================================
 
 Copyright (C)2008-2012 Ryo Iizuka
@@ -17,7 +17,7 @@ wm(at)nyatla.jp
     るためのライブラリです。
  * 拡張現実感ライブラリには、ARToolKitの派生ライブラリNyARToolKit for Java
     を使用しています。
- * Processing version 1.2での動作を確認しています。
+ * Processing version 1.5/2.0b7での動作を確認しています。
  * このライブラリは、processingのcamera()関数で取り込んだ画像や、PImage
     画像を元にマーカ検出処理を実行できます。
  * レンダリングシステムには、OPENGLとPV3Dをサポートします。
@@ -39,7 +39,7 @@ NyARToolkit for proce55ingの特徴
 環境の準備
 ----------------------------------------------------------------------
 
- 1.NyARToolkit for proce55ingの実行には、processing/1.2以上が必要です。
+ 1.NyARToolkit for proce55ingの実行には、processing/1.5.1、又は2.0b以上が必要です。
   サイトからダウンロードして下さい。
   http://processing.org/download/index.html
   
@@ -67,6 +67,14 @@ NyARToolkit for proce55ingの特徴
  2.libraryの中の2つのjarファイルを、example/simpleLite/codeへコピーします。
    (Windows環境では、setup_example.batを実行することで、全てのexampleへ
    ファイルをコピーすることができます。)
+
+   必要なファイルはProcessingのバージョン毎に異なります。
+   processing/1.x
+     jar:   NyAR4psg.jar,NyARToolkit.jar
+     batch: setup_example.bat
+   processing/2.x
+     jar:   NyAR4psg2b.jar,NyARToolkit.jar
+     batch: setup_example_pss2.bat
    
  3.example/simpleLiteにある、simpleLite.pdeを開いて実行してください。
    マーカを撮影すると、そこに立方体が表示されるはずです。

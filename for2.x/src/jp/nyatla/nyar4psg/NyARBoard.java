@@ -147,11 +147,25 @@ public class NyARBoard extends SingleMarkerBaseClass
 	 * pos2d,angle,trans,confidence,transmatのプロパティを更新します。
 	 * @param i_image
 	 * 検出する画像を指定します。この画像は、入力画像に設定した値と同じでなければなりません。
+	 * 関数を実行する前に、i_imageの{@link PImage#loadPixels()}を実行してください。
+	 * {@link PImage#loadPixels()}のタイミングをコントロールしたい場合は、{@link #detectWithoutLoadPixels}を使用してください。
 	 * @return
 	 * マーカが検出され、有効な値が得られればTRUEを返します。
 	 * TRUEの時には、新しいマーカの位置情報が更新されます。
 	 */
 	public boolean detect(PImage i_image)
+	{
+		i_image.loadPixels();
+		return this.detectWithoutLoadPixels(i_image);
+	}
+	/**
+	 * {@link PImage#loadPixels()}を伴わない{@link detect()}です。
+	 * 引数と戻り値の詳細は、{@link #detect(PImage)}を参照してください。
+	 * @param i_image
+	 * @return
+	 * @see #detect(PImage)
+	 */
+	public boolean detectWithoutLoadPixels(PImage i_image)
 	{
 		boolean is_marker_exist=false;
 		try{

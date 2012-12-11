@@ -141,31 +141,44 @@ public class SingleNyIdMarker extends SingleMarkerBaseClass
 			
 	}
 	/**
+	 * 画像から、マーカの認識処理を行い、プロパティを更新します。
+	 * 認識処理の結果は、戻り値にステータスコードで格納します。
+	 * 関数は、i_imageに対して1度だけ{@link PImage#loadPixels()}を実行します。
+	 * {@link PImage#loadPixels()}のタイミングをコントロールしたい場合は、{@link #detectWithoutLoadPixels}を使用してください。
 	 * @param i_image
+	 * 検出処理を行う画像を指定します。
 	 * @return
 	 * ステータスコードを返します。
 	 * <ul>
-	 * <li>ST_NOMARKER -
+	 * <li>{@link #ST_NOMARKER} -
 	 * マーカが認識されていない事を示します。
 	 * マーカパラメータのメンバ変数は使用不可能です。
 	 * </li>
-	 * <li>
-	 * ST_NEWMARKER -
+	 * <li>{@link #ST_NEWMARKER} -
 	 * マーカが発見された事を示します。
 	 * transmat,angle,trans,markeridメンバ変数が利用可能です。
 	 * </li>
-	 * <li>
-	 * ST_UPDATEMARKER -
+	 * <li>{@link #ST_UPDATEMARKER} -
 	 * マーカ座標が更新されたことを示します。
 	 * transmat,angle,trans,markeridメンバ変数が利用可能です。
 	 * </li>
-	 * <li>
-	 * ST_REMOVEMARKER -
+	 * <li>{@link #ST_REMOVEMARKER} -
 	 * マーカが消失したことを示します。
 	 * マーカパラメータのメンバ変数は使用不可能です。
 	 * </li>
 	 */
 	public int detect(PImage i_image)
+	{
+		i_image.loadPixels();
+		return this.detectWithoutLoadPixels(i_image);
+	}
+	/**
+	 * {@link PImage#loadPixels()}を伴わない{@link detect()}です。
+	 * 引数と戻り値の詳細は、{@link #detect(PImage)}を参照してください。
+	 * @param i_image
+	 * @see #detect(PImage)
+	 */
+	public int detectWithoutLoadPixels(PImage i_image)
 	{
 		if(!this._registerd_marker){
 			this._ref_papplet.die("Must call setIdMarkerSize function in the first.");

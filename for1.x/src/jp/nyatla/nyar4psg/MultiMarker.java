@@ -26,7 +26,6 @@
  */
 package jp.nyatla.nyar4psg;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import jp.nyatla.nyartoolkit.core.*;
@@ -49,11 +48,6 @@ public class MultiMarker extends NyARPsgBaseClass
 	class PsgMsCfg extends NyARMarkerSystemConfig
 	{
 		private int _tmat_type;
-//		public PsgMsCfg(InputStream iArParamStream,int i_tmat_type,int iWidth, int iHeight)throws NyARException
-//		{
-//			super(iArParamStream, iWidth, iHeight);
-//			this._tmat_type=i_tmat_type;
-//		}
 		public PsgMsCfg(NyARParam i_param,int i_tmat_type)throws NyARException
 		{
 			super(i_param);
@@ -341,10 +335,23 @@ public class MultiMarker extends NyARPsgBaseClass
 	}
 	/**
 	 * この関数は、画像からマーカーの検出処理を実行します。
+	 * 関数は、i_imageに対して1度だけ{@link PImage#loadPixels()}を実行します。
+	 * {@link PImage#loadPixels()}のタイミングをコントロールしたい場合は、{@link #detectWithoutLoadPixels}を使用してください。
 	 * @param i_image
 	 * 検出処理を行う画像を指定します。
-	 */
+	 */	
 	public void detect(PImage i_image)
+	{
+		i_image.loadPixels();
+		this.detectWithoutLoadPixels(i_image);
+	}
+	/**
+	 * {@link PImage#loadPixels()}を伴わない{@link detect()}です。
+	 * 引数と戻り値の詳細は、{@link #detect(PImage)}を参照してください。
+	 * @param i_image
+	 * @see #detect(PImage)
+	 */
+	public void detectWithoutLoadPixels(PImage i_image)
 	{
 		try{
 			this._ss.update(i_image);
@@ -354,6 +361,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			this._ref_papplet.die("Catch an exception!");
 		}
 	}
+	
 	
 	
 	
@@ -410,6 +418,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * この関数は、i_imgの画像をARマーカパターンとして登録します。
 	 * @param i_img
 	 * マーカパターンのカラー画像を指定します。
+	 * 関数はi_imgの{@link PImage#loadPixels()}を1度だけ呼び出します。
 	 * @param i_patt_resolution
 	 * 作成するマーカパターンの解像度を指定します。ARToolkitと同一であれば16です。
 	 * 数値が高いほどシビアな判定が出来ますが、速度は低下します。
@@ -425,6 +434,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	{
 		int psid=-1;
 		try{
+			i_img.loadPixels();
 			PImageRaster pr=new PImageRaster(i_img);
 			//初期化済みのアイテムを生成
 			this._id_map.add(this._ms.addARMarker(pr, i_patt_resolution, i_edge_percentage, i_width));

@@ -30,7 +30,7 @@ package jp.nyatla.nyar4psg;
 
 
 import processing.core.*;
-
+import processing.opengl.*;
 import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 
@@ -55,7 +55,7 @@ public abstract class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/1.2.1;"+NyARVersion.VERSION_STRING;
+	public final static String VERSION = "NyAR4psg/1.3.1;"+NyARVersion.VERSION_STRING;
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
 	/**　バックグラウンド用のModelviewMatrixです。*/
@@ -150,7 +150,10 @@ public abstract class NyARPsgBaseClass
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
+	 * //for 1.x<br/>
 	 * ortho(-i_width/2, i_width/2,-i_height/2,i_height/2,near,far+1);<br/>
+	 * //for 2.x<br/>
+	 * ortho(0,i_width,0,i_height,near,far+1);<br/>
 	 * :<br/>
 	 * <hr/>
 	 * @param i_width
@@ -160,9 +163,7 @@ public abstract class NyARPsgBaseClass
 	 */
 	public void setBackgroundOrtho(int i_width,int i_height)
 	{		
-		float half_w=i_width/2;
-		float half_h=i_height/2;
-		this._ref_papplet.ortho(-half_w, half_w,-half_h,half_h,this._clip_near,this._clip_far+1);
+		this._ref_papplet.ortho(0,i_width,0,i_height,this._clip_near,this._clip_far+1);
 	}
 	/**
 	 * この関数は、ARToolKit準拠のProjectionMatrixをProcessingにセットします。
