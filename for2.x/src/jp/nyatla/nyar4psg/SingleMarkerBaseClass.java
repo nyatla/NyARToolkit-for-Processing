@@ -61,7 +61,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	private final NyARDoubleMatrix44 _result=new NyARDoubleMatrix44();
 	
 	/** begin-endシーケンスで使う。*/
-	private PMatrix3D _old_matrix;
+	private boolean _is_in_begin_end_session;
 
 	@Override
 	public PMatrix3D getProjectionMatrix()
@@ -115,7 +115,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 * 通常は、{@link PApplet#g}をキャストして指定します。
 	 * @deprecated
 	 */
-	public void beginTransform(PGraphics3D i_pgl)
+	public void beginTransform(PGraphicsOpenGL i_pgl)
 	{
 		assert(i_pgl.equals(this._ref_papplet.g));
 		this.beginTransform();
@@ -129,7 +129,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
-	 * PMatrix3D prev_mat=new PMatrix3D(((PGraphics3D)g).projection);
+	 * PMatrix3D prev_mat=new PMatrix3D(((PGraphicsOpenGL)g).projection);
 	 * setARPerspective();//prev_matは現在の行列退避用。<br/>
 	 * pushMatrix();<br/>
 	 * setMatrix(ar.getMarkerMatrix());<br/>
@@ -139,14 +139,18 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 */
 	public void beginTransform()
 	{
-		if(this._old_matrix!=null){
+		if(this._is_in_begin_end_session){
 			this._ref_papplet.die("The function beginTransform is already called.", null);			
 		}
-		if(!(this._ref_papplet.g instanceof PGraphics3D)){
-			this._ref_papplet.die("NyAR4Psg require PGraphics3D instance.");
+		this._is_in_begin_end_session=true;
+
+		if(!(this._ref_papplet.g instanceof PGraphicsOpenGL)){
+			this._ref_papplet.die("NyAR4Psg require PGraphicsOpenGL instance.");
 		}		
 		//projectionの切り替え
-		this._old_matrix=new PMatrix3D(((PGraphics3D)this._ref_papplet.g).projection);
+		PGraphicsOpenGL pgl=((PGraphicsOpenGL)this._ref_papplet.g);
+		//行列の待避
+		pgl.pushProjection();
 		this.setARPerspective();
 		//ModelViewの設定
 		this._ref_papplet.pushMatrix();
@@ -168,14 +172,16 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 	 */
 	public void endTransform()
 	{
-		if(this._old_matrix==null){
+		if(!this._is_in_begin_end_session){
 			this._ref_papplet.die("The function beginTransform is never called.", null);			
 		}
+		this._is_in_begin_end_session=false;
 		//ModelViewの復帰
 		this._ref_papplet.popMatrix();
+
 		//Projectionの復帰
-		this.setPerspective(this._old_matrix);
-		this._old_matrix=null;
+		PGraphicsOpenGL pgl=((PGraphicsOpenGL)this._ref_papplet.g);
+		pgl.popProjection();
 		return;
 	}
 	/**
@@ -352,6 +358,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 			{
 				throw new Exception("this._pcopy.copyPatt failed.");
 			}
+			img.updatePixels();
 			return img;
 		}catch(Exception e){
 			e.printStackTrace();

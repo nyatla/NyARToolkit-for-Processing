@@ -770,6 +770,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			PImageRaster pr=new PImageRaster(p);
 			int msid=this._id_map.get(i_id);
 			this._ms.getMarkerPlaneImage(msid, this._ss, i_x1, i_y1, i_x2, i_y2, i_x3, i_y3, i_x4, i_y4,pr);
+			p.updatePixels();
 		}catch(Exception e){
 			this._ref_papplet.die("pickupMarkerImage failed.", null);
 		}

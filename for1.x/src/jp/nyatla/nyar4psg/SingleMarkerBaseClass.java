@@ -352,6 +352,7 @@ class SingleMarkerBaseClass extends NyARPsgBaseClass
 			{
 				throw new Exception("this._pcopy.copyPatt failed.");
 			}
+			img.updatePixels();
 			return img;
 		}catch(Exception e){
 			e.printStackTrace();

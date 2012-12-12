@@ -1,6 +1,6 @@
 ======================================================================
 NyARToolkit for proce55ing
- version 1.3.0
+ version 1.3.1
 ======================================================================
 
 Copyright (C)2008-2012 Ryo Iizuka
@@ -17,7 +17,7 @@ wm(at)nyatla.jp
     るためのライブラリです。
  * 拡張現実感ライブラリには、ARToolKitの派生ライブラリNyARToolKit for Java
     を使用しています。
- * Processing version 1.5/2.0b7での動作を確認しています。
+ * Processing version 1.5.1/2.0b7での動作を確認しています。
  * このライブラリは、processingのcamera()関数で取り込んだ画像や、PImage
     画像を元にマーカ検出処理を実行できます。
  * レンダリングシステムには、OPENGLとPV3Dをサポートします。

@@ -268,8 +268,8 @@ public class MultiMarker extends NyARPsgBaseClass
 		nyarMat2PsMat(tmp,this._ps_projection);
 	}	
 	
-	/** bgin-endシーケンスの退避用*/
-	private PMatrix3D _old_matrix=null;
+	/** begin-endシーケンスの判定用*/
+	private boolean _is_in_begin_end_session=false;
 	/**
 	 * この関数は、ProcessingのProjectionMatrixとModelview行列を、指定idのマーカ平面にセットします。
 	 * 必ず{@link #endTransform}とペアで使います。
@@ -281,7 +281,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * <hr/>
 	 * :<br/>
 	 * //prev_matは現在の行列退避用。endTransformで使用する。<br/>
-	 * PMatrix3D prev_mat=new PMatrix3D(((PGraphics3D)g).projection);<br/>
+	 * PMatrix3D prev_mat=new PMatrix3D(((PGraphicsOpenGL)g).projection);<br/>
 	 * setARPerspective();<br/>
 	 * pushMatrix();<br/>
 	 * setMatrix(ar.getMarkerMatrix(i_id));<br/>
@@ -293,14 +293,17 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public void beginTransform(int i_id)
 	{
-		if(this._old_matrix!=null){
+		if(this._is_in_begin_end_session){
 			this._ref_papplet.die("The function beginTransform is already called.", null);			
 		}
-		if(!(this._ref_papplet.g instanceof PGraphics3D)){
-			this._ref_papplet.die("NyAR4Psg require PGraphics3D instance.");
-		}
-		//古いMatrixの保存
-		this._old_matrix=new PMatrix3D(((PGraphics3D)this._ref_papplet.g).projection);
+		this._is_in_begin_end_session=true;
+		
+		if(!(this._ref_papplet.g instanceof PGraphicsOpenGL)){
+			this._ref_papplet.die("NyAR4Psg require PGraphicsOpenGL instance.");
+		}		
+		PGraphicsOpenGL pgl=((PGraphicsOpenGL)this._ref_papplet.g);
+		//行列の待避
+		pgl.pushProjection();
 		this.setARPerspective();
 		
 		//ModelViewの設定
@@ -323,15 +326,16 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public void endTransform()
 	{
-		if(this._old_matrix==null){
+		if(!this._is_in_begin_end_session){
 			this._ref_papplet.die("The function beginTransform is never called.", null);			
 		}
+		this._is_in_begin_end_session=false;	
+		
 		//ModelViewの復帰
 		this._ref_papplet.popMatrix();
 		//Projectionの復帰
-		this.setPerspective(this._old_matrix);
-		//退避した古いmatrixの破棄
-		this._old_matrix=null;
+		PGraphicsOpenGL pgl=((PGraphicsOpenGL)this._ref_papplet.g);
+		pgl.popProjection();
 		return;
 	}
 	/**
@@ -771,6 +775,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			PImageRaster pr=new PImageRaster(p);
 			int msid=this._id_map.get(i_id);
 			this._ms.getMarkerPlaneImage(msid, this._ss, i_x1, i_y1, i_x2, i_y2, i_x3, i_y3, i_x4, i_y4,pr);
+			p.updatePixels();
 		}catch(Exception e){
 			this._ref_papplet.die("pickupMarkerImage failed.", null);
 		}

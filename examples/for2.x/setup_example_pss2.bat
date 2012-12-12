@@ -1,11 +1,12 @@
 cd %~dp0
 echo off
-echo For Processing 1.5.x.
-echo This batch file copies NyARToolkit library jar files for Processing 1.5.x to example code directories.
-set libpsg=..\..\library\NyAR4psg.jar
+echo For Processing 2.x.
+echo This batch file copies NyARToolkit library jar files for Processing 2.x to example code directories.
+set libpsg=..\..\library\NyAR4psg2b.jar
 set libnyar=..\..\library\NyARToolkit.jar
 
 pause
+
 copy /y %libpsg% arPlusNyIdMarker\code\
 copy /y %libpsg% imagePickup\code\
 copy /y %libpsg% markerPlane\code\

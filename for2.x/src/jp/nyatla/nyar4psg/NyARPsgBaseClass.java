@@ -99,7 +99,7 @@ public abstract class NyARPsgBaseClass
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
-	 * PMatrix3D om=new PMatrix3D(((PGraphics3D)g).projection);<br/>
+	 * PMatrix3D om=new PMatrix3D(((PGrapPGraphicsOpenGLhics3D)g).projection);<br/>
 	 * setBackgroundOrtho(img.width,img.height)<br/>
 	 * pushMatrix();<br/>
 	 * resetMatrix();<br/>
@@ -117,14 +117,16 @@ public abstract class NyARPsgBaseClass
 	public void drawBackground(PImage i_img)
 	{
 		PApplet pa=this._ref_papplet;
-		PMatrix3D om=new PMatrix3D(((PGraphics3D)pa.g).projection);
+		PGraphicsOpenGL pgl=((PGraphicsOpenGL)pa.g);
+		//行列の待避
+		pgl.pushProjection();
 		this.setBackgroundOrtho(i_img.width,i_img.height);
 		pa.pushMatrix();
 		pa.setMatrix(this._ps_background_mv);
 		pa.image(i_img,-i_img.width/2,-i_img.height/2);
 		pa.popMatrix();
 		//行列の復帰
-		this.setPerspective(om);
+		pgl.popProjection();
 	}
 	
 	/**
@@ -168,10 +170,10 @@ public abstract class NyARPsgBaseClass
 	/**
 	 * この関数は、ARToolKit準拠のProjectionMatrixをProcessingにセットします。
 	 * 関数を実行すると、ProcessingのProjectionMatrixがARToolKitのカメラパラメータのものに変わり、映像にマッチした描画ができるようになります。
-	 * ProcessingのデフォルトFrustumに戻すときは、{@link PGraphics3D#perspective()}を使います。
-	 * Frustumの有効期間は、次に{@link PGraphics3D#perspective()}か{@link PGraphics3D#perspective()}をコールするまでです。
+	 * ProcessingのデフォルトFrustumに戻すときは、{@link PGraphicsOpenGL#perspective()}を使います。
+	 * Frustumの有効期間は、次に{@link PGraphicsOpenGL#perspective()}か{@link PGraphicsOpenGL#perspective()}をコールするまでです。
 	 * <p>
-	 * Version 1.1.0より、古いprojection matrixを返さなくなりました。古いprojection matrixが必要な時は、{@link PGraphics3D#projection}を複製して保存して下さい。
+	 * Version 1.1.0より、古いprojection matrixを返さなくなりました。古いprojection matrixが必要な時は、{@link PGraphicsOpenGL#projection}を複製して保存して下さい。
 	 * </p>
 	 */
 	public void setARPerspective()
@@ -187,7 +189,7 @@ public abstract class NyARPsgBaseClass
 	 * 今は無理なので、frustum経由
 	 * </p>
 	 * <p>
-	 * Version 1.1.0より、古いprojection matrixを返さなくなりました。古いprojection matrixが必要な時は、{@link PGraphics3D#projection}を複製して保存して下さい。
+	 * Version 1.1.0より、古いprojection matrixを返さなくなりました。古いprojection matrixが必要な時は、{@link PGraphicsOpenGL#projection}を複製して保存して下さい。
 	 * </p>
 	 */	
 	public void setPerspective(PMatrix3D i_projection)
