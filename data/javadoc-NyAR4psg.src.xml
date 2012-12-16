@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+
+<project default="javadoc_src">
+	<property name="SRC_ROOT" value="D:\project.sourceforge\NyARToolkit\nyar4psg\trunk\for1.x"/>
+	<property name="DEST_ROOT" value="D:\project.sourceforge\NyARToolkit\nyar4psg\trunk\reference"/>
+	<property name="GOOGLE_TRANSLATE" value="&lt;div id=\&quot;google_translate_element\&quot;&gt;&lt;/div&gt;&lt;script&gt;function googleTranslateElementInit() {  new google.translate.TranslateElement({    pageLanguage: 'ja',    multilanguagePage: true,    gaTrack: true,    gaId: 'UA-3136996-5'  }, 'google_translate_element');}&lt;/script&gt;&lt;script src=\&quot;http://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit\&quot;&gt;&lt;/script&gt;"/>
+	<property name="GOOGLE_ANALYTICS" value="&lt;script type=\&quot;text/javascript\&quot;&gt;var _gaq = _gaq || [];_gaq.push(['_setAccount', 'UA-3136996-5']);_gaq.push(['_trackPageview']);(function() {var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);})();&lt;/script&gt;"/>
+	<property name="ENCODING" value="-encoding &quot;utf-8&quot; -charset &quot;utf-8&quot;" />
+	<property name="URL_J2SE" value="http://java.sun.com/javase/6/docs/api/" />
+	<property name="URL_NYARTK_SRC" value="http://nyatla.jp/nyartoolkit/doc/nyartoolkit/3.0.0/api/" />
+	<property name="SRCPATH_NYAR4PSG_SRC" value="${SRC_ROOT}\src" />
+
+	<property name="BOTTOM" value="NyAR4psgは、&lt;a href=\&quot;http://nyatla.jp/nyartoolkit\&quot;&gt;NyARToolkit project&lt;/a&gt;で開発している、NyARToolKitのProcessingフロントエンドです。ソースコードは、sorceforge.jp&lt;a href=\&quot;http://sourceforge.jp/projects/nyartoolkit/\&quot;&gt;NyARToolkit&lt;/a&gt;からダウンロードできます。&lt;br/&gt;Copyright 2011 NyARToolkit project. All rights reserved." />
+    <target name="javadoc_src">
+    	<echo message="NyAR4psg"/>
+        <javadoc
+			destdir="${DEST_ROOT}"
+			sourcepath="${SRCPATH_NYAR4PSG_SRC}"
+			additionalparam="${ENCODING}"
+			access="package"
+			packagenames="jp.nyatla.nyar4psg.*"
+			author="true"
+			classpath="D:\project.sourceforge\NyARToolkit\nyar4psg\trunk\library\NyARToolkit.jar;D:\application.files\processing-1.5.1\lib\core.jar"
+			nodeprecated="false" nodeprecatedlist="false" noindex="true" nohelp="true" nonavbar="false" notree="true" source="1.6" splitindex="false" use="true" version="true">
+			<doctitle>NyARToolkit for Processing/1.3.1 API Specification</doctitle>
+			<header>${GOOGLE_ANALYTICS}${GOOGLE_TRANSLATE}</header>
+			<link href="${URL_J2SE}"/>
+			<link href="http://processing.googlecode.com/svn/trunk/processing/build/javadoc/core/"/>
+			<link href="${URL_NYARTK_SRC}"/>
+			<bottom>${BOTTOM}</bottom>
+		</javadoc>
+   		<echo message="finish"/>
+    </target>
+	
+	
+	
+</project>
