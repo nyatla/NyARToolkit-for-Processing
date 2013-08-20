@@ -134,7 +134,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	public int getCurrentThreshold()
 	{
 		//256スケールに直す。
-		return this.getCurrentThreshold();
+		return this._ms.getCurrentThreshold();
 	}
 	
 	/** 初期値定数。マーカ一致度の最小敷居値を示します。*/
