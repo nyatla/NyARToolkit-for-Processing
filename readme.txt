@@ -17,7 +17,8 @@ wm(at)nyatla.jp
     るためのライブラリです。
  * 拡張現実感ライブラリには、ARToolKitの派生ライブラリNyARToolKit for Java
     を使用しています。
- * Processing version 1.5.1/2.0b7での動作を確認しています。
+ * Processing version 2.2.0での動作を確認しています。
+  (1.x系は古いライブラリを使ってください。)
  * このライブラリは、processingのcamera()関数で取り込んだ画像や、PImage
     画像を元にマーカ検出処理を実行できます。
  * レンダリングシステムには、OPENGLとPV3Dをサポートします。
@@ -160,4 +161,4 @@ NyARToolkit for Processingの提供するクラス
  *Processingの座標系問題を解決して頂いた、reco氏に感謝します。
   http://www.hyde-ysd.com/reco-memo/
 
- *Version/1.0開発のきっかけを作って下さった、橋本 直 氏に感謝します。
+ *開発のきっかけを作って下さった、橋本 直 氏に感謝します。
