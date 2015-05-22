@@ -43,7 +43,7 @@ wm(at)nyatla.jp
 exampleにある、simpleLiteのサンプルの実行手順です。simpleLiteは、Hiroマーカの上に立方体を表示するシンプルなプログラムです。
 
 1. dataディレクトリにある、pattHiro.pdfを印刷しておいてきます。
-2.example/simpleLiteにある、simpleLite.pdeを開いて実行してください。マーカを撮影すると、そこに立方体が表示されるはずです。
+2. example/simpleLiteにある、simpleLite.pdeを開いて実行してください。マーカを撮影すると、そこに立方体が表示されるはずです。
 
 他のサンプルについても、同様の手順で試す事ができます。
 
@@ -73,8 +73,7 @@ NyARToolkitを使ったスケッチには、2つのjarライブラリと、使�
 ## その他
 
 * パターンファイルやカメラパラメータファイルについて  
-NyARToolKit for Processingの使用するカメラパラメータファイル、パターンファイルは、ARToolKitと完全な互換性があります。  
-現在のライブラリには、これらを作成する機能がありません。ARToolKit、またはFLARToolKitの機能を利用して作成してください。
+NyARToolKit for Processingの使用するカメラパラメータファイル、パターンファイルは、ARToolKitと完全な互換性があります。現在のライブラリには、これらを作成する機能がありません。ARToolKit、またはFLARToolKitの機能を利用して作成してください。
 
 ## ライセンス
 
