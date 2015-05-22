@@ -1,3 +1,5 @@
+[English here!](readme.en.md "")
+
 # NyARToolkit for proce55ing
 
 Copyright (C)2008-2012 Ryo Iizuka
@@ -5,6 +7,7 @@ Copyright (C)2008-2012 Ryo Iizuka
 http://nyatla.jp/nyartoolkit/  
 airmail(at)ebony.plala.or.jp  
 wm(at)nyatla.jp  
+
 
 
 ## NyARToolkit for Processing
@@ -78,4 +81,4 @@ NyARToolKit for Processingの使用するカメラパラメータファイル、
 ## ライセンス
 
 * LGPLv3での提供になります。但し、src以下のファイルをのみを使用する場合には、MITライセンスでも使用できます。
-* パッケージに含まれるNyARToolkitのソースファイルは、(https://github.com/nyatla/NyARToolkit/)よりダウンロードできます。
+* パッケージに含まれるNyARToolkitのソースファイルは、 [https://github.com/nyatla/NyARToolkit/](https://github.com/nyatla/NyARToolkit/ "")よりダウンロードできます。
