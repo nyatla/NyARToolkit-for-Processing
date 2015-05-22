@@ -42,11 +42,11 @@ wm(at)nyatla.jp
 * MultiMarker class (MultiMarker.java)  
 This class can handle some NyId marker and AR marker at the same time.
 
-* NyARBoradクラス(NyARBoard.java)  
+* NyARBorad class(NyARBoard.java)  
 Old version. Single AR marker. This class is for compatibility.
-* SingleARTKMarkerクラス（SingleARTKMarker.java）  
+* SingleARTKMarker class (SingleARTKMarker.java)  
 Old version. Single AR marker. This class is for compatibility.
-* SingleNyIdMarkerクラス（SingleNyIdMarker.java）  
+* SingleNyIdMarker class (SingleNyIdMarker.java)  
 Old version. Single AR marker. This class is for compatibility.
 
 ## Other
