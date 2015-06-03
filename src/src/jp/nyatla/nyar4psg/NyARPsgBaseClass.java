@@ -55,7 +55,7 @@ public abstract class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/2.0.0;"+NyARVersion.VERSION_STRING;
+	public final static String VERSION = "NyAR4psg/2.1.0;"+NyARVersion.VERSION_STRING;
 	/**　参照するAppletのインスタンスです。*/
 	protected PApplet _ref_papplet;	
 	/**　バックグラウンド用のModelviewMatrixです。*/

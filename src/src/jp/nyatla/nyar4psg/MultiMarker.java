@@ -30,7 +30,6 @@ import java.util.ArrayList;
 
 import jp.nyatla.nyartoolkit.core.*;
 import jp.nyatla.nyartoolkit.core.param.NyARParam;
-import jp.nyatla.nyartoolkit.core.transmat.*;
 import jp.nyatla.nyartoolkit.core.types.*;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 import processing.core.*;
@@ -46,27 +45,6 @@ import jp.nyatla.nyartoolkit.markersystem.*;
  */
 public class MultiMarker extends NyARPsgBaseClass
 {
-	class PsgMsCfg extends NyARMarkerSystemConfig
-	{
-		private int _tmat_type;
-		public PsgMsCfg(NyARParam i_param,int i_tmat_type)throws NyARException
-		{
-			super(i_param);
-			this._tmat_type=i_tmat_type;
-		}
-		public INyARTransMat createTransmatAlgorism() throws NyARException
-		{
-			switch(this._tmat_type)
-			{
-			case NyAR4PsgConfig.TM_ARTK:
-				return new NyARTransMat_ARToolKit(this._param);
-			case NyAR4PsgConfig.TM_NYARTK:
-				return new NyARTransMat(this._param);
-			default:
-				throw new NyARException("Invalid Transmat algolism type.");
-			}
-		}		
-	}
 	class PImageSensor extends NyARSensor
 	{
 		private PImageRaster _src;
@@ -244,7 +222,7 @@ public class MultiMarker extends NyARPsgBaseClass
 		NyARIntSize s=i_param.getScreenSize();
 		this._ss=new PImageSensor(new NyARIntSize(s.w,s.h));
 		this._ms=new NyARMarkerSystem(
-				new PsgMsCfg(i_param,i_config.env_transmat_mode));
+				new NyARMarkerSystemConfig(i_param,i_config.env_transmat_mode));
 		super.initInstance(parent,i_config);
 	}
 	@Override

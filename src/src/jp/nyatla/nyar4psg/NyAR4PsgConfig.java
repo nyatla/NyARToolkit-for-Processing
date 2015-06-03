@@ -1,5 +1,6 @@
 package jp.nyatla.nyar4psg;
 
+import jp.nyatla.nyartoolkit.markersystem.NyARMarkerSystemConfig;
 import processing.core.PApplet;
 
 /**
@@ -11,11 +12,15 @@ public class NyAR4PsgConfig
 	/**定数値です。ARToolkit互換の姿勢計算アルゴリズムを選択します。
 	 * このアルゴリズムは、ARToolkitと完全に同じです。
 	 */
-	public final static int TM_ARTK  =0;
+	public final static int TM_ARTK  =NyARMarkerSystemConfig.TM_ARTKV2;
 	/**定数値です。NyARToolkitの姿勢計算アルゴリズムを選択します。
 	 * このアルゴリズムは高速ですが、角度の浅い時にずれが大きくなります。
 	 */
-	public final static int TM_NYARTK=1;
+	public final static int TM_NYARTK=NyARMarkerSystemConfig.TM_NYARTK;
+	/**定数値です。ARToolkitV4に実装されているICPアルゴリズムを選択します。
+	 * 通常はこのアルゴリズムを選択してください。
+	 */
+	public final static int TM_ARTKICP=NyARMarkerSystemConfig.TM_ARTKICP;
 	/**
 	 * 定数値です。RightHand系の座標を選択します。
 	 * RightHand座標系は、ARToolKitと互換性のある座標系ですが、Processingの座標系と互換性がないため、text等の出力が鏡像になります。
@@ -47,6 +52,7 @@ public class NyAR4PsgConfig
 	 * <ul>
 	 * <li> {@link #TM_NYARTK} - NyARToolKitの姿勢推定を使用します。
 	 * <li> {@link #TM_ARTK} - ARToolKitの姿勢推定を使用します。
+	 * <li> {@link #TM_ARTKICP} - ARToolKitV4の姿勢推定を使用します。
 	 * </ul>
 	 */
 	public NyAR4PsgConfig(int i_cs,int i_tm)
@@ -59,11 +65,12 @@ public class NyAR4PsgConfig
 			PApplet.println("Invalid CS param. select CS_LEFT_HAND or CS_RIGHT_HAND.");
 		}
 		switch(i_tm){
+		case TM_ARTKICP:
 		case TM_NYARTK:
 		case TM_ARTK:
 			break;
 		default:
-			PApplet.println("Invalid TM param. select TM_NYARTK or TM_ARTK.");
+			PApplet.println("Invalid TM param. select TM_NYARTK or TM_ARTK　or TM_ARTKICP.");
 		}
 		this._coordinate_system=i_cs;
 		this.env_transmat_mode=i_tm;
@@ -71,14 +78,14 @@ public class NyAR4PsgConfig
 	/**
 	 * 定数値です。
 	 * Processingと互換性のあるコンフィギュレーションです。
-	 * パラメータは、座標系=左手系、姿勢推定アルゴリズム=NyARToolkitです。
+	 * パラメータは、座標系=左手系、姿勢推定アルゴリズム={@link #TM_ARTKICP}です。
 	 */
-	public static final NyAR4PsgConfig CONFIG_PSG=new NyAR4PsgConfig(CS_LEFT_HAND,TM_NYARTK);
+	public static final NyAR4PsgConfig CONFIG_PSG=new NyAR4PsgConfig(CS_LEFT_HAND,TM_ARTKICP);
 	/**
 	 * 定数値です。
 	 * システムのデフォルトコンフィギュレーションです。
 	 * nyar4psg/0.2.xのCS_LEFTと互換性があります。（nyar4psg/0.2.xのCS_RIGHTと互換性のある値はありません。）
-	 * パラメータは、座標系=右手系、姿勢推定アルゴリズム=NyARToolkitです。
+	 * パラメータは、座標系=右手系、姿勢推定アルゴリズム={@link #TM_ARTKICP}です。
 	 */
-	public static final NyAR4PsgConfig CONFIG_DEFAULT=new NyAR4PsgConfig(CS_RIGHT_HAND,TM_NYARTK);
+	public static final NyAR4PsgConfig CONFIG_DEFAULT=new NyAR4PsgConfig(CS_RIGHT_HAND,TM_ARTKICP);
 }
