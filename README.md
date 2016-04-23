@@ -13,28 +13,23 @@ wm(at)nyatla.jp
 ## NyARToolkit for Processing
 
  * NyARToolkit for proce55ingは、processing環境下でNyARToolkitを利用するためのライブラリです。
- * 拡張現実感ライブラリには、ARToolKitの派生ライブラリNyARToolKit for Javaを使用しています。
+ * NyIdマーカ、ARToolKitマーカ、NFTターゲット(ARToolKit5仕様)をトラッキングできます。
  * Processing version 2.2.1,3.0.2での動作を確認しています。 (1.xには対応していません。)
- * このライブラリは、processingのcamera()関数で取り込んだ画像や、PImage画像を元にマーカ検出処理を実行できます。
- * レンダリングシステムには、PV3Dをサポートします。
+ * 拡張現実感ライブラリには、ARToolKitの派生ライブラリNyARToolKit for Javaを使用しています。
 
 ## NyARToolkit for proce55ingの特徴
-
+ * 数十行のコンパクトなスケッチでARアプリケーションを作ることができます。
  * 左手系・右手系両方の座標系をサポートします。
- * NyIdマーカ、ARToolKitマーカ、NFTターゲット(ARToolKit5仕様)に対応します。
  * パターン取得、スクリーン座標のマーカ座標変換等が手軽に使えます。
  * レンダリングにProcessingCoreAPIのみを使います。Graphics3D派生オブジェクト全てに対応します。
+ * レンダリングシステムには、PV3Dをサポートします。
 
 ## 環境の準備
-
-
-1. NyARToolkit for proce55ingの実行には、processing/2.2.1、又は3.0.1以上が必要です。Processingウェブサイトからダウンロードして下さい。http://processing.org/download/index.html
-  
-2. ProcessingのCapture機能を使用できるようにコンピュータを設定してください。Capture機能は、ProcessingのExamples>Libraries>Video(Capture)以下のサンプルの動作で確認できます。（このステップは、キャプチャ機能を使わないときには必要ありません。）
-
-3. ProcessingからOpenGL機能を使用できるように、コンピュータの設定をして下さい。OpenGL機能はProcessingのExamples>Libraries>OpenGL以下のサンプルの動作で確認できます。（このステップは、レンダリングにP3Dを使用するときには必要ありません。）
-
-4. 以上で準備は完了です。
+1. NyARToolKit for Processingのパッケージをreleaseページからダウンロードします。[https://github.com/nyatla/NyARToolkit-for-Processing/releases](https://github.com/nyatla/NyARToolkit-for-Processing/releases)  
+2. NyARToolkit for proce55ingの実行には、processing/2.2.1、又は3.0.1以上が必要です。Processingウェブサイトからダウンロードして下さい。[http://processing.org/download/index.html](http://processing.org/download/index.html)
+3. ProcessingのCapture機能を使用できるようにコンピュータを設定してください。Capture機能は、ProcessingのExamples>Libraries>Video(Capture)以下のサンプルの動作で確認できます。（このステップは、キャプチャ機能を使わないときには必要ありません。）
+4. ProcessingからOpenGL機能を使用できるように、コンピュータの設定をして下さい。OpenGL機能はProcessingのExamples>Libraries>OpenGL以下のサンプルの動作で確認できます。（このステップは、レンダリングにP3Dを使用するときには必要ありません。）
+5. 以上で準備は完了です。
 
 
 ## サンプル実行(ARマーカ)
@@ -42,7 +37,6 @@ wm(at)nyatla.jp
 exampleにある、simpleLiteのサンプルの実行手順です。simpleLiteは、Hiroマーカの上に立方体を表示するシンプルなプログラムです。
 
 1. dataディレクトリにある、pattHiro.pdfを印刷しておいてきます。
- 
 2. example/simpleLiteにある、simpleLite.pdeを開いて実行してください。マーカを撮影すると、そこに立方体が表示されるはずです。
 
 
@@ -51,7 +45,6 @@ exampleにある、simpleLiteのサンプルの実行手順です。simpleLite�
 exampleにある、simpleNftのサンプルの実行手順です。simpleNftは、画像の上に立方体を表示するシンプルなプログラムです。
 
 1. dataディレクトリにある、infinitycat.pdfを印刷しておいてきます。
- 
 2. example/simpleNftにある、simpleNft.pdeを開いて実行してください。マーカを撮影すると、そこに立方体が表示されるはずです。
 
 
@@ -70,6 +63,9 @@ NFTターゲットを取り扱うクラスです。複数個を同時に使う�
 
 * パターンファイルやカメラパラメータファイルの互換性について
 NyARToolKit for Processingの使用するカメラパラメータファイル、パターンファイルと互換性があります。
+* カメラキャリブレーションについて
+キャリブレーションツールは付属しません。OpenCVか、ARToolKit付属のツールを使ってください。
+カメラキャリブレーションを行うとより正確なトラッキングを行うことができます。
 * ARマーカの作り方
 PNG/JPEG画像をそのまま使用することができます。ARToolKitフォーマットのファイルを使う場合は、外部ツールで作成してください。
 * NFTターゲットファイルセットの作り方

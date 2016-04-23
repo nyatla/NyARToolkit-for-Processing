@@ -1,13 +1,10 @@
 /**
   NyARToolkit for proce55ing/1.0.0
-  (c)2008-2011 nyatla
+  (c)2008-2016 nyatla
   airmail(at)ebony.plala.or.jp
   
-  ARマーカとIdマーカを同時に使う例です。
-  ARマーカはkanji,hiro、idマーカは0,1番のマーカを使う事ができます。
-  
-  This sample handles 2 ARToolkit style markers and 2 NyId markers at same time.
-  The ARToolKit marker files are kanji.patt and hiro.patt. NyId marker ids are #0 and #1.
+  This sample handles a NFT target.
+  The NFT target files are infinitycat.*.
 */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
