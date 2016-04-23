@@ -45,19 +45,19 @@ wm(at)nyatla.jp
 * MultiMarker class (MultiMarker.java)  
 This class can handle some NyId marker and AR marker at the same time.
 
-* MultiNft class (MultiNft.java) 
+* MultiNft class (MultiNft.java)  
 This class can handle some NFT targets.
 
 ## Other
 
-* Files compatibility with ARToolKit
+* Files compatibility with ARToolKit  
 NyARToolkit can read all files of ARToolKit5.
-* Camera caliblarion
+* Camera caliblarion  
 NyARToolkit supports 2 Camera calibration file format. ARToolkit format and OpenCV format.
 ARToolkit can not create the files. It is necessary to create by tools of ARToolkit or OpenCV .
-* How to make your AR marker.
+* How to make your AR marker  
 NyARToolKit can use anyimage file as AR-Marker. You can use the ARToolKit format patt, but NyARToolkit has not generator.
-* How to make your NFT target
+* How to make your NFT target  
 You can use the sketch "nftFileGen". It can make NFT target files from an image file.
 
 

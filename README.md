@@ -52,25 +52,24 @@ exampleにある、simpleNftのサンプルの実行手順です。simpleNftは�
 
 NyARToolkit for proce55ingの提供するクラスを説明します。
  
-* MultiMarkerクラス (MultiMarker.java)
+* MultiMarkerクラス (MultiMarker.java)  
 ARマーカ、NyIdマーカを取り扱うクラスです。複数個同時に使うことができます。
-
-* MultiNftクラス (MultiNft.java)
+* MultiNftクラス (MultiNft.java)  
 NFTターゲットを取り扱うクラスです。複数個を同時に使うことができます。
 
 
 ## その他
 
-* パターンファイルやカメラパラメータファイルの互換性について
+* パターンファイルやカメラパラメータファイルの互換性について  
 NyARToolKit for Processingの使用するカメラパラメータファイル、パターンファイルと互換性があります。
-* カメラキャリブレーションについて
+* カメラキャリブレーションについて  
 キャリブレーションツールは付属しません。OpenCVか、ARToolKit付属のツールを使ってください。
 カメラキャリブレーションを行うとより正確なトラッキングを行うことができます。
-* ARマーカの作り方
+* ARマーカの作り方  
 PNG/JPEG画像をそのまま使用することができます。ARToolKitフォーマットのファイルを使う場合は、外部ツールで作成してください。
-* NFTターゲットファイルセットの作り方
+* NFTターゲットファイルセットの作り方  
 スケッチ"nftFileGen"を使うことができます。スケッチを起動するとツールが立ち上がります。Jpegなどの画像からターゲットファイルセットを作ることができます。
-* Processing 2.2.1での使用方法
+* Processing 2.2.1での使用方法  
 MultiMarker/MultiNftのコンフィギュレーションパラメータに、NyAR4PsgConfig.CONFIG_PSG_PV221を使います。カスタムコンフィギュレーションを使う場合は、バージョンパラメータにNyAR4PsgConfig.PV_221を指定してコンフィギュレーションを作成します。
 
 ## ライセンス
