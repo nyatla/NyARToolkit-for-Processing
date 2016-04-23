@@ -25,23 +25,27 @@
  * 
  */
 
-package jp.nyatla.nyar4psg;
+package jp.nyatla.nyar4psg.utils;
 
 
 
 import processing.core.*;
 import processing.opengl.*;
+import jp.nyatla.nyar4psg.NyAR4PsgConfig;
+import jp.nyatla.nyar4psg.SingleCameraView;
 import jp.nyatla.nyartoolkit.core.*;
+import jp.nyatla.nyartoolkit.core.types.NyARIntSize;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 
 
 
 /**
  * このクラスは、NyARToolkit for Processingのベースクラスです。
- * ARToolkit座標系の環境定数、環境設定機能を継承クラスに対して提供します。
+ * 環境定数などの共通値を定義します。
  */
 public abstract class NyARPsgBaseClass
 {
+
 	/**
 	 * nearクリップ面のデフォルト値です。
 	 */
@@ -55,45 +59,28 @@ public abstract class NyARPsgBaseClass
 	 * バージョン文字列です。
 	 * NyAR4psgのバージョン情報を示します。
 	 */
-	public final static String VERSION = "NyAR4psg/2.1.0;"+NyARVersion.VERSION_STRING;
+	final public static String VERSION = "NyAR4psg/3.0.2;"+NyARVersion.VERSION_STRING;
 	/**　参照するAppletのインスタンスです。*/
-	protected PApplet _ref_papplet;	
-	/**　バックグラウンド用のModelviewMatrixです。*/
-	protected final PMatrix3D _ps_background_mv=new PMatrix3D();
-	
-	/**　ARToolkitパラメータのインスタンスです。*/
-	protected NyAR4PsgConfig _config;
+	final protected PApplet _ref_papplet;	
+
+	/** 関連付けられているビューです。他のインスタンスと共有するときに使います。*/
+	final public SingleCameraView cameraview;
 	
 
-	
-	private float _clip_far;
-	private float _clip_near;
 	
 	/**
 	 * コンストラクタです。
 	 */
-	protected NyARPsgBaseClass()
+	protected NyARPsgBaseClass(PApplet i_ref_applet,SingleCameraView i_view)
 	{
-	}
-	protected void initInstance(PApplet parent,NyAR4PsgConfig i_config) throws NyARException
-	{
-			this._ref_papplet=parent;
-			this._config=i_config;
-			//ProcessingのprojectionMatrixの計算と、Frustumの計算
-			this.setARClipping(FRUSTUM_DEFAULT_NEAR_CLIP,FRUSTUM_DEFAULT_FAR_CLIP);
+		this._ref_papplet=i_ref_applet;
+		this.cameraview=i_view;
+		NyARIntSize ss=i_view._view.getARParam().getScreenSize();
+		//ProcessingのprojectionMatrixの計算と、Frustumの計算
+		i_view.setARClipping(ss.w,ss.h,FRUSTUM_DEFAULT_NEAR_CLIP,FRUSTUM_DEFAULT_FAR_CLIP);//ここ問題があるよ？
 		return;
 	}
-	/**
-	 * [readonly]この関数は、Processing形式のProjectionMatrixの参照値を返します。
-	 * @return
-	 */
-	public abstract PMatrix3D getProjectionMatrix();
-	/**
-	 * この関数は、ProjectionMatrixをi_bufへ複製して返します。
-	 * @return
-	 * ProjectionMatrixです。
-	 */
-	public abstract PMatrix3D getProjectionMatrix(PMatrix3D i_buf);
+
 	/**
 	 * この関数は、PImageをバックグラウンドへ描画します。PImageはfarclip面+1の部分に描画します。
 	 * <div>この関数は、次のコードと等価です。</div>
@@ -116,34 +103,10 @@ public abstract class NyARPsgBaseClass
 	 */
 	public void drawBackground(PImage i_img)
 	{
-		PApplet pa=this._ref_papplet;
-		PGraphicsOpenGL pgl=((PGraphicsOpenGL)pa.g);
-		//行列の待避
-		pgl.pushProjection();
-		this.setBackgroundOrtho(i_img.width,i_img.height);
-		pa.pushMatrix();
-		pa.setMatrix(this._ps_background_mv);
-		pa.image(i_img,-i_img.width/2,-i_img.height/2);
-		pa.popMatrix();
-		//行列の復帰
-		pgl.popProjection();
+		this.cameraview.drawBackground(i_img);
 	}
 	
-	/**
-	 * この関数は、視錐台のクリップ面を設定します。この値のデフォルト値は、{@link #FRUSTUM_DEFAULT_NEAR_CLIP}と{@link #FRUSTUM_DEFAULT_FAR_CLIP}です。
-	 * 設定値は、次回の{@link #setARPerspective()}から影響を及ぼします。現在の設定値にただちに影響を及ぼすものではありません。
-	 * @param i_near
-	 * NearPlaneの値を設定します。単位は[mm]です。
-	 * @param i_far
-	 * FarPlaneの値を設定します。単位は[mm]です。
-	 */
-	public void setARClipping(float i_near,float i_far)
-	{
-		this._clip_far=i_far;
-		this._clip_near=i_near;
-		this._ps_background_mv.reset();
-		this._ps_background_mv.translate(0,0,-i_far);
-	}
+
 	/**
 	 * この関数は、正射影行列をProcessingへセットします。
 	 * 画面の中心が0,0にセットされます。
@@ -164,8 +127,8 @@ public abstract class NyARPsgBaseClass
 	 * 高さを指定します。
 	 */
 	public void setBackgroundOrtho(int i_width,int i_height)
-	{		
-		this._ref_papplet.ortho(0,i_width,0,i_height,this._clip_near,this._clip_far+1);
+	{
+		this.cameraview.setBackgroundOrtho(i_width, i_height);
 	}
 	/**
 	 * この関数は、ARToolKit準拠のProjectionMatrixをProcessingにセットします。
@@ -192,7 +155,7 @@ public abstract class NyARPsgBaseClass
 	 * Version 1.1.0より、古いprojection matrixを返さなくなりました。古いprojection matrixが必要な時は、{@link PGraphicsOpenGL#projection}を複製して保存して下さい。
 	 * </p>
 	 */	
-	public void setPerspective(PMatrix3D i_projection)
+	final public void setPerspective(PMatrix3D i_projection)
 	{
 		//Projectionをfrustum経由で設定。
 		float far=i_projection.m23/(i_projection.m22+1);
@@ -206,63 +169,35 @@ public abstract class NyARPsgBaseClass
 		return;
 	}
 
-	protected static void PMatrix2GLProjection(PMatrix3D i_in,float[] o_out)
+
+	
+	/**
+	 * [readonly]この関数は、Processing形式のProjectionMatrixの参照値を返します。
+	 * @return
+	 */	
+	final public PMatrix3D getProjectionMatrix()
 	{
-		o_out[ 0]=i_in.m00;
-		o_out[ 1]=i_in.m10;
-		o_out[ 2]=i_in.m20;
-		o_out[ 3]=i_in.m30;
-		o_out[ 4]=i_in.m01;
-		o_out[ 5]=i_in.m11;
-		o_out[ 6]=i_in.m21;
-		o_out[ 7]=i_in.m31;
-		o_out[ 8]=i_in.m02;
-		o_out[ 9]=i_in.m12;
-		o_out[10]=i_in.m22;
-		o_out[11]=i_in.m32;
-		o_out[12]=i_in.m03;
-		o_out[13]=i_in.m13;
-		o_out[14]=i_in.m23;
-		o_out[15]=i_in.m33;		
+		return this.cameraview.getProjectionMatrix();
 	}
-	protected static void PMatrix2GLProjection(PMatrix3D i_in,double[] o_out)
+	/**
+	 * この関数は、視錐台のクリップ面を設定します。この値のデフォルト値は、{@link #FRUSTUM_DEFAULT_NEAR_CLIP}と{@link #FRUSTUM_DEFAULT_FAR_CLIP}です。
+	 * 設定値は、次回の{@link #setARPerspective()}から影響を及ぼします。現在の設定値にただちに影響を及ぼすものではありません。
+	 * @param i_near
+	 * NearPlaneの値を設定します。単位は[mm]です。
+	 * @param i_far
+	 * FarPlaneの値を設定します。単位は[mm]です。
+	 */
+	final public void setARClipping(float i_near,float i_far)
 	{
-		o_out[ 0]=i_in.m00;
-		o_out[ 1]=i_in.m10;
-		o_out[ 2]=i_in.m20;
-		o_out[ 3]=i_in.m30;
-		o_out[ 4]=i_in.m01;
-		o_out[ 5]=i_in.m11;
-		o_out[ 6]=i_in.m21;
-		o_out[ 7]=i_in.m31;
-		o_out[ 8]=i_in.m02;
-		o_out[ 9]=i_in.m12;
-		o_out[10]=i_in.m22;
-		o_out[11]=i_in.m32;
-		o_out[12]=i_in.m03;
-		o_out[13]=i_in.m13;
-		o_out[14]=i_in.m23;
-		o_out[15]=i_in.m33;	
+		NyARIntSize s=this.cameraview._view.getARParam().getScreenSize();
+		this.cameraview.setARClipping(s.w,s.h, i_near, i_far);
+		return;
 	}
-	protected static void nyarMat2PsMat(NyARDoubleMatrix44 i_src,PMatrix3D i_dst)
-	{
-		i_dst.m00=(float)(i_src.m00);
-		i_dst.m01=(float)(i_src.m01);
-		i_dst.m02=(float)(i_src.m02);
-		i_dst.m03=(float)(i_src.m03);
-		i_dst.m10=(float)(i_src.m10);
-		i_dst.m11=(float)(i_src.m11);
-		i_dst.m12=(float)(i_src.m12);
-		i_dst.m13=(float)(i_src.m13);
-		i_dst.m20=(float)(i_src.m20);
-		i_dst.m21=(float)(i_src.m21);
-		i_dst.m22=(float)(i_src.m22);
-		i_dst.m23=(float)(i_src.m23);
-		i_dst.m30=(float)(i_src.m30);
-		i_dst.m31=(float)(i_src.m31);
-		i_dst.m32=(float)(i_src.m32);
-		i_dst.m33=(float)(i_src.m33);
-	}
+	
+	
+	
+
+
 
 	/**
 	 * 左手系変換用の行列
@@ -321,6 +256,7 @@ public abstract class NyARPsgBaseClass
 		o_gl_array[3 + 2 * 4] = 0.0;
 		o_gl_array[3 + 3 * 4] = 1.0;
 	}	
+
 
 }
 

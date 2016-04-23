@@ -38,13 +38,11 @@ void draw()
   nya.detect(cam);
   background(0);
   nya.drawBackground(cam);//frustumを考慮した背景描画
-  if((!nya.isExistMarker(0))){
+  if((!nya.isExist(0))){
     return;
   }
-  PImage pm=nya.pickupRectMarkerImage(0,-40,-40,80,80,100,100);
+  PImage pm=nya.pickupRectImage(0,-40,-40,80,80,100,100);
   //以下のコードと意味は同じです。 The meaning of this code is the same as the next lines. 
   //PImage pm=nya.pickupMarkerImage(0,40,40,-40,40,-40,-40,40,-40,100,100);
   image(pm,0,0);
 }
-
-

@@ -36,10 +36,10 @@ void draw()
   nya.detect(cam);
   background(0);
   nya.drawBackground(cam);//frustumを考慮した背景描画
-  if((!nya.isExistMarker(0))){
+  if((!nya.isExist(0))){
     return;
   }
-  PVector p=nya.screen2MarkerCoordSystem(0,mouseX,mouseY);
+  PVector p=nya.screen2ObjectCoordSystem(0,mouseX,mouseY);
   nya.beginTransform(0);
   noFill();
   stroke(100,0,0);
@@ -48,5 +48,3 @@ void draw()
   ellipse((int)p.x,(int)p.y,20-c%20,20-c%20);
   nya.endTransform();
 }
-
-

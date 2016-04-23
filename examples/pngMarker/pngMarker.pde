@@ -35,7 +35,7 @@ void draw()
   nya.detect(cam);
   background(0);
   nya.drawBackground(cam);//frustumを考慮した背景描画
-  if((!nya.isExistMarker(0))){
+  if((!nya.isExist(0))){
     return;
   }
   nya.beginTransform(0);
@@ -44,5 +44,3 @@ void draw()
   box(40);
   nya.endTransform();
 }
-
-

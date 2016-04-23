@@ -50,7 +50,7 @@ void draw()
   hint(DISABLE_DEPTH_TEST);
   image(cam,0,0);
   hint(ENABLE_DEPTH_TEST);
-  if(!nya.isExistMarker(0)){
+  if(!nya.isExist(0)){
     return;
   }
   picker.start(0);
@@ -69,5 +69,3 @@ void mouseClicked() {
     cb=int(random(0,100));
   }
 }
-
-

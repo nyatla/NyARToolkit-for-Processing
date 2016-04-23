@@ -28,10 +28,11 @@ package jp.nyatla.nyar4psg;
 
 import java.util.ArrayList;
 
-import jp.nyatla.nyartoolkit.core.*;
+import jp.nyatla.nyar4psg.utils.NyARPsgBaseClass;
+import jp.nyatla.nyar4psg.utils.PImageRaster;
+import jp.nyatla.nyar4psg.utils.PImageSensor;
 import jp.nyatla.nyartoolkit.core.param.NyARParam;
 import jp.nyatla.nyartoolkit.core.types.*;
-import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 import processing.core.*;
 import processing.opengl.*;
 import jp.nyatla.nyartoolkit.markersystem.*;
@@ -45,25 +46,10 @@ import jp.nyatla.nyartoolkit.markersystem.*;
  */
 public class MultiMarker extends NyARPsgBaseClass
 {
-	class PImageSensor extends NyARSensor
-	{
-		private PImageRaster _src;
-		public PImageSensor(NyARIntSize i_size) throws NyARException
-		{
-			super(i_size);
-			this._src=new PImageRaster(i_size.w,i_size.h);
-		}
-		public void update(PImage i_img) throws NyARException
-		{
-			this._src.wrapBuffer(i_img);
-			super.update(this._src);
-		}
-		
-	}
-	
-	protected PImageSensor _ss;
-	protected NyARMarkerSystem _ms;
-
+	/**　ARToolkitパラメータのインスタンスです。*/
+	final protected PImageSensor _ss;
+	final protected NyARMarkerSystem _ms;
+	final private int _coordinate_system;
 
 	
 	/**
@@ -125,10 +111,23 @@ public class MultiMarker extends NyARPsgBaseClass
 	/** PSGのIDとMarkerSystemのマッピング*/
 	private ArrayList<Integer> _id_map=new ArrayList<Integer>();
 
-	private final PMatrix3D _ps_projection=new PMatrix3D();
+
+	/**
+	 * インスタンスを初期化します。
+	 * @param i_config
+	 */
+	private MultiMarker(PApplet i_applet,SingleCameraView i_view,NyAR4PsgConfig i_config)
+	{
+		super(i_applet,i_view);
+		NyARIntSize s=i_view._view.getARParam().getScreenSize();
+		this._ss=new PImageSensor(new NyARIntSize(s.w,s.h));
+		this._ms=new NyARMarkerSystem(new NyARMarkerSystemConfig(i_view._view,i_config.env_transmat_mode));
+		this._coordinate_system=i_config._coordinate_system;
+	}
+
 	/**
 	 * コンストラクタです。
-	 * @param parent
+	 * @param i_applet
 	 * 親となるAppletオブジェクトを指定します。このOpenGLのレンダリングシステムを持つAppletである必要があります。
 	 * @param i_cparam_file
 	 * ARToolKitフォーマットのカメラパラメータファイルの名前を指定します。
@@ -140,53 +139,36 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * コンフィギュレーションオブジェクトを指定します。
 	 * @throws NyARException
 	 */
-	public MultiMarker(PApplet parent, int i_width,int i_height,String i_cparam_file,NyAR4PsgConfig i_config)
+	public MultiMarker(PApplet i_applet, int i_width,int i_height,String i_cparam_file,NyAR4PsgConfig i_config)
 	{
-		try{
-			NyARParam cp=NyARParam.createFromARParamFile(parent.createInput(i_cparam_file));
-			cp.changeScreenSize(i_width,i_height);
-			this.initInstance(parent,cp,i_config);
-		}catch(Exception e){
-			e.printStackTrace();
-			parent.die("Catch an exception!");
-		}			
+		this(i_applet,new SingleCameraView(i_applet,
+				NyARParam.loadFromARParamFile(i_applet.createInput(i_cparam_file), i_width, i_height),i_config._ps_patch_version),
+				i_config);		
 		return;
-	}
+	}	
+
 	/**
 	 * コンストラクタです。
-	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}のコンフィギュレーションに、{@link NyAR4PsgConfig#CONFIG_DEFAULT}を指定した物と同じです。
-	 * @param parent
-	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照。
+	 * @param i_applet
+	 * 親となるAppletオブジェクトを指定します。このOpenGLのレンダリングシステムを持つAppletである必要があります。
 	 * @param i_width
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_height
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_cparam_file
-	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照。
-	 * @throws NyARException
+	 * ARToolKitフォーマットのカメラパラメータファイルの名前を指定します。
 	 */
-	public MultiMarker(PApplet parent,int i_width,int i_height,String i_cparam_file)
+	public MultiMarker(PApplet i_applet, int i_width,int i_height,String i_cparam_file)
 	{
-		try{
-			NyARParam cp=NyARParam.createFromARParamFile(parent.createInput(i_cparam_file));
-			cp.changeScreenSize(i_width,i_height);
-			this.initInstance(parent,cp, NyAR4PsgConfig.CONFIG_DEFAULT);
-		}catch(Exception e){
-			e.printStackTrace();
-			parent.die("Catch an exception!");
-		}
-		return;
+		this(i_applet,i_width,i_height,i_cparam_file,NyAR4PsgConfig.CONFIG_OLD);
 	}
+
 	/**
 	 * コンストラクタです。
-	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}のコンフィギュレーションに、{@link NyAR4PsgConfig#CONFIG_DEFAULT}を指定した物と同じです。
-	 * @param parent
-	 * {@link MultiMarker#MultiMarker(PApplet, int, int, String, NyAR4PsgConfig)}を参照。
+	 * OpenCVのカメラパラメータ値を使ってインスタンスを生成します。
 	 * @param i_width
-	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * カメラパラメータのサイズ値
 	 * @param i_height
-	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
-	 * @param i_size
 	 * カメラパラメータのサイズ値
 	 * @param i_intrinsic_matrix
 	 * 3x3 matrix
@@ -194,57 +176,39 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * @param i_distortion_coeffs
 	 * 4x1 matrix
 	 * このパラメータは、OpenCVのcvCalibrateCamera2関数が出力するdistortion_coeffsの値と合致します。
+	 * @param i_screen_width
+	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * @param i_screen_height
+	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * @param i_cfg
 	 */	
-	public MultiMarker(PApplet parent,int i_width,int i_height,double[] i_intrinsic_matrix,double[] i_distortion_coeffs)
+	public MultiMarker(PApplet i_applet,int i_width,int i_height,double[] i_intrinsic_matrix,double[] i_distortion_coeffs,int i_screen_width,int i_screen_height,NyAR4PsgConfig i_config)
 	{
-		try{
-			NyARParam cp=NyARParam.createFromCvCalibrateCamera2Result(i_width, i_height, i_intrinsic_matrix, i_distortion_coeffs);
-			cp.changeScreenSize(i_width,i_height);
-			this.initInstance(parent,cp, NyAR4PsgConfig.CONFIG_DEFAULT);
-		}catch(Exception e){
-			e.printStackTrace();
-			parent.die("Catch an exception!");
-		}
+		this(i_applet,new SingleCameraView(i_applet,
+				NyARParam.loadFromCvCalibrateCamera2Result(i_width, i_height, i_intrinsic_matrix, i_distortion_coeffs, i_screen_width, i_screen_height),i_config._ps_patch_version),
+				i_config);
 		return;
 	}
-	/**
-	 * インスタンスを初期化します。
-	 * @param parent
-	 * @param i_width
-	 * @param i_height
-	 * @param i_cparam_file
-	 * @param i_patt_resolution
-	 * @param i_projection_coord_system
-	 * @throws NyARException 
-	 */
-	protected void initInstance(PApplet parent,NyARParam i_param,NyAR4PsgConfig i_config) throws NyARException
+	
+	public MultiMarker(PApplet i_applet,int i_width,int i_height,double[] i_intrinsic_matrix,double[] i_distortion_coeffs,int i_screen_width,int i_screen_height,int i_cs,int i_tm)
 	{
-		NyARIntSize s=i_param.getScreenSize();
-		this._ss=new PImageSensor(new NyARIntSize(s.w,s.h));
-		this._ms=new NyARMarkerSystem(
-				new NyARMarkerSystemConfig(i_param,i_config.env_transmat_mode));
-		super.initInstance(parent,i_config);
+		this(
+			i_applet,
+			i_width,i_height,i_intrinsic_matrix, i_distortion_coeffs,
+			i_screen_width, i_screen_height,new NyAR4PsgConfig(i_cs,i_tm));
+		return;
 	}
-	@Override
-	public PMatrix3D getProjectionMatrix()
+	
+	public MultiMarker(PApplet i_applet,int i_width,int i_height,double[] i_intrinsic_matrix,double[] i_distortion_coeffs,int i_screen_width,int i_screen_height)
 	{
-		return this._ps_projection;
+		this(
+			i_applet,
+			i_width,i_height,i_intrinsic_matrix, i_distortion_coeffs,
+			i_screen_width, i_screen_height,NyAR4PsgConfig.CONFIG_OLD);
 	}
-	@Override
-	public PMatrix3D getProjectionMatrix(PMatrix3D i_buf)
-	{
-		return new PMatrix3D(this._ps_projection);
-	}	
-	@Override
-	public void setARClipping(float i_near,float i_far)
-	{
-		super.setARClipping(i_near, i_far);
-		this._ms.setProjectionMatrixClipping(i_near,i_far);
-		NyARIntSize s=this._ms.getARParam().getScreenSize();
-		NyARDoubleMatrix44 tmp=new NyARDoubleMatrix44();
-		this._ms.getARParam().getPerspectiveProjectionMatrix().makeCameraFrustumRH(s.w,s.h,i_near,i_far,tmp);
-		nyarMat2PsMat(tmp,this._ps_projection);
-	}	
+	
+	
+	
 	
 	/** begin-endシーケンスの判定用*/
 	private boolean _is_in_begin_end_session=false;
@@ -286,7 +250,7 @@ public class MultiMarker extends NyARPsgBaseClass
 		
 		//ModelViewの設定
 		this._ref_papplet.pushMatrix();
-		this._ref_papplet.setMatrix(this.getMarkerMatrix(i_id));
+		this._ref_papplet.setMatrix(this.getMatrix(i_id));
 		return;	
 	}
 	/**
@@ -325,24 +289,36 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */	
 	public void detect(PImage i_image)
 	{
-		i_image.loadPixels();
-		this.detectWithoutLoadPixels(i_image);
+		this.detect(i_image,true);
 	}
 	/**
-	 * {@link PImage#loadPixels()}を伴わない{@link detect()}です。
+	 * この関数は、画像からマーカーの検出処理を実行します。
 	 * 引数と戻り値の詳細は、{@link #detect(PImage)}を参照してください。
 	 * @param i_image
+	 * 検出処理を行う画像を指定します。
+	 * @param i_with_loadpixels
+	 * {@link PImage#loadPixels()}を実行するかのフラグ値です。
 	 * @see #detect(PImage)
 	 */
-	public void detectWithoutLoadPixels(PImage i_image)
+	public void detect(PImage i_image,boolean i_with_loadpixels)
 	{
-		try{
+		if(i_with_loadpixels){
+			i_image.loadPixels();
 			this._ss.update(i_image);
-			this._ms.update(this._ss);
-		}catch(Exception e){
-			e.printStackTrace();
-			this._ref_papplet.die("Catch an exception!");
+			i_image.updatePixels();
+		}else{
+			this._ss.update(i_image);
 		}
+		this.detect(this._ss);
+	}
+	/**
+	 * {@link PImageSensor}の内容で更新します。
+	 * 他のインスタンスで処理した{@link PImageSensor}を使うことができます。
+	 * @param i_source_image
+	 */
+	public void detect(PImageSensor i_source_image)
+	{
+		this._ms.update(i_source_image);
 	}
 	
 	
@@ -520,7 +496,7 @@ public class MultiMarker extends NyARPsgBaseClass
 		int msid=this._id_map.get(i_id);
 		PVector[] r=new PVector[4];
 		try{
-			NyARIntPoint2d[] pos=this._ms.getMarkerVertex2D(msid);
+			NyARIntPoint2d[] pos=this._ms.getVertex2D(msid);
 			for(int i=0;i<4;i++){
 				r[i]=new PVector((float)(pos[i].x),(float)(pos[i].y));
 			}
@@ -529,31 +505,6 @@ public class MultiMarker extends NyARPsgBaseClass
 			this._ref_papplet.die("Catch an exception!");
 		}
 		return r;
-	}
-	
-	/**
-	 * この関数は、マーカの姿勢行列を返します。
-	 * 返却した行列は{@link PApplet#setMatrix}でProcessingにセットできます。
-	 * @param i_armk_id
-	 * マーカidを指定します。
-	 * @return
-	 * マーカの姿勢行列を返します。
-	 */
-	public PMatrix3D getMarkerMatrix(int i_id)
-	{
-		PMatrix3D p=new PMatrix3D();
-		//存在チェック
-		if(!this.isExistMarker(i_id)){
-			this._ref_papplet.die("Marker id " +i_id + " is not exist on image.", null);
-		}
-		int msid=this._id_map.get(i_id);
-		try{
-			matResult2PMatrix3D(this._ms.getMarkerMatrix(msid),this._config._coordinate_system,p);
-		}catch(Exception e){
-			e.printStackTrace();
-			this._ref_papplet.die("Catch an exception!");
-		}			
-		return p;
 	}
 	/**
 	 * この関数は、指定idのARマーカパターンの一致率を返します。
@@ -592,26 +543,6 @@ public class MultiMarker extends NyARPsgBaseClass
 		}
 		return -1;
 	}
-	
-	/**
-	 * この関数は、指定idのマーカが有効かを返します。
-	 * {@list #isExistMarker}がtrueを返すときだけ有効です。
-	 * @param i_id
-	 * マーカidを指定します。
-	 * @return
-	 * マーカが有効ならばtrueです。無効ならfalseです。
-	 */
-	public boolean isExistMarker(int i_id)
-	{
-		int msid=this._id_map.get(i_id);
-		try{
-			return this._ms.isExistMarker(msid);
-		}catch(Exception e){
-			this._ref_papplet.die("Catch an exception!", null);
-			return false;
-		}
-	}
-	
 	/**
 	 * この関数は、指定idのマーカの認識状態を返します。
 	 * 数値は、マーカが連続して認識に失敗した回数です。
@@ -622,7 +553,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	 */
 	public int getLostCount(int i_id)
 	{
-		if(!this.isExistMarker(i_id)){
+		if(!this.isExist(i_id)){
 			this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
 		}
 		int msid=this._id_map.get(i_id);
@@ -645,7 +576,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	public long getLife(int i_id)
 	{
 		try{
-			if(!this.isExistMarker(i_id)){
+			if(!this.isExist(i_id)){
 				this._ref_papplet.die("Marker id " +i_id + " is not on image.", null);
 			}
 			int msid=this._id_map.get(i_id);
@@ -654,7 +585,53 @@ public class MultiMarker extends NyARPsgBaseClass
 			this._ref_papplet.die("Catch an exception!", null);
 			return -1;
 		}
+	}	
+	/**
+	 * この関数は、マーカの姿勢行列を返します。
+	 * 返却した行列は{@link PApplet#setMatrix}でProcessingにセットできます。
+	 * @param i_armk_id
+	 * マーカidを指定します。
+	 * @return
+	 * マーカの姿勢行列を返します。
+	 */
+	public PMatrix3D getMatrix(int i_id)
+	{
+		PMatrix3D p=new PMatrix3D();
+		//存在チェック
+		if(!this.isExist(i_id)){
+			this._ref_papplet.die("Marker id " +i_id + " is not exist on image.", null);
+		}
+		int msid=this._id_map.get(i_id);
+		try{
+			matResult2PMatrix3D(this._ms.getTransformMatrix(msid),this._coordinate_system,p);
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Catch an exception!");
+		}			
+		return p;
 	}
+
+
+	
+	/**
+	 * この関数は、指定idのマーカが有効かを返します。
+	 * @param i_id
+	 * マーカidを指定します。
+	 * @return
+	 * マーカが有効ならばtrueです。無効ならfalseです。
+	 */
+	public boolean isExist(int i_id)
+	{
+		int msid=this._id_map.get(i_id);
+		try{
+			return this._ms.isExistMarker(msid);
+		}catch(Exception e){
+			this._ref_papplet.die("Catch an exception!", null);
+			return false;
+		}
+	}
+	
+
 	/**
 	 * この関数は、idで示されるマーカ座標系の点をスクリーン座標へ変換します。
 	 * @param i_id
@@ -668,7 +645,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * @return
 	 * スクリーン座標
 	 */
-	public PVector marker2ScreenCoordSystem(int i_id,double i_x,double i_y,double i_z)
+	public PVector object2ScreenCoordSystem(int i_id,double i_x,double i_y,double i_z)
 	{
 		try{
 			int msid=this._id_map.get(i_id);
@@ -696,7 +673,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * @return
 	 * マーカ平面上の座標点です。
 	 */
-	public PVector screen2MarkerCoordSystem(int i_id,int i_x,int i_y)
+	public PVector screen2ObjectCoordSystem(int i_id,int i_x,int i_y)
 	{
 		try{
 			int msid=this._id_map.get(i_id);
@@ -706,7 +683,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			ret.x=(float)tmp.x;
 			ret.y=(float)tmp.y;
 			ret.z=(float)tmp.z;
-			if(this._config._coordinate_system==NyAR4PsgConfig.CS_LEFT_HAND){
+			if(this._coordinate_system==NyAR4PsgConfig.CS_LEFT_HAND){
 				ret.x*=-1;
 			}		
 			return ret;
@@ -746,13 +723,13 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * @return
 	 * 取得したパターンを返します。
 	 */
-	public PImage pickupMarkerImage(int i_id,int i_x1,int i_y1,int i_x2,int i_y2,int i_x3,int i_y3,int i_x4,int i_y4,int i_out_w_pix,int i_out_h_pix)
+	public PImage pickupImage(int i_id,int i_x1,int i_y1,int i_x2,int i_y2,int i_x3,int i_y3,int i_x4,int i_y4,int i_out_w_pix,int i_out_h_pix)
 	{
 		PImage p=new PImage(i_out_w_pix,i_out_h_pix);
 		try{
 			PImageRaster pr=new PImageRaster(p);
 			int msid=this._id_map.get(i_id);
-			this._ms.getMarkerPlaneImage(msid, this._ss, i_x1, i_y1, i_x2, i_y2, i_x3, i_y3, i_x4, i_y4,pr);
+			this._ms.getPlaneImage(msid, this._ss, i_x1, i_y1, i_x2, i_y2, i_x3, i_y3, i_x4, i_y4,pr);
 			p.updatePixels();
 		}catch(Exception e){
 			this._ref_papplet.die("pickupMarkerImage failed.", null);
@@ -779,9 +756,9 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * @return
 	 * 取得したパターンを返します。
 	 */
-	public PImage pickupRectMarkerImage(int i_id,int i_l,int i_t,int i_w,int i_h,int i_out_w_pix,int i_out_h_pix)
+	public PImage pickupRectImage(int i_id,int i_l,int i_t,int i_w,int i_h,int i_out_w_pix,int i_out_h_pix)
 	{
-		return pickupMarkerImage(
+		return pickupImage(
 			i_id,
 			i_l+i_w-1,i_t+i_h-1,
 			i_l,i_t+i_h-1,
@@ -789,5 +766,61 @@ public class MultiMarker extends NyARPsgBaseClass
 			i_l+i_w-1,i_t,
 			i_out_w_pix,i_out_h_pix);
 	}
+	//
+	//	duplicated functions.
+	//
+	/**
+	 * {@link #isExist}のエイリアスです。
+	 * @param i_id
+	 * @return
+	 */
+	@Deprecated
+	public boolean isExistMarker(int i_id)
+	{
+		return this.isExist(i_id);
+	}	
+
+	/**
+	 * {@link #getMatrix}のエイリアスです。
+	 * @param i_id
+	 * @return
+	 */
+	@Deprecated
+	public PMatrix3D getMarkerMatrix(int i_id)
+	{
+		return this.getMatrix(i_id);
+	}
+	/**
+	 * {@link #pickupImage}のエイリアスです。
+	 */
+	@Deprecated
+	public PImage pickupMarkerImage(int i_id,int i_x1,int i_y1,int i_x2,int i_y2,int i_x3,int i_y3,int i_x4,int i_y4,int i_out_w_pix,int i_out_h_pix)
+	{
+		return this.pickupImage(i_id, i_x1, i_y1, i_x2, i_y2, i_x3, i_y3, i_x4, i_y4, i_out_w_pix, i_out_h_pix);
+	}
+	/**
+	 * {@link #pickupRectImage}のエイリアスです。
+	　*/
+	@Deprecated
+	public PImage pickupRectMarkerImage(int i_id,int i_l,int i_t,int i_w,int i_h,int i_out_w_pix,int i_out_h_pix)
+	{
+		return this.pickupRectImage(i_id, i_l, i_t, i_w, i_h, i_out_w_pix, i_out_h_pix);
+	}	
+	/**
+	 * {@link #screen2ObjectCoordSystem}のエイリアスです。
+	 */
+	@Deprecated	
+	public PVector screen2MarkerCoordSystem(int i_id,int i_x,int i_y)
+	{
+		return this.screen2ObjectCoordSystem(i_id, i_x, i_y);
+	}	
+	/**
+	 * {link #object2ScreenCoordSystem}のエイリアスです。
+	 */
+	@Deprecated
+	public PVector marker2ScreenCoordSystem(int i_id,double i_x,double i_y,double i_z)
+	{
+		return this.object2ScreenCoordSystem(i_id, i_x, i_y, i_z);
+	}	
 
 }

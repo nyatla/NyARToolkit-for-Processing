@@ -68,4 +68,71 @@ public class NyPsUtils
 			PApplet.println(i_val[i]);
 		}
 	}
+	
+	/**
+	 * NyARToolKitのMatrixをProcessing形式に変換します。
+	 * @param i_src
+	 * @param i_dst
+	 * @return
+	 */
+	public static PMatrix3D nyarMat2PsMat(NyARDoubleMatrix44 i_src,PMatrix3D i_dst)
+	{
+		i_dst.m00=(float)(i_src.m00);
+		i_dst.m01=(float)(i_src.m01);
+		i_dst.m02=(float)(i_src.m02);
+		i_dst.m03=(float)(i_src.m03);
+		i_dst.m10=(float)(i_src.m10);
+		i_dst.m11=(float)(i_src.m11);
+		i_dst.m12=(float)(i_src.m12);
+		i_dst.m13=(float)(i_src.m13);
+		i_dst.m20=(float)(i_src.m20);
+		i_dst.m21=(float)(i_src.m21);
+		i_dst.m22=(float)(i_src.m22);
+		i_dst.m23=(float)(i_src.m23);
+		i_dst.m30=(float)(i_src.m30);
+		i_dst.m31=(float)(i_src.m31);
+		i_dst.m32=(float)(i_src.m32);
+		i_dst.m33=(float)(i_src.m33);
+		return i_dst;
+	}	
+	protected static float[] pMatrix2GLMatrix(PMatrix3D i_in,float[] o_out)
+	{
+		o_out[ 0]=i_in.m00;
+		o_out[ 1]=i_in.m10;
+		o_out[ 2]=i_in.m20;
+		o_out[ 3]=i_in.m30;
+		o_out[ 4]=i_in.m01;
+		o_out[ 5]=i_in.m11;
+		o_out[ 6]=i_in.m21;
+		o_out[ 7]=i_in.m31;
+		o_out[ 8]=i_in.m02;
+		o_out[ 9]=i_in.m12;
+		o_out[10]=i_in.m22;
+		o_out[11]=i_in.m32;
+		o_out[12]=i_in.m03;
+		o_out[13]=i_in.m13;
+		o_out[14]=i_in.m23;
+		o_out[15]=i_in.m33;	
+		return o_out;
+	}
+	protected static double[] pMatrix2GLMatrix(PMatrix3D i_in,double[] o_out)
+	{
+		o_out[ 0]=i_in.m00;
+		o_out[ 1]=i_in.m10;
+		o_out[ 2]=i_in.m20;
+		o_out[ 3]=i_in.m30;
+		o_out[ 4]=i_in.m01;
+		o_out[ 5]=i_in.m11;
+		o_out[ 6]=i_in.m21;
+		o_out[ 7]=i_in.m31;
+		o_out[ 8]=i_in.m02;
+		o_out[ 9]=i_in.m12;
+		o_out[10]=i_in.m22;
+		o_out[11]=i_in.m32;
+		o_out[12]=i_in.m03;
+		o_out[13]=i_in.m13;
+		o_out[14]=i_in.m23;
+		o_out[15]=i_in.m33;
+		return o_out;
+	}	
 }

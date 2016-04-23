@@ -15,10 +15,11 @@ import jp.nyatla.nyar4psg.*;
 Capture cam;
 MultiMarker nya_r;
 MultiMarker nya_l;
-PFont font=createFont("FFScala", 32);
+PFont font;
 
 void setup() {
   size(640,480,P3D);
+  font=createFont("FFScala", 32);
   colorMode(RGB, 100);
   println(MultiMarker.VERSION);
   
@@ -59,7 +60,7 @@ void draw()
   nya_r.drawBackground(cam);//frustumを考慮した背景描画
 
   //right
-  if((nya_r.isExistMarker(0))){
+  if((nya_r.isExist(0))){
     nya_r.beginTransform(0);
     fill(0,0,255);
     drawgrid();
@@ -69,7 +70,7 @@ void draw()
     nya_r.endTransform();
   }
   //left
-  if((nya_l.isExistMarker(0))){
+  if((nya_l.isExist(0))){
     nya_l.beginTransform(0);
     fill(0,255,0);
     drawgrid();
@@ -79,7 +80,3 @@ void draw()
     nya_l.endTransform();
   }
 }
-
-
-
-

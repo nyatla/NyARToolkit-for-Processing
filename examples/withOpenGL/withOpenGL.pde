@@ -13,7 +13,7 @@
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
 import processing.opengl.*;
-import javax.media.opengl.*; 
+
 
 Capture cam;
 MultiMarker nya;
@@ -56,7 +56,7 @@ void draw()
   int current_mode=getCurrentMatrixMode(gl);
   
   for(int i=0;i<1;i++){
-    if((!nya.isExistMarker(i))){
+    if((!nya.isExist(i))){
       continue;
     }
     
@@ -65,7 +65,7 @@ void draw()
     gl.glLoadMatrixf(gl_projection, 0 );
     
     //ModelView行列の適応
-    PMatrix3D m=nya.getMarkerMatrix(i);
+    PMatrix3D m=nya.getMatrix(i);
     m.transpose();
     m.get(mv);
     gl.glMatrixMode( gl.GL_MODELVIEW );
@@ -85,7 +85,7 @@ void draw()
 }
 
 //現在のMatrixmodeを取得する。
-int getCurrentMatrixMode(GL2 i_gl)
+int getCurrentMatrixMode(GL i_gl)
 {
   int[] tmp=new int[1];
   i_gl.glGetIntegerv(GL2.GL_MATRIX_MODE,tmp,0);
@@ -107,6 +107,3 @@ void drawGLObject(GL2 i_gl)
   i_gl.glVertex3f(0,0,100);
   i_gl.glEnd();
 }
-
-
-

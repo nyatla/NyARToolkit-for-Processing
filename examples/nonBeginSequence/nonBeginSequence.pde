@@ -39,15 +39,14 @@ void draw()
   nya.detect(cam);
   background(0);
   nya.drawBackground(cam);//frustumを考慮した背景描画
-  if(!nya.isExistMarker(0)){
+  if(!nya.isExist(0)){
     return;
   }
   nya.setARPerspective();//NyAR projection
   pushMatrix();
-  setMatrix(nya.getMarkerMatrix(0)); //load Marker matrix
+  setMatrix(nya.getMatrix(0)); //load Marker matrix
   fill(cr,cg,cb);
   translate(0,0,20);
   box(40);
   popMatrix();
 }
-

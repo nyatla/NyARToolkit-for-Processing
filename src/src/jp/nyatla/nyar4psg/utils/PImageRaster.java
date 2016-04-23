@@ -24,10 +24,10 @@
  * THE SOFTWARE.
  * 
  */
-package jp.nyatla.nyar4psg;
+package jp.nyatla.nyar4psg.utils;
 
 import jp.nyatla.nyartoolkit.core.*;
-import jp.nyatla.nyartoolkit.core.raster.rgb.*;
+import jp.nyatla.nyartoolkit.core.raster.rgb.format.NyARRgbRaster_INT1D_X8R8G8B8_32;
 import jp.nyatla.nyartoolkit.core.types.NyARBufferType;
 import processing.core.PImage;
 
@@ -36,35 +36,20 @@ import processing.core.PImage;
  *　ラップした{@link PImage}の{@link PImage#pixels}を参照します。
  * {@link PImage#pixels}との同期は外部で調整してください。
  */
-class PImageRaster extends NyARRgbRaster
+public class PImageRaster extends NyARRgbRaster_INT1D_X8R8G8B8_32
 {
 	public final static int BUFFER_TYPE=NyARBufferType.INT1D_X8R8G8B8_32;
+	protected int[] _buf;
+
 	/**
 	 * i_imgをラップします。具体的には、i_imgのpixels配列をラップします。
 	 * @param i_img
-	 * @throws NyARException
+	 * @throws NyARRuntimeException
 	 */
-	public PImageRaster(PImage i_img) throws NyARException
+	public PImageRaster(PImage i_img)
 	{
-		super(i_img.width,i_img.height,BUFFER_TYPE,false);
-		this.wrapBuffer(i_img);
+		super(i_img.width,i_img.height,i_img.pixels);
 		return;
-	}	
-	public PImageRaster(int i_width, int i_height) throws NyARException
-	{
-		super(i_width,i_height,BUFFER_TYPE,false);
-		return;
-	}
-	/**
-	 * PImageをラップします。
-	 * 画像のサイズはコンストラクタに指定したサイズと一致させてください。
-	 * @param i_ref_image
-	 * @throws NyARException
-	 */
-	public void wrapBuffer(PImage i_ref_image) throws NyARException
-	{
-		assert(this._size.isEqualSize(i_ref_image.width,i_ref_image.height));
-		super.wrapBuffer(i_ref_image.pixels);
-	}
+	}		
 }
 
