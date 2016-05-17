@@ -624,7 +624,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	{
 		int msid=this._id_map.get(i_id);
 		try{
-			return this._ms.isExistMarker(msid);
+			return this._ms.isExist(msid);
 		}catch(Exception e){
 			this._ref_papplet.die("Catch an exception!", null);
 			return false;
