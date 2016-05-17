@@ -19,9 +19,9 @@ void setup() {
   colorMode(RGB, 100);
   println(MultiMarker.VERSION);  
   cam=new Capture(this,640,480);
-  nya=new MultiMarker(this,width,height,"camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
-  nya.addARMarker("patt.hiro",80);//id=0
-  nya.addARMarker("patt.kanji",80);//id=1
+  nya=new MultiMarker(this,width,height,"../../data/camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
+  nya.addARMarker("../../data/patt.hiro",80);//id=0
+  nya.addARMarker("../../data/patt.kanji",80);//id=1
   cam.start();
 }
 

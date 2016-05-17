@@ -17,8 +17,8 @@ void setup() {
   colorMode(RGB, 100);
   println(MultiMarker.VERSION);
   cam=new Capture(this,640,480);
-  nya=new MultiNft(this,width,height,"camera_para5.dat",NyAR4PsgConfig.CONFIG_PSG);
-  nya.addNftTarget("infinitycat",160);//id=0
+  nya=new MultiNft(this,width,height,"../../data/camera_para5.dat",NyAR4PsgConfig.CONFIG_PSG);
+  nya.addNftTarget("../../data/infinitycat",160);//id=0
   cam.start();
 }
 

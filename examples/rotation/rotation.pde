@@ -25,11 +25,11 @@ void setup() {
   
   //キャプチャを作成
   cam=new Capture(this,640,480);
-  nya_l=new MultiMarker(this,width,height,"camera_para.dat",new NyAR4PsgConfig(NyAR4PsgConfig.CS_LEFT_HAND,NyAR4PsgConfig.TM_NYARTK));
-  nya_l.addARMarker("patt.hiro",80);
+  nya_l=new MultiMarker(this,width,height,"../../data/camera_para.dat",new NyAR4PsgConfig(NyAR4PsgConfig.CS_LEFT_HAND,NyAR4PsgConfig.TM_NYARTK));
+  nya_l.addARMarker("../../data/patt.hiro",80);
   
-  nya_r=new MultiMarker(this,width,height,"camera_para.dat",new NyAR4PsgConfig(NyAR4PsgConfig.CS_RIGHT_HAND,NyAR4PsgConfig.TM_NYARTK));
-  nya_r.addARMarker("patt.kanji",80);
+  nya_r=new MultiMarker(this,width,height,"../../data/camera_para.dat",new NyAR4PsgConfig(NyAR4PsgConfig.CS_RIGHT_HAND,NyAR4PsgConfig.TM_NYARTK));
+  nya_r.addARMarker("../../data/patt.kanji",80);
   cam.start();
 }
 

@@ -19,7 +19,7 @@ void setup() {
   colorMode(RGB, 100);
   println(MultiMarker.VERSION);
   cam=new Capture(this,640,480);
-  nya=new MultiMarker(this,width,height,"camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
+  nya=new MultiMarker(this,width,height,"../../data/camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
   nya.addNyIdMarker(0,80);
   cam.start();
 }

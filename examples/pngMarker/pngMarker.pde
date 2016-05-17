@@ -21,8 +21,8 @@ void setup() {
   colorMode(RGB, 100);
   println(MultiMarker.VERSION);
   cam=new Capture(this,640,480);
-  nya=new MultiMarker(this,width,height,"camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
-  nya.addARMarker(loadImage("hiro.png"),16,25,80);
+  nya=new MultiMarker(this,width,height,"../../data/camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
+  nya.addARMarker(loadImage("../../data/hiro.png"),16,25,80);
   cam.start();
 }
 

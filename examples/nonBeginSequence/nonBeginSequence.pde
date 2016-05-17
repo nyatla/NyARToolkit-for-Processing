@@ -20,8 +20,8 @@ void setup() {
   size(640,480,P3D);
   colorMode(RGB, 100);
   println(MultiMarker.VERSION);
-  nya=new MultiMarker(this,width,height,"camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
-  nya.addARMarker("patt.hiro",80);//id=0
+  nya=new MultiMarker(this,width,height,"../../data/camera_para.dat",NyAR4PsgConfig.CONFIG_PSG);
+  nya.addARMarker("../../data/patt.hiro",80);//id=0
   nya.setARPerspective();
   cam=new Capture(this,640,480);
   cr=cg=cb=100;

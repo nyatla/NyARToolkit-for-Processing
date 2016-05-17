@@ -14,11 +14,11 @@ void setup() {
   size(640,480,P3D);
   colorMode(RGB, 100);
   cam=new Capture(this,width,height);
-  nya=new MultiMarker(this,width,height,"camera_para.dat",new NyAR4PsgConfig(NyAR4PsgConfig.CS_RIGHT_HAND,NyAR4PsgConfig.TM_NYARTK));
+  nya=new MultiMarker(this,width,height,"../../data/camera_para.dat",new NyAR4PsgConfig(NyAR4PsgConfig.CS_RIGHT_HAND,NyAR4PsgConfig.TM_NYARTK));
   nya.setARClipping(100,1000);
   nya.setConfidenceThreshold(0.6);
-  nya.addARMarker("patt.hiro",80);
-  nya.addARMarker("patt.kanji",80);
+  nya.addARMarker("../../data/patt.hiro",80);
+  nya.addARMarker("../../data/patt.kanji",80);
   nya.addNyIdMarker(31,80);
   println(nya.VERSION); //バージョンの表示
   cam.start();
@@ -137,4 +137,3 @@ void drawgrid()
   textFont(font,20.0); text("Z",0,0,100);
   popMatrix();
 }
-
