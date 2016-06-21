@@ -379,6 +379,7 @@ ${line}
 	<target name="clean" depends="library.run">
 		<delete dir="${project.bin}"/>
  	 <delete dir="${project.tmp}"/>	
+ 		<delete dir="${project.tmp}"/>
 		<echo>
 		
 ${line}
