@@ -39,10 +39,8 @@ import jp.nyatla.nyartoolkit.markersystem.*;
 
 
 /**
- * このクラスは、複数のマーカに対応したARToolKit管理クラスです。
- * 1映像中に異なる複数のマーカのあるユースケースで動作します。
- * 
- * 入力画像はPImage形式です。
+ * このクラスは、同時に複数のマーカを取り扱える検出・トラッキングクラスです。
+ * PImage画像の入力から、マーカ(ARマーカ/NyIDマーカ)の位置姿勢を検出することができます。
  */
 public class MultiMarker extends NyARPsgBaseClass
 {
@@ -113,8 +111,14 @@ public class MultiMarker extends NyARPsgBaseClass
 
 
 	/**
-	 * インスタンスを初期化します。
+	 * コンストラクタです。
+	 * 生成済みのビューを共有したインスタンスを生成します。
+	 * @param i_applet
+	 * 親となるAppletオブジェクトを指定します。
+	 * @param i_view
+	 * 他のインスタンスで生成したViewオブジェクトを指定します。
 	 * @param i_config
+	 * コンフィギュレーションオブジェクトを指定します。
 	 */
 	private MultiMarker(PApplet i_applet,SingleCameraView i_view,NyAR4PsgConfig i_config)
 	{
@@ -127,8 +131,9 @@ public class MultiMarker extends NyARPsgBaseClass
 
 	/**
 	 * コンストラクタです。
+	 * スクリーンサイズ、カメラパラメータ、コンフィギュレーションを指定してインスタンスを生成します。
 	 * @param i_applet
-	 * 親となるAppletオブジェクトを指定します。このOpenGLのレンダリングシステムを持つAppletである必要があります。
+	 * 親となるAppletオブジェクトを指定します。
 	 * @param i_cparam_file
 	 * ARToolKitフォーマットのカメラパラメータファイルの名前を指定します。
 	 * @param i_width
@@ -149,23 +154,18 @@ public class MultiMarker extends NyARPsgBaseClass
 
 	/**
 	 * コンストラクタです。
-	 * @param i_applet
-	 * 親となるAppletオブジェクトを指定します。このOpenGLのレンダリングシステムを持つAppletである必要があります。
-	 * @param i_width
-	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
-	 * @param i_height
-	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
-	 * @param i_cparam_file
-	 * ARToolKitフォーマットのカメラパラメータファイルの名前を指定します。
+	 * i_configパラメータに、{@link NyAR4PsgConfig#CONFIG_OLD)を指定した{@link #MultiMarker}です。
+	 * パラメータ詳細は{@link #MultiMarker(PApplet, int, int, double[], double[], int, int, int, int)}を参照してください。
 	 */
 	public MultiMarker(PApplet i_applet, int i_width,int i_height,String i_cparam_file)
 	{
 		this(i_applet,i_width,i_height,i_cparam_file,NyAR4PsgConfig.CONFIG_OLD);
 	}
-
 	/**
 	 * コンストラクタです。
 	 * OpenCVのカメラパラメータ値を使ってインスタンスを生成します。
+	 * @param i_applet
+	 * 親となるAppletオブジェクトを指定します。このOpenGLのレンダリングシステムを持つAppletである必要があります。
 	 * @param i_width
 	 * カメラパラメータのサイズ値
 	 * @param i_height
@@ -180,7 +180,8 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_screen_height
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
-	 * @param i_cfg
+	 * @param i_config
+	 * コンフィギュレーションオブジェクトを指定します。
 	 */	
 	public MultiMarker(PApplet i_applet,int i_width,int i_height,double[] i_intrinsic_matrix,double[] i_distortion_coeffs,int i_screen_width,int i_screen_height,NyAR4PsgConfig i_config)
 	{
@@ -189,7 +190,15 @@ public class MultiMarker extends NyARPsgBaseClass
 				i_config);
 		return;
 	}
-	
+	/**
+	 * コンストラクタです。
+	 * i_configパラメータに、new {@link NyAR4PsgConfig(int,int)}で生成したコンフィギュレーションを指定した{@link MultiMarker}です。
+	 * 共通のパラメータ詳細は{@link #MultiMarker(PApplet, int, int, double[], double[], int, int, NyAR4PsgConfig)}を参照してください。
+	 * @param i_cs
+	 * {@link NyAR4PsgConfig#NyAR4PsgConfig(int, int)}の第1パラメータです。
+	 * @param i_tm
+	 * {@link NyAR4PsgConfig#NyAR4PsgConfig(int, int)}の第2パラメータです。
+	 */
 	public MultiMarker(PApplet i_applet,int i_width,int i_height,double[] i_intrinsic_matrix,double[] i_distortion_coeffs,int i_screen_width,int i_screen_height,int i_cs,int i_tm)
 	{
 		this(
@@ -198,7 +207,11 @@ public class MultiMarker extends NyARPsgBaseClass
 			i_screen_width, i_screen_height,new NyAR4PsgConfig(i_cs,i_tm));
 		return;
 	}
-	
+	/**
+	 * コンストラクタです。
+	 * i_configパラメータに、{@link NyAR4PsgConfig#CONFIG_OLD}を指定した{@link MultiMarker}です。
+	 * パラメータ詳細は{@link #MultiMarker(PApplet, int, int, double[], double[], int, int, NyAR4PsgConfig)}を参照してください。
+	 */
 	public MultiMarker(PApplet i_applet,int i_width,int i_height,double[] i_intrinsic_matrix,double[] i_distortion_coeffs,int i_screen_width,int i_screen_height)
 	{
 		this(
@@ -213,8 +226,8 @@ public class MultiMarker extends NyARPsgBaseClass
 	/** begin-endシーケンスの判定用*/
 	private boolean _is_in_begin_end_session=false;
 	/**
-	 * この関数は、ProcessingのProjectionMatrixとModelview行列を、指定idのマーカ平面にセットします。
-	 * 必ず{@link #endTransform}とペアで使います。
+	 * この関数は、ProcessingのProjectionMatrixとModelview行列を指定したidのマーカ平面にセットします。
+	 * 必ず{@link #endTransform}とペアで使ってください。
 	 * 関数を実行すると、現在のModelView行列とProjection行列がインスタンスに保存され、新しい行列がセットされます。
 	 * これらを復帰するには、{@link #endTransform}を使います。
 	 * 復帰するまでの間は、再度{@link #beginTransform}を使うことはできません。
@@ -254,8 +267,8 @@ public class MultiMarker extends NyARPsgBaseClass
 		return;	
 	}
 	/**
-	 * この関数は、{@link #beginTransform}でセットしたProjectionとModelViewを元に戻します。
-	 * この関数は、必ず{@link #beginTransform}とペアで使います。
+	 * この関数は、{@link #beginTransform}で設定したProcessingのProjectionMatrixとModelview行列を元の値に復帰します。
+	 * 必ず{@link #beginTransform}とペアで使ってください。
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
@@ -282,8 +295,9 @@ public class MultiMarker extends NyARPsgBaseClass
 	}
 	/**
 	 * この関数は、画像からマーカーの検出処理を実行します。
-	 * 関数は、i_imageに対して1度だけ{@link PImage#loadPixels()}を実行します。
-	 * {@link PImage#loadPixels()}のタイミングをコントロールしたい場合は、{@link #detectWithoutLoadPixels}を使用してください。
+	 * {@link #detect(PImage,boolean)}の第二引数にtrueを設定したものと同じです。
+	 * i_imageに対して1度だけ{@link PImage#loadPixels()}を実行します。
+	 * {@link PImage#loadPixels()}のタイミングをコントロールしたい場合は、{@link #detect(PImage,boolean)}を使用してください。
 	 * @param i_image
 	 * 検出処理を行う画像を指定します。
 	 */	
@@ -293,11 +307,10 @@ public class MultiMarker extends NyARPsgBaseClass
 	}
 	/**
 	 * この関数は、画像からマーカーの検出処理を実行します。
-	 * 引数と戻り値の詳細は、{@link #detect(PImage)}を参照してください。
 	 * @param i_image
 	 * 検出処理を行う画像を指定します。
 	 * @param i_with_loadpixels
-	 * {@link PImage#loadPixels()}を実行するかのフラグ値です。
+	 * 画像取得前に{@link PImage#loadPixels()}を実行するかのフラグ値です。
 	 * @see #detect(PImage)
 	 */
 	public void detect(PImage i_image,boolean i_with_loadpixels)
@@ -315,15 +328,12 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * {@link PImageSensor}の内容で更新します。
 	 * 他のインスタンスで処理した{@link PImageSensor}を使うことができます。
 	 * @param i_source_image
+	 * 入力画像を格納したセンサオブジェクト
 	 */
 	public void detect(PImageSensor i_source_image)
 	{
 		this._ms.update(i_source_image);
 	}
-	
-	
-	
-	
 	/**
 	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
 	 * 同じパターンを複数回登録した場合には、最後に登録したものを優先して認識します。
@@ -339,8 +349,8 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * @return
 	 * 0から始まるマーカーIDを返します。
 	 * この数値は、マーカを区別するためのId値です。0から始まり、{@link #addARMarker}と{@link #addNyIdMarker}関数を呼ぶたびにインクリメントされます。
-	 * {@link #getMarkerMatrix},{@link #getConfidence},{@link #isExistMarker},{@link #addARMarker},
-	 * {@link #screen2MarkerCoordSystem},{@link #pickupMarkerImage},{@link #pickupRectMarkerImage}
+	 * {@link #getMatrix},{@link #getConfidence},{@link #isExist},{@link #addARMarker},
+	 * {@link #screen2ObjectCoordSystem},{@link #pickupImage},{@link #pickupRectImage}
 	 * のid値に使います。
 	 */
 	public int addARMarker(String i_file_name,int i_patt_resolution,int i_edge_percentage,float i_width)
@@ -357,7 +367,7 @@ public class MultiMarker extends NyARPsgBaseClass
 		return psid;
 	}
 	/**
-	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
+	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして登録します。
 	 * エッジ割合はARToolKitの標準マーカと同じ25%です。
 	 * 重複するidを登録した場合には、最後に登録したidを優先して認識します。
 	 * @param i_file_name
@@ -490,6 +500,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	/**
 	 * この関数は、マーカのスクリーン上の4頂点を返します。
 	 * @return
+	 * 4頂点のスクリーン座標を格納した配列。
 	 */
 	public PVector[] getMarkerVertex2D(int i_id)
 	{
@@ -589,7 +600,7 @@ public class MultiMarker extends NyARPsgBaseClass
 	/**
 	 * この関数は、マーカの姿勢行列を返します。
 	 * 返却した行列は{@link PApplet#setMatrix}でProcessingにセットできます。
-	 * @param i_armk_id
+	 * @param i_id
 	 * マーカidを指定します。
 	 * @return
 	 * マーカの姿勢行列を返します。
@@ -679,7 +690,7 @@ public class MultiMarker extends NyARPsgBaseClass
 			int msid=this._id_map.get(i_id);
 			PVector ret=new PVector();
 			NyARDoublePoint3d tmp=new NyARDoublePoint3d();
-			this._ms.getMarkerPlanePos(msid,i_x, i_y,tmp);
+			this._ms.getPlanePos(msid,i_x, i_y,tmp);
 			ret.x=(float)tmp.x;
 			ret.y=(float)tmp.y;
 			ret.z=(float)tmp.z;

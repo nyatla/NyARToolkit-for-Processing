@@ -48,6 +48,11 @@ public class NyPsUtils
 		PApplet.println(String.format("%f %f %f %f",i_mat.m20,i_mat.m21,i_mat.m22,i_mat.m23));
 		PApplet.println(String.format("%f %f %f %f",i_mat.m30,i_mat.m31,i_mat.m32,i_mat.m33));
 	}
+	/**
+	 * この関数は、{@link NyARDoubleMatrix44}の内容をダンプします。
+	 * @param i_mat
+	 * ダンプするオブジェクト。
+	 */
 	public static void dumpObject(NyARDoubleMatrix44 i_mat)
 	{
 		PApplet.println("NyARDoubleMatrix44");
@@ -72,8 +77,11 @@ public class NyPsUtils
 	/**
 	 * NyARToolKitのMatrixをProcessing形式に変換します。
 	 * @param i_src
+	 * 変換元のオブジェクト
 	 * @param i_dst
+	 * 変換先のオブジェクト
 	 * @return
+	 * i_dstをそのまま返します。
 	 */
 	public static PMatrix3D nyarMat2PsMat(NyARDoubleMatrix44 i_src,PMatrix3D i_dst)
 	{
@@ -94,7 +102,16 @@ public class NyPsUtils
 		i_dst.m32=(float)(i_src.m32);
 		i_dst.m33=(float)(i_src.m33);
 		return i_dst;
-	}	
+	}
+	/**
+	 * PMatrix3Dをfloat配列に変換します。
+	 * @param i_in
+	 * 変換元のオブジェクト
+	 * @param o_out
+	 * 変換先のオブジェクト
+	 * @return
+	 * o_outをそのまま返します。
+	 */	
 	protected static float[] pMatrix2GLMatrix(PMatrix3D i_in,float[] o_out)
 	{
 		o_out[ 0]=i_in.m00;
@@ -115,6 +132,15 @@ public class NyPsUtils
 		o_out[15]=i_in.m33;	
 		return o_out;
 	}
+	/**
+	 * PMatrix3Dをdouble配列に変換します。
+	 * @param i_in
+	 * 変換元のオブジェクト
+	 * @param o_out
+	 * 変換先のオブジェクト
+	 * @return
+	 * o_outをそのまま返します。
+	 */	
 	protected static double[] pMatrix2GLMatrix(PMatrix3D i_in,double[] o_out)
 	{
 		o_out[ 0]=i_in.m00;

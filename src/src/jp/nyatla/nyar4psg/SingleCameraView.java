@@ -11,7 +11,10 @@ import jp.nyatla.nyartoolkit.core.param.NyARParam;
 import jp.nyatla.nyartoolkit.core.types.matrix.NyARDoubleMatrix44;
 import jp.nyatla.nyartoolkit.markersystem.NyARSingleCameraView;
 
-
+/**
+ * カメラ1台の視点を管理するクラスです。
+ * オブジェクト検出クラスに視点情報に関連した機能を提供します。
+ */
 public class SingleCameraView
 {
 	final PatchCollection _patch_collection;
@@ -93,7 +96,10 @@ public class SingleCameraView
 //		this._ref_applet.ortho(0,i_width,0,i_height,this._clip_near,this._clip_far+1);
 	}
 	
-	
+	/**
+	 * 現在の正射影行列を返します。
+	 * @return
+	 */
 	public PMatrix3D getProjectionMatrix()
 	{
 		return this._ps_projection;
@@ -119,8 +125,9 @@ public class SingleCameraView
 		NyPsUtils.nyarMat2PsMat(tmp,this._ps_projection);
 	}
 	/**
-	 * バージョンIDパッチコレクションを返します。からコンストラクタから使います。
+	 * バージョンIDからパッチコレクションオブジェクトを返します。からコンストラクタから使います。
 	 * @param i_version_id
+	 * ProcessingのバージョンIDです。
 	 * @return
 	 */
 	private static PatchCollection createPatchCollection(int i_version_id)

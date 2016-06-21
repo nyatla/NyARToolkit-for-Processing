@@ -5,8 +5,8 @@ import jp.nyatla.nyartoolkit.markersystem.NyARMarkerSystemConfig;
 import processing.core.PApplet;
 
 /**
- * このクラスは、コンフィギュレーション定数を保持します。
- * また、2つの定義済みコンフィギュレーションを定義します。
+ * このクラスは、検出器のコンフィギュレーション定数を保持します。
+ * 定義済みコンフィギュレーションを２つ定義します。
  */
 public class NyAR4PsgConfig
 {
