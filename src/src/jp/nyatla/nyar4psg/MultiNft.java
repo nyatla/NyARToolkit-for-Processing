@@ -44,10 +44,8 @@ import jp.nyatla.nyartoolkit.nftsystem.NyARNftSystemConfig;
 
 
 /**
- * このクラスは、複数のマーカに対応したARToolKit管理クラスです。
- * 1映像中に異なる複数のマーカのあるユースケースで動作します。
- * 
- * 入力画像はPImage形式です。
+ * このクラスは、同時に複数のNFTマーカを取り扱える検出・トラッキングクラスです。
+ * PImage画像の入力から、NFTマーカの位置姿勢を検出することができます。
  */
 public class MultiNft extends NyARPsgBaseClass
 {
@@ -70,8 +68,7 @@ public class MultiNft extends NyARPsgBaseClass
 	 * @param i_patt_resolution
 	 * @param i_projection_coord_system
 	 * @throws NyARRuntimeException 
-	 */
-	
+	 */	
 	private MultiNft(PApplet i_applet,SingleCameraView i_view,int i_coordinate_system)
 	{
 		super(i_applet,i_view);
@@ -93,7 +90,7 @@ public class MultiNft extends NyARPsgBaseClass
 	/**
 	 * コンストラクタです。
 	 * @param parent
-	 * 親となるAppletオブジェクトを指定します。このOpenGLのレンダリングシステムを持つAppletである必要があります。
+	 * 親となるAppletオブジェクトを指定します。
 	 * @param i_cparam_file
 	 * ARToolKitフォーマットのカメラパラメータファイルの名前を指定します。
 	 * @param i_width
@@ -163,9 +160,9 @@ public class MultiNft extends NyARPsgBaseClass
 	/** begin-endシーケンスの判定用*/
 	private boolean _is_in_begin_end_session=false;
 	/**
-	 * この関数は、ProcessingのProjectionMatrixとModelview行列を、指定idのマーカ平面にセットします。
-	 * 必ず{@link #endTransform}とペアで使います。
-	 * 関数を実行すると、現在のModelView行列とProjection行列がインスタンスに保存され、新しい行列がセットされます。
+	 * この関数は、ProcessingのProjectionMatrixとModelview行列に指定idのマーカ平面にセットします。
+	 * 必ず{@link #endTransform}とペアで使ってください。
+	 * 関数を実行すると、現在のModelView行列とProjection行列を退避した後に、新しい行列がセットされます。
 	 * これらを復帰するには、{@link #endTransform}を使います。
 	 * 復帰するまでの間は、再度{@link #beginTransform}を使うことはできません。
 	 * <div>
@@ -205,7 +202,7 @@ public class MultiNft extends NyARPsgBaseClass
 	}
 	/**
 	 * この関数は、{@link #beginTransform}でセットしたProjectionとModelViewを元に戻します。
-	 * この関数は、必ず{@link #beginTransform}とペアで使います。
+	 * 必ず{@link #beginTransform}とペアで使ってください。
 	 * <div>この関数は、次のコードと等価です。</div>
 	 * <hr/>
 	 * :<br/>
@@ -370,7 +367,7 @@ public class MultiNft extends NyARPsgBaseClass
 	{
 		int msid=this._id_map.get(i_id);
 		try{
-			return this._ns.isExistTarget(msid);
+			return this._ns.isExist(msid);
 		}catch(Exception e){
 			this._ref_papplet.die("Catch an exception!", null);
 			return false;
@@ -426,7 +423,7 @@ public class MultiNft extends NyARPsgBaseClass
 			int msid=this._id_map.get(i_id);
 			PVector ret=new PVector();
 			NyARDoublePoint3d tmp=new NyARDoublePoint3d();
-			this._ns.getMarkerPlanePos(msid,i_x, i_y,tmp);
+			this._ns.getPlanePos(msid,i_x, i_y,tmp);
 			ret.x=(float)tmp.x;
 			ret.y=(float)tmp.y;
 			ret.z=(float)tmp.z;
@@ -575,6 +572,7 @@ public class MultiNft extends NyARPsgBaseClass
 	
 	/**
 	 * Processing callback function
+	 * インスタンスが起動したマルチスレッドを終了時に停止します。
 	 */
 	public void dispose()
 	{

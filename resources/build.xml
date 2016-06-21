@@ -219,15 +219,17 @@ ${line}
 				classpath="${classpath.local.location}/core.jar;{project.bin}" 
 				destdir="${project.tmp}/${project.name}/reference" 
 				verbose="false" 
+				encoding="UTF-8"
+ 			docencoding="UTF-8"
+ 			charset="UTF-8"
 				stylesheetfile="resources/stylesheet.css" 
 				doctitle="Javadocs: ${project.name}" 
 				public="true" version="false" 
 				windowtitle="Javadocs: ${project.name}">
- 			
  			<link href="${javadoc.java.href}" />
 			<link href="${javadoc.processing.href}" />
 			<taglet name="ExampleTaglet" path="resources/code" />
- 			<fileset dir="${project.tmp}/${project.name}/src" defaultexcludes="yes">
+ 			<fileset dir="${project.tmp}/${project.name}/src/src" defaultexcludes="yes">
 			<!-- add packages to be added to reference. -->
 				<include name="**/*"/>
 			</fileset>
@@ -376,7 +378,7 @@ ${line}
 	
 	<target name="clean" depends="library.run">
 		<delete dir="${project.bin}"/>
-		<delete dir="${project.tmp}"/>
+ 	 <delete dir="${project.tmp}"/>	
 		<echo>
 		
 ${line}
