@@ -28,6 +28,7 @@ package jp.nyatla.nyar4psg;
 
 
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import jp.nyatla.nyar4psg.utils.NyARPsgBaseClass;
@@ -86,6 +87,22 @@ public class MultiNft extends NyARPsgBaseClass
 			new SingleCameraView(i_applet,i_param,i_config._ps_patch_version),
 			i_config._coordinate_system);
 	}
+	/**
+	 * コンストラクタです。カメラパラメータを{@link InputStream}から読みだしてインスタンスを生成します。
+	 * @param parent
+	 * 親となるAppletオブジェクトを指定します。
+	 * @param i_width
+	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * @param i_height
+	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * @param i_cparam_is
+	 * ARToolKitフォーマットのカメラパラメータファイルを読み出す{@link InputStream}です。
+	 * @param i_config
+	 */
+	public MultiNft(PApplet parent, int i_width,int i_height,InputStream i_cparam_is,NyAR4PsgConfig i_config)
+	{
+		this(parent,NyARParam.loadFromARParamFile(i_cparam_is,i_width,i_height),i_config);
+	}
 
 	/**
 	 * コンストラクタです。
@@ -99,27 +116,22 @@ public class MultiNft extends NyARPsgBaseClass
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_config
 	 * コンフィギュレーションオブジェクトを指定します。
-	 * @throws NyARRuntimeException
 	 */
 	public MultiNft(PApplet parent, int i_width,int i_height,String i_cparam_file,NyAR4PsgConfig i_config)
 	{
-		this(
-			parent,
-			NyARParam.loadFromARParamFile(parent.createInput(i_cparam_file),
-			i_width,i_height),i_config);
+		this(parent,i_width,i_height,parent.createInput(i_cparam_file),i_config);
 	}
 	/**
 	 * コンストラクタです。
 	 * {@link MultiNft#MultiNft(PApplet, int, int, String, NyAR4PsgConfig)}のコンフィギュレーションに、{@link NyAR4PsgConfig#CONFIG_DEFAULT}を指定した物と同じです。
 	 * @param parent
-	 * {@link MultiNft#MultiNft(PApplet, int, int, String, NyAR4PsgConfig)}を参照。
+	 * 親となるAppletオブジェクトを指定します。
 	 * @param i_width
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_height
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_cparam_file
-	 * {@link MultiNft#MultiNft(PApplet, int, int, String, NyAR4PsgConfig)}を参照。
-	 * @throws NyARRuntimeException
+	 * ARToolKitフォーマットのカメラパラメータファイルの名前を指定します。
 	 */
 	public MultiNft(PApplet parent,int i_width,int i_height,String i_cparam_file)
 	{
@@ -267,6 +279,49 @@ public class MultiNft extends NyARPsgBaseClass
 	{
 		this._ns.update(i_source_image);
 	}
+	private int addNftTarget(NyARNftDataSet i_dataset)
+	{
+		//初期化済みのアイテムを生成
+		int psid=-1;
+		try{
+			this._id_map.add(this._ns.addNftTarget(i_dataset));
+			psid=this._id_map.size()-1;
+		}catch(Exception e){
+			e.printStackTrace();
+			this._ref_papplet.die("Catch an exception!");
+		}
+		return psid;
+	}	
+	
+	/**
+	 * この関数は、NFTファイルセットを{@link InputStream}から読みだして、NFTターゲットを生成して登録します。
+	 * 同じターゲットを複数個登録することはできません。
+	 * @param i_iset_is
+	 * isetファイルを読み出す{@link InputStream}
+	 * @param i_fset_is
+	 * fsetファイルを読み出す{@link InputStream}
+	 * @param i_fset3_is
+	 * fset3ファイルを読み出す{@link InputStream}
+	 * @param i_page_no
+	 * fset3のページ番号を指定します。
+	 * @param i_target_width
+	 * NFTパターンの横幅をmm単位で指定します。
+	 * @return
+	 * 0から始まるマーカーIDを返します。
+	 * この数値は、マーカを区別するためのId値です。0から始まり、{@link #addNftTarget}関数を呼ぶたびにインクリメントされます。
+	 * {@link #getMatrix},{@link #isExistTarget},{@link #addNftTarget},
+	 * {@link #screen2CoordSystem},{@link #pickupTargetImage},{@link #pickupRectTargetImage}
+	 * のid値に使います。
+	 */	
+	public int addNftTarget(InputStream i_iset_is,InputStream i_fset_is,InputStream i_fset3_is,int i_page_no,float i_target_width)
+	{
+		return this.addNftTarget(
+			NyARNftDataSet.loadFromNftFiles(
+			i_iset_is,i_fset_is,i_fset3_is,i_page_no,
+			Float.isNaN(i_target_width)?Double.NaN:i_target_width));
+	}
+	
+	
 	/**
 	 * この関数は、NFTファイルセットからNFTターゲットを生成して登録します。
 	 * 同じターゲットを複数個登録することはできません。
@@ -286,20 +341,11 @@ public class MultiNft extends NyARPsgBaseClass
 	 */
 	public int addNftTarget(String i_file_name_prefix,int i_page_no,float i_target_width)
 	{
-		//初期化済みのアイテムを生成
-		int psid=-1;
-		try{
-			this._id_map.add(this._ns.addNftTarget(NyARNftDataSet.loadFromNftFiles(
-				this._ref_papplet.createInput(i_file_name_prefix+".iset"),
-				this._ref_papplet.createInput(i_file_name_prefix+".fset"),
-				this._ref_papplet.createInput(i_file_name_prefix+".fset3"),i_page_no,
-				Float.isNaN(i_target_width)?Double.NaN:i_target_width)));
-			psid=this._id_map.size()-1;
-		}catch(Exception e){
-			e.printStackTrace();
-			this._ref_papplet.die("Catch an exception!");
-		}
-		return psid;
+		return this.addNftTarget(
+			this._ref_papplet.createInput(i_file_name_prefix+".iset"),
+			this._ref_papplet.createInput(i_file_name_prefix+".fset"),
+			this._ref_papplet.createInput(i_file_name_prefix+".fset3"),i_page_no,
+			i_target_width);
 	}	
 	
 	
@@ -329,7 +375,24 @@ public class MultiNft extends NyARPsgBaseClass
 	{
 		return this.addNftTarget(i_file_name_prefix,Float.NaN);
 	}
-
+	/**
+	 * この関数は、NFTデータセットを{@link InputStream}から読みだして、NFTターゲットを登録します。
+	 * 同じターゲットを複数個登録することはできません。
+	 * @param i_isetdataset
+	 * nftdatasetファイルを読み出す{@link InputStream}です。
+	 * @param i_target_width
+	 * NFTパターンの横幅をmm単位で指定します。
+	 * @return
+	 * 0から始まるマーカーIDを返します。
+	 * この数値は、マーカを区別するためのId値です。0から始まり、{@link #addNftTarget}関数を呼ぶたびにインクリメントされます。
+	 * {@link #getMatrix},{@link #isExistTarget},{@link #addNftTarget},
+	 * {@link #screen2CoordSystem},{@link #pickupTargetImage},{@link #pickupRectTargetImage}
+	 * のid値に使います。
+	 */	
+	public int addNftTarget(InputStream i_isetdataset,int i_page_no,float i_target_width)
+	{
+		return this.addNftTarget(NyARNftDataSet.loadFromNftDataSet(i_isetdataset, i_target_width));
+	}
 	
 	/**
 	 * この関数は、マーカの姿勢行列を返します。

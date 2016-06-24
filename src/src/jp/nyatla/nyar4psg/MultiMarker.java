@@ -26,6 +26,7 @@
  */
 package jp.nyatla.nyar4psg;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import jp.nyatla.nyar4psg.utils.NyARPsgBaseClass;
@@ -128,7 +129,27 @@ public class MultiMarker extends NyARPsgBaseClass
 		this._ms=new NyARMarkerSystem(new NyARMarkerSystemConfig(i_view._view,i_config.env_transmat_mode));
 		this._coordinate_system=i_config._coordinate_system;
 	}
-
+	/**
+	 * コンストラクタです。
+	 * スクリーンサイズ、カメラパラメータ、コンフィギュレーションを指定してインスタンスを生成します。
+	 * @param i_applet
+	 * 親となるAppletオブジェクトを指定します。
+	 * @param i_width
+	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * @param i_height
+	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
+	 * @param i_cparam_is
+	 * ARToolKitフォーマットのカメラパラメータファイルを読み出す{@link InputStream}です。
+	 * @param i_config
+	 * コンフィギュレーションオブジェクトを指定します。
+	 */
+	public MultiMarker(PApplet i_applet, int i_width,int i_height,InputStream i_cparam_is,NyAR4PsgConfig i_config)
+	{
+		this(i_applet,new SingleCameraView(i_applet,
+				NyARParam.loadFromARParamFile(i_cparam_is, i_width, i_height),i_config._ps_patch_version),
+				i_config);
+		return;
+	}
 	/**
 	 * コンストラクタです。
 	 * スクリーンサイズ、カメラパラメータ、コンフィギュレーションを指定してインスタンスを生成します。
@@ -142,7 +163,6 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * 入力画像の横解像度を指定します。通常、キャプチャ画像のサイズを指定します。
 	 * @param i_config
 	 * コンフィギュレーションオブジェクトを指定します。
-	 * @throws NyARException
 	 */
 	public MultiMarker(PApplet i_applet, int i_width,int i_height,String i_cparam_file,NyAR4PsgConfig i_config)
 	{
@@ -335,10 +355,10 @@ public class MultiMarker extends NyARPsgBaseClass
 		this._ms.update(i_source_image);
 	}
 	/**
-	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして、登録します。
+	 * この関数は、ARToolKitスタイルのマーカーを{@link InputStream}から読みだして、登録します。
 	 * 同じパターンを複数回登録した場合には、最後に登録したものを優先して認識します。
-	 * @param i_file_name
-	 * マーカパターンファイル名を指定します。
+	 * @param i_file_is
+	 * マーカパターンファイルを読み出す{@link InputStream}オブジェクト。
 	 * @param i_patt_resolution
 	 * マーカパターンの解像度を指定します。
 	 * @param i_edge_percentage
@@ -353,18 +373,36 @@ public class MultiMarker extends NyARPsgBaseClass
 	 * {@link #screen2ObjectCoordSystem},{@link #pickupImage},{@link #pickupRectImage}
 	 * のid値に使います。
 	 */
-	public int addARMarker(String i_file_name,int i_patt_resolution,int i_edge_percentage,float i_width)
+	public int addARMarker(InputStream i_file_is,int i_patt_resolution,int i_edge_percentage,float i_width)
 	{
 		//初期化済みのアイテムを生成
 		int psid=-1;
 		try{
-			this._id_map.add(this._ms.addARMarker(this._ref_papplet.createInput(i_file_name), i_patt_resolution, i_edge_percentage, i_width));
+			this._id_map.add(this._ms.addARMarker(i_file_is, i_patt_resolution, i_edge_percentage, i_width));
 			psid=this._id_map.size()-1;
 		}catch(Exception e){
 			e.printStackTrace();
 			this._ref_papplet.die("Catch an exception!");
 		}
 		return psid;
+	}	
+	/**
+	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして登録します。
+	 * ファイルは{@link PApplet#createInput(String)}関数で作成したストリームから読み出します。
+	 * @param i_file_name
+	 * {@link #addARMarker(InputStream, int, int, float)}を参照
+	 * @param i_patt_resolution
+	 * {@link #addARMarker(InputStream, int, int, float)}を参照
+	 * @param i_edge_percentage
+	 * {@link #addARMarker(InputStream, int, int, float)}を参照
+	 * @param i_width
+	 * マーカの物理サイズをmm単位で指定します。
+	 * @return
+	 * {@link #addARMarker(InputStream, int, int, float)}を参照
+	 */
+	public int addARMarker(String i_file_name,int i_patt_resolution,int i_edge_percentage,float i_width)
+	{
+		return this.addARMarker(this._ref_papplet.createInput(i_file_name), i_patt_resolution, i_edge_percentage, i_width);
 	}
 	/**
 	 * この関数は、ARToolKitスタイルのマーカーをファイルから読みだして登録します。
