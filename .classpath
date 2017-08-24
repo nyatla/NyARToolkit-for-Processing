@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/src"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="examples/withPicking/code/Picking.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="D:/application.files/processing-2.2.1/core/library/core.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/NyARToolKit"/>
-	<classpathentry kind="output" path="src/bin"/>
+	<classpathentry kind="lib" path="lib/NyARToolkit.jar"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

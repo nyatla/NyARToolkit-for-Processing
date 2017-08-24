@@ -1,13 +1,15 @@
 /**
-  NyARToolkit for proce55ing/1.0.0
-  (c)2008-2011 nyatla
-  airmail(at)ebony.plala.or.jp
-  
-  複数のARマーカを扱う例です。Hiroマーカと、Kanjiマーカを用意して下さい。
-  
-  This sample proglam handles 2 ARToolKit marker.
-  The markers are "patt.hiro" and "patt.kanji"
-*/
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * 複数のARマーカを扱う例です。Hiroマーカと、Kanjiマーカを用意して下さい。
+ * 全ての設定ファイルとマーカファイルはスケッチディレクトリのlibraries/nyar4psg/dataにあります。
+ * 
+ * This sketch handles 2 ARToolKit marker.
+ * The markers are "patt.hiro" and "patt.kanji"
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder.  
+ */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
 

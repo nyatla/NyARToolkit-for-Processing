@@ -1,15 +1,16 @@
 /**
-  NyARToolkit for proce55ing/1.0.0
-  (c)2008-2011 nyatla
-  airmail(at)ebony.plala.or.jp
-  
-  OpenGLAPIで使用する例です。
-  OpenGLにAPIを集約することで、Processing行列スタックとの衝突を回避します。
-  
-  This sample uses OpenGL API only.
-  This sample avoids the matrix processing conflict of Processing and OpenGL.
-
-*/
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * OpenGLAPIで使用する例です。
+ * OpenGLにAPIを集約することで、Processing行列スタックとの衝突を回避します。
+ * 全ての設定ファイルとマーカファイルはスケッチディレクトリのlibraries/nyar4psg/dataにあります。
+ * 
+ * This sketch uses OpenGL API only.
+ * The sketch avoids the matrix conflict of Processing and OpenGL.
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder. 
+ */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
 import processing.opengl.*;

@@ -1,7 +1,11 @@
-/*
-  MultiMarker class function test program
-
-*/
+/**
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * This sketch is test program for dev.
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder. 
+ */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
 import processing.opengl.*;

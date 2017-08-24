@@ -1,13 +1,17 @@
 /**
-  NyARToolkit for proce55ing/1.0.0
-  (c)2008-2011 nyatla
-  airmail(at)ebony.plala.or.jp
-  
-  人マーカの上に右手系、Hiroマーカの上に左手系の立方体を表示します。
-  
-  This sample program shows rotation of 2 coordinate system.(left and right).
-  The marker is "patt.hiro" and "patt.kanji"
-*/
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * ２つの座標系を同時に扱う例です。
+ * 人マーカの上に右手系、Hiroマーカの上に左手系の座標系を使って、立方体を表示します。
+ * 全ての設定ファイルとマーカファイルはスケッチディレクトリのlibraries/nyar4psg/dataにあります。
+ * 
+ * This sketch handles 2 coordinate system in same time.(left and right).
+ * Each markers show different coordinate system.
+ * The marker is "patt.hiro" and "patt.kanji"
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder. 
+ */
  
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;

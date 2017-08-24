@@ -1,11 +1,12 @@
 /**
-  NyARToolkit for proce55ing/1.0.0
-  (c)2008-2016 nyatla
-  airmail(at)ebony.plala.or.jp
-  
-  This sample handles a NFT target.
-  The NFT target files are infinitycat.*.
-*/
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * This sketch handles a NFT target.
+ * The NFT target files are infinitycat.*.
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder. 
+ */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
 

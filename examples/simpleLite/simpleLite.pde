@@ -1,13 +1,15 @@
 /**
-  NyARToolkit for proce55ing/1.0.0
-  (c)2008-2011 nyatla
-  airmail(at)ebony.plala.or.jp
-  
-  最も短いARToolKitのコードです。
-  Hiroマーカを用意してください。
-  
-  This sample program is most small sample as simpleLite.
-  The marker is "patt.hiro".
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * 最も短いARToolKitのコードです。
+ * Hiroマーカの上に立方体を表示します。
+ * 全ての設定ファイルとマーカファイルはスケッチディレクトリのlibraries/nyar4psg/dataにあります。
+ * 
+ * This sketch is shortest sample.
+ * The sketch shows cube on the marker of "patt.hiro".
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder. 
 */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;

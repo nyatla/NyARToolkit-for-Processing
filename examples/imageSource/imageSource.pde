@@ -1,8 +1,15 @@
-//
-//  This sketch preview a cube on PNG file.
-//  nyAR4psg can handle any PImage object!
-//
-
+/**
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * カメラ画像の代わりにPNG画像を入力画像に使います。
+ * 全ての設定ファイルとマーカファイルはスケッチディレクトリのlibraries/nyar4psg/dataにあります。
+ * 
+ * This sketch uses PNG file insted of captured image.
+ * nyAR4psg can handle any PImage object!
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder.  
+ */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
 

@@ -1,14 +1,16 @@
 /**
-  NyARToolkit for proce55ing/1.0.0
-  (c)2008-2011 nyatla
-  airmail(at)ebony.plala.or.jp
-  
-  ARマーカとIdマーカを同時に使う例です。
-  ARマーカはkanji,hiro、idマーカは0,1番のマーカを使う事ができます。
-  
-  This sample handles 2 ARToolkit style markers and 2 NyId markers at same time.
-  The ARToolKit marker files are kanji.patt and hiro.patt. NyId marker ids are #0 and #1.
-*/
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * ARマーカとIdマーカを同時に使う例です。
+ * このスケッチはARマーカのkanji,hiroと、idマーカは0,1番のマーカを使います。
+ * 全ての設定ファイルとマーカファイルはスケッチディレクトリのlibraries/nyar4psg/dataにあります。
+ * 
+ * This sample handles 2 ARToolkit style markers and 2 NyId markers at same time.
+ * The sketch uses ARToolKit standard marker files(kanji.patt,hiro.patt) and NyIdMarker(#0 and #1).
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder.
+ */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
 

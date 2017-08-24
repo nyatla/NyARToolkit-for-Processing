@@ -1,14 +1,16 @@
 /**
-  NyARToolkit for proce55ing/1.0.0
-  (c)2008-2011 nyatla
-  airmail(at)ebony.plala.or.jp
-  
-  このサンプルは、スクリーン座標をマーカ座標に変換します。
-  Hiroマーカを使います。マーカが認識されたら、マウスカーソルを移動させてみて下さい。
-  
-  This sample converts to the marker plain position from the screen position. 
-  Please move the mouse cursor on the screen the marker is recognized.
-  The marker is "Patt.hiro" .
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * スクリーン座標からARマーカーの表面座標を計算するサンプルです。マーカーを認識した後にマウスをスクリーンで動かしてみてください。
+ * Hiroマーカを使います。
+ * 全ての設定ファイルとマーカファイルはスケッチディレクトリのlibraries/nyar4psg/dataにあります。
+ * 
+ * This sample converts to the marker plain position from the screen position.
+ * Move the mouse cursor on the screen after the marker is captured.
+ * The sketch uses "Patt.hiro".
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder.  
  */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;

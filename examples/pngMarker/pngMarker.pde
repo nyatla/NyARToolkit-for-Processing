@@ -1,15 +1,17 @@
 /**
-  NyARToolkit for proce55ing/1.2.0
-  (c)2008-2012 nyatla
-  airmail(at)ebony.plala.or.jp
-  
-  マーカファイルの変わりにPNGを使います。
-  PNGは任意解像度の正方形である必要があります。
-  エッジ部分のパターンは含めてください。
-  
-  This sample program uses a PNG image instead of the patt file.
-  The PNG image must be square form that includes edge.
-*/
+ * NyARToolkit for proce55ing/3.0.5
+ * (c)2008-2017 nyatla
+ * airmail(at)ebony.plala.or.jp
+ * 
+ * マーカファイルの変わりにPNGを使います。
+ * PNGは任意解像度の正方形である必要があります。
+ * PNG画像にはエッジ部分を含めてください。
+ * 全ての設定ファイルとマーカファイルはスケッチディレクトリのlibraries/nyar4psg/dataにあります。
+ * 
+ * This sketch uses a PNG image instead of the standard patt file.
+ * The PNG image must be square form that includes edge.
+ * Any pattern and configuration files are found in libraries/nyar4psg/data inside your sketchbook folder. 
+ */
 import processing.video.*;
 import jp.nyatla.nyar4psg.*;
 
