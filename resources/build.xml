@@ -1,4 +1,4 @@
-<project name="ProcessingLibs" default="clean" basedir="../">
+<project name="Processing Library" default="clean" basedir="../">
 
     
 <!--	
@@ -47,13 +47,12 @@
 	<property name="project.data" location="data"/>
 	<property name="project.lib" location="lib"/>
 	<property name="project.bin" location="bin"/>
-<!--  <property name="project.bin.data" location="${project.bin}/data"/> -->	
 	<property name="project.examples" location="examples"/>
 	<property name="project.reference" location="reference"/>
 	<property name="project.dist" location="distribution"/>
 	<property name="project.dist.version" location="distribution/${project.name}-${library.version}"/>
-	<property name="install.source" location="resources/install_instructions.txt"/>
-	<property name="install.destination" location="${project.dist.version}/INSTALL.txt"/>
+	<property name="install.source" location="resources/readme.txt"/>
+	<property name="install.destination" location="${project.dist.version}/readme.txt"/>
 	<property name="libprops.source" location="resources/library.properties"/>
 	
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
@@ -78,7 +77,7 @@
 	
 	<target name="init"> 
 		<echo>${line}
-    Building the Processing library ${project.name} ${library.version}
+    Building the Processing Library ${project.name} ${library.version}
 ${line}
 	src path        ${project.src}
 	bin path        ${project.bin}
@@ -121,7 +120,7 @@ ${line}
   		<copy todir="${project.tmp}/${project.name}/data">
   			<fileset dir="${project.data}" />
 	  	</copy>
-	</target>
+	</target>	
 	
 	<target name="generate.libprops" if="is.normal">
 		<property name="libprops.destination" location="${project.tmp}/${project.name}/library.properties"/>
@@ -168,11 +167,15 @@ ${line}
   		<mkdir dir="${project.tmp}/${project.name}/examples" />
 	  	<mkdir dir="${project.tmp}/${project.name}/reference" />
   		<mkdir dir="${project.tmp}/${project.name}/src" />
+  		<mkdir dir="${project.tmp}/${project.name}/data" />
   		<copy todir="${project.tmp}/${project.name}/examples">
   			<fileset dir="${project.examples}">
 	  			<exclude name="**/*README*"/>
   			</fileset>
 	  	</copy>
+  		<copy todir="${project.tmp}/${project.name}/data">
+  			<fileset dir="${project.data}"/>
+	  	</copy>		
   		<copy todir="${project.tmp}/${project.name}/src">
   			<fileset dir="${project.src}"/>
 	  	</copy>
@@ -214,18 +217,16 @@ ${line}
 	
 	
 	<target name="generate.javadoc" if="is.normal">
-	  	<!-- create the java reference of the library -->
-		<javadoc bottom="Processing library ${project.name} by ${author.name}. ${library.copyright}" 
+	  	<!-- create the java reference of the Library -->
+		<javadoc bottom="Processing Library ${project.name} by ${author.name}. ${library.copyright}" 
 				classpath="${classpath.local.location}/core.jar;{project.bin}" 
 				destdir="${project.tmp}/${project.name}/reference" 
 				verbose="false" 
-				encoding="UTF-8"
- 			docencoding="UTF-8"
- 			charset="UTF-8"
 				stylesheetfile="resources/stylesheet.css" 
 				doctitle="Javadocs: ${project.name}" 
 				public="true" version="false" 
 				windowtitle="Javadocs: ${project.name}">
+ 			
  			<link href="${javadoc.java.href}" />
 			<link href="${javadoc.processing.href}" />
 			<taglet name="ExampleTaglet" path="resources/code" />
@@ -282,7 +283,7 @@ ${line}
         <replaceregexp file="${file}" match="##compatible.maxRevision##" replace="${compatible.maxRevision}" flags="g" /> 
         
         <replaceregexp file="${file}" match="##library.url##" replace="${library.url}" flags="g" />
-        <replaceregexp file="${file}" match="##library.category##" replace="${library.category}" flags="g" />
+        <replaceregexp file="${file}" match="##library.categories##" replace="${library.categories}" flags="g" />
         <replaceregexp file="${file}" match="##library.sentence##" replace="${library.sentence}" flags="g" />
     	<replaceregexp file="${file}" match="##library.paragraph##" replace="${library.paragraph}" flags="g" />
     	<replaceregexp file="${file}" match="##library.keywords##" replace="${library.keywords}" flags="g" />
@@ -299,7 +300,7 @@ ${line}
 	
 	
 	<target name="generate.install.library" if="is.normal">	
-		<copy file="${install.source}" tofile="${project.dist.version}/INSTALL.txt" />
+		<copy file="${install.source}" tofile="${install.destination}" />
 		
 		<antcall target="parse.file"><param name="file" value="${install.destination}"/></antcall>
 	</target>	
@@ -307,7 +308,7 @@ ${line}
 	
 	
 	<target name="generate.zip" if="is.normal">
-		<!-- zip the distribution of the library -->
+		<!-- zip the distribution of the Library -->
 		
 		<move todir="${project.dist.version}/tmp/${project.name}">
   			<fileset dir="${project.dist.version}/${project.name}" />
@@ -378,10 +379,8 @@ ${line}
 	
 	<target name="clean" depends="library.run">
 		<delete dir="${project.bin}"/>
- 	 <delete dir="${project.tmp}"/>	
- 		<delete dir="${project.tmp}"/>
+		<delete dir="${project.tmp}"/>
 		<echo>
-		
 ${line}
 Name        ${project.name} 
 Version     ${library.prettyVersion} (${library.version})
@@ -394,4 +393,3 @@ ${line}
 	</target>
 	
 </project>
-
