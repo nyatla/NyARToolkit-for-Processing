@@ -47,6 +47,7 @@
 	<property name="project.data" location="data"/>
 	<property name="project.lib" location="lib"/>
 	<property name="project.bin" location="bin"/>
+	<property name="project.bin.data" location="${project.bin}/data"/>
 	<property name="project.examples" location="examples"/>
 	<property name="project.reference" location="reference"/>
 	<property name="project.dist" location="distribution"/>
@@ -142,7 +143,7 @@ ${line}
 	
 	
 	<target name="compile">
-		<javac srcdir="${project.tmp}/${project.name}/src" destdir="${project.bin}" source="${java.target.version}" target="${java.target.version}" includeantruntime="false">
+		<javac srcdir="${project.tmp}/${project.name}/src" destdir="${project.bin}" source="${java.target.version}" target="${java.target.version}" includeantruntime="false" encoding="utf-8">
 			<classpath>
 				<path refid="classpath"/>
 			</classpath>
@@ -175,8 +176,7 @@ ${line}
 	  	</copy>
   		<copy todir="${project.tmp}/${project.name}/data">
   			<fileset dir="${project.data}"/>
-	  	</copy>		
-  		<copy todir="${project.tmp}/${project.name}/src">
+	  	</copy>	  		<copy todir="${project.tmp}/${project.name}/src">
   			<fileset dir="${project.src}"/>
 	  	</copy>
 	  	<copy todir="${project.tmp}/${project.name}/${folder}">
@@ -219,17 +219,19 @@ ${line}
 	<target name="generate.javadoc" if="is.normal">
 	  	<!-- create the java reference of the Library -->
 		<javadoc bottom="Processing Library ${project.name} by ${author.name}. ${library.copyright}" 
-				classpath="${classpath.local.location}/core.jar;{project.bin}" 
-				destdir="${project.tmp}/${project.name}/reference" 
-				verbose="false" 
-				stylesheetfile="resources/stylesheet.css" 
-				doctitle="Javadocs: ${project.name}" 
-				public="true" version="false" 
-				windowtitle="Javadocs: ${project.name}">
+			encoding="utf-8"
+			charset="utf-8"
+			docencoding="utf-8"
+			classpath="${classpath.local.location}/core.jar;{project.bin};./lib/NyARToolkit.jar" 
+			destdir="${project.tmp}/${project.name}/reference" 
+			verbose="false" 
+			stylesheetfile="resources/stylesheet.css" 
+			doctitle="Javadocs: ${project.name}" 
+			public="true" version="false" 
+			windowtitle="Javadocs: ${project.name}">
  			
  			<link href="${javadoc.java.href}" />
 			<link href="${javadoc.processing.href}" />
-			<taglet name="ExampleTaglet" path="resources/code" />
  			<fileset dir="${project.tmp}/${project.name}/src" defaultexcludes="yes">
 			<!-- add packages to be added to reference. -->
 				<include name="**/*"/>
@@ -393,3 +395,4 @@ ${line}
 	</target>
 	
 </project>
+
