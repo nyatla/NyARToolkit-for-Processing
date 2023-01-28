@@ -7,5 +7,5 @@ public class Version {
 	public final static int MAJOR = 3;
 	public final static int MINER = 0;
 	public final static int PATCH = 10;
-	public final static String STRING=String.format("%s/%d.%d.%d;%d",Version.MODULE,Version.MAJOR,Version.MINER,Version.PATCH,NyARVersion.VERSION_STRING);
+	public final static String STRING=String.format("%s/%d.%d.%d;%s",Version.MODULE,Version.MAJOR,Version.MINER,Version.PATCH,NyARVersion.VERSION_STRING);
 }
